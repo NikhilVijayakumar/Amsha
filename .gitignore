@@ -1,0 +1,54 @@
+# These are some examples of commonly ignored file patterns for Python projects.
+# You should customize this list as applicable to your project.
+# Learn more about .gitignore:
+#     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
+
+# PyCharm related files
+.idea/
+
+# Virtual Environment
+venv/
+.venv/
+
+# Compiled Python bytecode
+__pycache__/
+*.py[cod]
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+
+# Log files
+*.log
+
+# Unit test reports
+TEST*.xml
+reports/
+
+# Coverage data
+.coverage
+htmlcov/
+
+# MyPy cache
+.mypy_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS Specific - feel free to remove if not relevant
+.DS_Store
+Thumbs.db
+
+# Applications
+*.app
+*.exe
+*.war
+
+# Large media files (optional, depending on your project)
+# *.mp4
+# *.tiff
+# *.avi
+# *.flv
+# *.mov
+# *.wmv
