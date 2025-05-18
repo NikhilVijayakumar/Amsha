@@ -1,6 +1,7 @@
-PyYAML==6.0.2
-python-dotenv== 1.1.0
-crewai==0.108.0
-crewai-tools==0.38.1
-duckduckgo-search==8.0.2
-pymongo==4.11.3
+PyYAML == 6.0.2
+python-dotenv == 1.1.0
+crewai == 0.108.0
+crewai-tools == 0.38.1
+duckduckgo-search == 8.0.2
+pymongo == 4.11.3
+arxiv == 2.2.0
