@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 
-from src.bavans.amsha.config.lm_studio_config import LMStudioConfig
-from src.bavans.amsha.repo.agent_repo import AgentRepository
-from src.bavans.amsha.repo.task_repo import TaskRepository
+from src.nikhil.amsha.config.lm_studio_config import LMStudioConfig
+from src.nikhil.amsha.repo.agent_repo import AgentRepository
+from src.nikhil.amsha.repo.task_repo import TaskRepository
 
 
 class CrewData(BaseModel):

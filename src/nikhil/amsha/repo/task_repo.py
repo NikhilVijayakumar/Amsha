@@ -3,9 +3,9 @@ from pymongo.errors import DuplicateKeyError
 
 
 
-from src.bavans.amsha.model.repo_data import RepoData
-from src.bavans.amsha.model.task_data import TaskRequest, TaskResponse
-from src.bavans.amsha.repo.base_repo import BaseRepository
+from src.nikhil.amsha.model.repo_data import RepoData
+from src.nikhil.amsha.model.task_data import TaskRequest, TaskResponse
+from src.nikhil.amsha.repo.base_repo import BaseRepository
 
 
 class TaskRepository(BaseRepository):

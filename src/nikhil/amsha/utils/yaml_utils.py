@@ -3,8 +3,8 @@ import yaml
 
 import re
 
-from src.bavans.amsha.model.agent_data import AgentRequest
-from src.bavans.amsha.model.task_data import TaskRequest
+from src.nikhil.amsha.model.agent_data import AgentRequest
+from src.nikhil.amsha.model.task_data import TaskRequest
 
 
 class YamlUtils:

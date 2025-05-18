@@ -4,7 +4,7 @@ import time
 
 from crewai import Crew, Agent, Process, Task
 
-from src.bavans.amsha.model.crew_data import CrewData
+from src.nikhil.amsha.model.crew_data import CrewData
 
 
 class CreateCrew:
