@@ -2,6 +2,14 @@
 name = "Amsha"
 version = "0.1.0"
 description = "Common config and crew AI helpers"
+dependencies = [
+    "PyYAML==6.0.2",
+    "crewai==0.108.0",
+    "crewai-tools==0.38.1",
+    "duckduckgo-search==8.0.2",
+    "pymongo==4.11.3",
+    "arxiv==2.2.0"
+]
 [tool.setuptools]
 package-dir = {"" = "src"}
 
