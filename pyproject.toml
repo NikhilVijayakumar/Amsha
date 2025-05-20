@@ -2,8 +2,8 @@
 name = "Amsha"
 version = "0.1.0"
 description = "Common config and crew AI helpers"
-authors = [{ name="Nikhil Vijayakumar" }]
-dependencies = []
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
