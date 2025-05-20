@@ -10,6 +10,7 @@ class LLMConfig:
     def __init__(self, yaml_path: str):
         self.utils = YamlUtils()
         self.config = self.utils.load_llm_config(yaml_path)
+        self.model_name = ""
 
     @staticmethod
     def noop(*args, **kwargs):
@@ -29,7 +30,7 @@ class LLMConfig:
 
     def _create_instance(self, use_case: str, model_key: str = None):
         model_config, params = self.utils.get_llm_settings(use_case, model_key)
-
+        self.model_name =  self.extract_model_name(model_config['model'])
 
 
         return LLM(
@@ -41,6 +42,14 @@ class LLMConfig:
             frequency_penalty=params.get('frequency_penalty', 0.0),
             stop=params.get('stop', [])
         )
+
+    @staticmethod
+    def extract_model_name(model_string):
+        prefixes = ["lm_studio/", "gemini/", "open_ai/"]  # Add any other prefixes here
+        for prefix in prefixes:
+            if model_string.startswith(prefix):
+                return model_string[len(prefix):]  # Remove the prefix
+        return model_string
 
     def create_creative_instance(self, model_key: str = None):
         return self._create_instance("creative", model_key)
