@@ -3,7 +3,7 @@ import os
 from crewai import LLM
 from crewai.telemetry import Telemetry
 
-from src.nikhil.amsha.utils.yaml_utils import YamlUtils
+from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
 class LLMConfig:

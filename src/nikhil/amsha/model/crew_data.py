@@ -1,12 +1,11 @@
 from pydantic import BaseModel, Field
 
-from src.nikhil.amsha.config.lm_studio_config import LLMConfig
-from src.nikhil.amsha.repo.agent_repo import AgentRepository
-from src.nikhil.amsha.repo.task_repo import TaskRepository
+from nikhil.amsha.repo.agent_repo import AgentRepository
+from nikhil.amsha.repo.task_repo import TaskRepository
 
 
 class CrewData(BaseModel):
-    llm: LLMConfig.ModelNames = Field(..., description="Model name")
+    llm: str = Field(..., description="Model name")
     module_name: str = Field(..., description="The name of module")
     agent_repo: AgentRepository = Field(..., description="Agent repo")
     task_repo: TaskRepository = Field(..., description="Task repo")

@@ -1,9 +1,8 @@
 import yaml
 import re
 
-
-from src.nikhil.amsha.model.agent_data import AgentRequest
-from src.nikhil.amsha.model.task_data import TaskRequest
+from nikhil.amsha.model.agent_data import AgentRequest
+from nikhil.amsha.model.task_data import TaskRequest
 
 
 class YamlUtils:
