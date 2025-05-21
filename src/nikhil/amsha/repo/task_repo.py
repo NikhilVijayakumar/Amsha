@@ -36,14 +36,14 @@ class TaskRepository(BaseRepository):
     def update_task(self, task_id: str, task: TaskRequest):
         """Updates an existing task."""
         updated_data = task.model_dump()
-        result = self.update_one({"task_id": task_id}, updated_data)
+        result = self.update_one({"_id": task_id}, updated_data)
         if result.modified_count > 0:
             return self.get_task_by_id(task_id)
         return None
 
     def delete_task(self, task_id: str):
         """Deletes a task by its ID."""
-        result = self.delete_one({"task_id": task_id})
+        result = self.delete_one({"_id": task_id})
         return result.deleted_count > 0
 
     def get_tasks_by_usecase(self,usecase: str):

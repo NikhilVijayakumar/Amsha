@@ -28,3 +28,13 @@ class BaseRepository:
 
     def delete_one(self, query: dict):
         return self.collection.delete_one(query)
+
+    def create_unique_compound_index(self, keys: list[str]):
+        if not keys:
+            raise ValueError("List of keys cannot be empty.")
+        index_keys = [(key, pymongo.ASCENDING) for key in keys]
+        try:
+            self.collection.create_index(index_keys, unique=True)
+            print(f"Unique compound index created on: {keys}")
+        except Exception as e:
+            print(f"Error creating unique compound index on {keys}: {e}")

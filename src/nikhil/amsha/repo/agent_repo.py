@@ -39,14 +39,14 @@ class AgentRepository(BaseRepository):
     def update_agent(self, agent_id: str, agent: AgentRequest):
         """Updates an existing agent."""
         updated_data = agent.model_dump()
-        result = self.update_one({"agent_id": agent_id}, updated_data)
+        result = self.update_one({"_id": agent_id}, updated_data)
         if result.modified_count > 0:
             return self.get_agent_by_id(agent_id)
         return None
 
     def delete_agent(self, agent_id: str):
         """Deletes an agent by its ID."""
-        result = self.delete_one({"agent_id": agent_id})
+        result = self.delete_one({"_id": agent_id})
         return result.deleted_count > 0
 
     def get_agents_by_usecase(self, usecase: str):
