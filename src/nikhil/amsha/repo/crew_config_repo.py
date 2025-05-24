@@ -64,3 +64,11 @@ class CrewConfigRepository(BaseRepository):
         for crew_config_data in crew_config_list:
             crew_config_data["_id"] = str(crew_config_data["_id"])
         return [CrewConfigResponse(**crew_config_data) for crew_config_data in crew_config_list]
+
+    def get_crew_by_name_and_usecase(self, name: str, usecase: str) -> Optional[CrewConfigResponse]:
+        """Retrieves a specific crew configuration by its name and usecase."""
+        crew_config_data = self.find_one({"name": name, "usecase": usecase})
+        if crew_config_data:
+            crew_config_data["_id"] = str(crew_config_data["_id"])
+            return CrewConfigResponse(**crew_config_data)
+        return None
