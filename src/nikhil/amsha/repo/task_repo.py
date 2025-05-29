@@ -36,14 +36,22 @@ class TaskRepository(BaseRepository):
     def update_task(self, task_id: str, task: TaskRequest):
         """Updates an existing task."""
         updated_data = task.model_dump()
-        result = self.update_one({"_id": task_id}, updated_data)
+        try:
+            obj_id = ObjectId(task_id)
+        except Exception:
+            raise ValueError("Invalid ObjectId format")
+        result = self.update_one({"_id": obj_id}, updated_data)
         if result.modified_count > 0:
             return self.get_task_by_id(task_id)
         return None
 
     def delete_task(self, task_id: str):
         """Deletes a task by its ID."""
-        result = self.delete_one({"_id": task_id})
+        try:
+            obj_id = ObjectId(task_id)
+        except Exception:
+            raise ValueError("Invalid ObjectId format")
+        result = self.delete_one({"_id": obj_id})
         return result.deleted_count > 0
 
     def get_tasks_by_usecase(self,usecase: str):
