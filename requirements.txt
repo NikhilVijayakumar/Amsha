@@ -4,3 +4,11 @@ crewai-tools == 0.38.1
 duckduckgo-search == 8.0.2
 pymongo == 4.11.3
 arxiv == 2.2.0
+pydantic == 2.11.5
+fuzzywuzzy == 0.18.0
+python-Levenshtein == 0.27.1
+scikit-learn == 1.6.1
+gensim == 4.3.3
+bertopic == 0.17.0
+networkx == 3.4.2
+nltk == 3.9.1
