@@ -18,11 +18,13 @@ class YamlUtils:
         cleaned = re.sub(r'\s{2,}', ' ', cleaned)
         return cleaned.strip()
 
+    @staticmethod
+    def yaml_safe_load(config_file_path:str):
+        with open(config_file_path, "r") as file:
+            return yaml.safe_load(file)
+
     def parse_agent(self, agent_yaml_file: str):
-        with open(agent_yaml_file, 'r') as file:
-            config = yaml.safe_load(file)
-
-
+        config = YamlUtils.yaml_safe_load(agent_yaml_file)
         self.agent = AgentRequest(
             role=config['agent']['role'],
             goal=self.clean_multiline_string(config['agent']['goal']),
@@ -31,10 +33,7 @@ class YamlUtils:
         return self.agent
 
     def parse_task(self, task_yaml_file: str):
-        with open(task_yaml_file, 'r') as file:
-            config = yaml.safe_load(file)
-
-
+        config = YamlUtils.yaml_safe_load(task_yaml_file)
         self.task = TaskRequest(
             name=config['task']['name'],
             description=self.clean_multiline_string(config['task']['description']),
@@ -43,8 +42,7 @@ class YamlUtils:
         return self.task
 
     def load_llm_config(self, llm_yaml_path: str):
-        with open(llm_yaml_path, 'r') as file:
-            self.llm_config = yaml.safe_load(file)
+        self.llm_config = YamlUtils.yaml_safe_load(llm_yaml_path)
         return self.llm_config
 
     def get_llm_settings(self, use_case: str, model_key: str = None):
