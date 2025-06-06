@@ -2,7 +2,7 @@ from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
 from nikhil.amsha.crewai.model.repo_data import RepoData
-from nikhil.amsha.crewai.model.task_data import TaskRequest
+from nikhil.amsha.crewai.model.task_data import TaskRequest, TaskResponse
 from nikhil.amsha.crewai.repo.base_repo import BaseRepository
 
 
