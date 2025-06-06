@@ -3,9 +3,9 @@ from typing import Optional
 from pymongo.errors import DuplicateKeyError
 from bson import ObjectId
 
-from nikhil.amsha.crewai.model import RepoData
+from nikhil.amsha.crewai.model.crew_config_data import CrewConfigRequest, CrewConfigResponse
+from nikhil.amsha.crewai.model.repo_data import RepoData
 from nikhil.amsha.crewai.repo.base_repo import BaseRepository
-from nikhil.amsha.crewai.model import CrewConfigRequest, CrewConfigResponse
 
 
 class CrewConfigRepository(BaseRepository):
