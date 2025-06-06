@@ -1,8 +1,8 @@
 import yaml
 import re
 
-from nikhil.amsha.model.agent_data import AgentRequest
-from nikhil.amsha.model.task_data import TaskRequest
+from nikhil.amsha.crewai.model import AgentRequest
+from nikhil.amsha.crewai.model import TaskRequest
 
 
 class YamlUtils:

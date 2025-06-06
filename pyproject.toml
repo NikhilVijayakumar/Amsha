@@ -16,7 +16,9 @@ dependencies = [
     "gensim == 4.3.3",
     "bertopic == 0.17.0",
     "networkx == 3.4.2",
-    "nltk == 3.9.1"
+    "nltk == 3.9.1",
+    "markdown-it-py == 3.0.0",
+    "numpy == 2.2.6"
 ]
 [tool.setuptools]
 package-dir = { "" = "src" }

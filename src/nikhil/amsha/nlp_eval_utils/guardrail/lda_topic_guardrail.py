@@ -6,7 +6,7 @@ from gensim.models import LdaModel
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-from nikhil.amsha.nlp_eval_utils.exception.missing_nltk_data_exception import MissingNLTKDataException
+from nikhil.amsha.exception.missing_nltk_data_exception import MissingNLTKDataException
 from nikhil.amsha.nlp_eval_utils.models.lda_topic_data import LdaTopicResult, LdaTopicInput
 
 

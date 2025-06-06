@@ -1,8 +1,8 @@
 from crewai import LLM
 from pydantic import BaseModel, Field, ConfigDict
 
-from nikhil.amsha.repo.agent_repo import AgentRepository
-from nikhil.amsha.repo.task_repo import TaskRepository
+from nikhil.amsha.crewai.repo.agent_repo import AgentRepository
+from nikhil.amsha.crewai.repo.task_repo import TaskRepository
 
 
 class CrewData(BaseModel):

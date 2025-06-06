@@ -1,6 +1,6 @@
 import pymongo
 
-from nikhil.amsha.model.repo_data import RepoData
+from nikhil.amsha.crewai.model import RepoData
 
 
 class BaseRepository:

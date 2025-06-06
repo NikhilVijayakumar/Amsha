@@ -3,9 +3,9 @@ from pymongo.errors import DuplicateKeyError
 
 from bson import ObjectId
 
-from nikhil.amsha.model.agent_data import AgentRequest, AgentResponse
-from nikhil.amsha.model.repo_data import RepoData
-from nikhil.amsha.repo.base_repo import BaseRepository
+from nikhil.amsha.crewai.model import AgentRequest, AgentResponse
+from nikhil.amsha.crewai.model import RepoData
+from nikhil.amsha.crewai.repo.base_repo import BaseRepository
 
 
 class AgentRepository(BaseRepository):
