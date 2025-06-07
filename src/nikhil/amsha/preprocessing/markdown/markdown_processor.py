@@ -1,3 +1,5 @@
+import os
+
 from markdown_it import MarkdownIt
 
 
@@ -130,3 +132,38 @@ class MarkdownProcessor:
 
         # Filter out empty chunks that might arise from empty sections
         return {k: v for k, v in chunks.items() if v}
+
+    @staticmethod
+    def _is_valid_markdown_extension(file_path: str) -> bool:
+        valid_extensions = {'.md', '.markdown', '.mdown'}
+        _, ext = os.path.splitext(file_path)
+        return ext.lower() in valid_extensions
+
+    @staticmethod
+    def read_markdown_from_file(file_path: str, encoding: str = 'utf-8') -> str:
+        if not isinstance(file_path, str) or not file_path:
+            raise ValueError("`file_path` must be a non-empty string.")
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+
+        if not os.path.isfile(file_path):
+            raise IOError(f"The path '{file_path}' is not a file.")
+
+        if not MarkdownProcessor._is_valid_markdown_extension(file_path):
+            raise ValueError(
+                f"The file '{file_path}' has an **unrecognized file extension for Markdown**. "
+                "Please provide a file with one of the supported Markdown extensions: .md, .markdown, or .mdown."
+            )
+
+        try:
+            with open(file_path, 'r', encoding=encoding) as f:
+                content = f.read()
+            return content
+        except UnicodeDecodeError as e:
+            raise UnicodeDecodeError(
+                f"Failed to decode file '{file_path}' with encoding '{encoding}'. "
+                "Try a different encoding (e.g., 'latin-1' or 'cp1252'). Error: {e}"
+            ) from e
+        except IOError as e:
+            raise IOError(f"An error occurred while reading the file '{file_path}': {e}") from e
