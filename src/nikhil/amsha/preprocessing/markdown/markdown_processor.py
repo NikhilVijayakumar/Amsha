@@ -1,6 +1,13 @@
 import os
 
 from markdown_it import MarkdownIt
+# Direct imports for the plugins, assuming markdown-it-py[full] is installed
+from mdit_py_plugins.deflist import deflist_plugin
+from mdit_py_plugins.footnote import footnote_plugin
+from mdit_py_plugins.abbr import abbr_plugin
+from mdit_py_plugins.sup import sup_plugin
+from mdit_py_plugins.sub import sub_plugin
+from mdit_py_plugins.mark import mark_plugin
 
 
 class MarkdownProcessor:
@@ -8,12 +15,12 @@ class MarkdownProcessor:
     def __init__(self, md_config=None):
         if md_config is None:
             # Default configuration: enable common Markdown rules
-            self.md = MarkdownIt().enable([
-                'heading', 'paragraph', 'list', 'code', 'fence', 'image', 'link', 'text',
-                'strong', 'em', 's_inline', 'backticks', 'linkify', 'autolink', 'hr',
-                'blockquote', 'table', 'dl', 'abbr', 'footnote', 'sup', 'sub', 'mark',
-                'container', 'deflist', 'cmark'  # More comprehensive CommonMark support
-            ])
+            self.md.use(deflist_plugin)
+            self.md.use(footnote_plugin)
+            self.md.use(abbr_plugin)
+            self.md.use(sup_plugin)
+            self.md.use(sub_plugin)
+            self.md.use(mark_plugin)
         else:
             self.md = MarkdownIt(md_config)
 
