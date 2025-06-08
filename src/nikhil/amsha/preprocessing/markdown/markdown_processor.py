@@ -1,14 +1,15 @@
 import os
-import markdown  # For converting Markdown to HTML
-from bs4 import BeautifulSoup, Tag
-
+import markdown
+from bs4 import BeautifulSoup, Tag,NavigableString
+import re
 
 class MarkdownProcessor:
 
     VALID_MD_EXTENSIONS = {'.md', '.markdown', '.mdown'}
+    HTML_PARSER = 'lxml'
 
     def __init__(self, markdown_extensions=None, markdown_extension_configs=None):
-        # Default to 'extra' extension for common features like fenced code blocks, tables, footnotes.
+
         if markdown_extensions is None:
             self.markdown_extensions = ['extra', 'nl2br']  # nl2br for preserving newlines
         else:
@@ -62,7 +63,7 @@ class MarkdownProcessor:
 
     def get_structured_elements(self, markdown_text: str) -> list:
         html_content = self._markdown_to_html(markdown_text)
-        soup = BeautifulSoup(html_content, 'html.parser')
+        soup = BeautifulSoup(html_content, MarkdownProcessor.HTML_PARSER)
 
         structured_data = []
         for element in soup.body.children:
@@ -81,7 +82,6 @@ class MarkdownProcessor:
                 elif element.name == 'pre':  # For code blocks
                     code_tag = element.find('code')
                     if code_tag:
-                        # Markdown library usually adds a class for language if specified
                         lang = ''
                         if 'class' in code_tag.attrs:
                             for cls in code_tag.attrs['class']:
@@ -106,10 +106,7 @@ class MarkdownProcessor:
                         'type': 'blockquote',
                         'content': element.get_text(strip=True)
                     })
-                # Add other tags as needed, e.g., 'table', 'hr', 'img' (for alt text)
             elif isinstance(element, NavigableString) and element.strip():
-                # Capture text that might exist directly under body before first block
-                # This is less common but can happen.
                 structured_data.append({
                     'type': 'text',
                     'content': str(element).strip()
@@ -118,21 +115,18 @@ class MarkdownProcessor:
 
     def get_chunks_by_heading(self, markdown_text: str, include_header_in_chunk: bool = True) -> dict:
         html_content = self._markdown_to_html(markdown_text)
-        soup = BeautifulSoup(html_content, 'html.parser')
+        soup = BeautifulSoup(html_content, MarkdownProcessor.HTML_PARSER)
 
         chunks = {}
         current_heading_text = "HEADER_LESS_CONTENT"
         current_chunk_elements = []
 
-        # Iterate through all top-level children of the body
         for element in soup.body.children:
             if isinstance(element, Tag) and element.name.startswith('h') and len(element.name) == 2 and element.name[
                 1].isdigit():
-                # Found a new heading, save the previous chunk
                 if current_chunk_elements:
                     chunks[current_heading_text] = ''.join(str(e) for e in current_chunk_elements).strip()
 
-                # Start a new chunk
                 current_heading_text = element.get_text(strip=True)
                 current_chunk_elements = []
 
@@ -148,7 +142,18 @@ class MarkdownProcessor:
         # Filter out empty chunks
         return {k: v for k, v in chunks.items() if v}
 
-    def to_plaintext(self, markdown_text: str) -> str:
+    def markdown_to_plaintext(self, markdown_text: str) -> str:
         html_content = self._markdown_to_html(markdown_text)
-        soup = BeautifulSoup(html_content, 'html.parser')
-        return soup.get_text(separator='\n', strip=True)  # Use newline separator for better paragraph breaks
+        return MarkdownProcessor.get_plaintext(html_content)
+
+    @staticmethod
+    def get_plaintext(html_content: str) -> str:
+        if not html_content.strip():
+            return ""
+
+        soup = BeautifulSoup(html_content, MarkdownProcessor.HTML_PARSER)
+
+        text = soup.get_text(separator='\n', strip=True)
+        text = re.sub(r'\n\n+', '\n\n', text)  # Collapse multiple newlines
+        text = re.sub(r'[ \t]+', ' ', text)  # Normalize spaces and tabs
+        return text.strip()
