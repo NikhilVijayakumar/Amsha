@@ -17,10 +17,8 @@ dependencies = [
     "bertopic == 0.17.0",
     "networkx == 3.4.2",
     "nltk == 3.9.1",
-    "markdown-it-py == 3.0.0",
-    "numpy",
-    "markdown-it-py[full]",
-    "mdit-py-plugins "
+    "markdown == 3.8",
+    "beautifulsoup4 == 4.13.4"
 ]
 [tool.setuptools]
 package-dir = { "" = "src" }
