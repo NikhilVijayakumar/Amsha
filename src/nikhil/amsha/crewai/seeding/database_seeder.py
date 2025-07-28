@@ -125,8 +125,6 @@ class DatabaseSeeder:
             tasks=task_id_map,
             usecase=usecase
         )
-
-        logging.info(f"Attempting to synchronize crew: {crew_req.model_dump_json(indent=2)}")
         try:
             existing_crew = self.crew_repo.get_crew_by_name_and_usecase(crew_name, usecase)
             if not existing_crew:
