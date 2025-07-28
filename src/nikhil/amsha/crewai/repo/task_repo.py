@@ -5,22 +5,21 @@ from nikhil.amsha.crewai.model.repo_data import RepoData
 from nikhil.amsha.crewai.model.task_data import TaskRequest, TaskResponse
 from nikhil.amsha.crewai.repo.base_repo import BaseRepository
 
-
 class TaskRepository(BaseRepository):
-    def __init__(self, data:RepoData):
+    def __init__(self, data: RepoData):
         super().__init__(data)
+        # 🛡️ Enforce uniqueness at the database level
+        self.create_unique_compound_index(["name", "usecase"])
 
-    def create_task(self, task: TaskRequest):
+    def create_task(self, task: TaskRequest) -> TaskResponse:
         """Creates a new task in the database."""
         try:
             result = self.insert_one(task.model_dump())
-            if result:
-                return self.get_task_by_id(result.inserted_id)
-            return result
+            return self.get_task_by_id(result.inserted_id)
         except DuplicateKeyError:
-            raise ValueError(f"Task with ID '{task.task_id}' already exists.")
+            raise ValueError(f"Task with name '{task.name}' and usecase '{task.usecase}' already exists.")
 
-    def get_task_by_id(self, task_id: str):
+    def get_task_by_id(self, task_id: str | ObjectId) -> TaskResponse | None:
         """Retrieves a task by its ID."""
         try:
             obj_id = ObjectId(task_id)
@@ -28,12 +27,18 @@ class TaskRepository(BaseRepository):
             raise ValueError("Invalid ObjectId format")
         task_data = self.find_one({"_id": obj_id})
         if task_data:
-            task_data["_id"] = str(task_data["_id"])
             return TaskResponse(**task_data)
         return None
 
+    def find_by_name_and_usecase(self, name: str, usecase: str) -> TaskResponse | None:
+        """Finds a task by its name and usecase."""
+        query = {"name": name, "usecase": usecase}
+        task_doc = self.find_one(query)
+        if task_doc:
+            return TaskResponse(**task_doc)
+        return None
 
-    def update_task(self, task_id: str, task: TaskRequest):
+    def update_task(self, task_id: str, task: TaskRequest) -> TaskResponse | None:
         """Updates an existing task."""
         updated_data = task.model_dump()
         try:
@@ -43,9 +48,9 @@ class TaskRepository(BaseRepository):
         result = self.update_one({"_id": obj_id}, updated_data)
         if result.modified_count > 0:
             return self.get_task_by_id(task_id)
-        return None
+        return self.get_task_by_id(task_id) # Return existing if no fields were changed
 
-    def delete_task(self, task_id: str):
+    def delete_task(self, task_id: str) -> bool:
         """Deletes a task by its ID."""
         try:
             obj_id = ObjectId(task_id)
@@ -54,11 +59,7 @@ class TaskRepository(BaseRepository):
         result = self.delete_one({"_id": obj_id})
         return result.deleted_count > 0
 
-    def get_tasks_by_usecase(self,usecase: str):
-        """Retrieves a list of all tasks."""
+    def get_tasks_by_usecase(self, usecase: str) -> list[TaskResponse]:
+        """Retrieves all tasks for a given usecase."""
         task_data_list = self.find_many({"usecase": usecase})
-        for task_data in task_data_list:
-            task_data["_id"] = str(task_data["_id"])
         return [TaskResponse(**task_data) for task_data in task_data_list]
-
-
