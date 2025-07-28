@@ -25,11 +25,8 @@ class DatabaseSeeder:
             return
 
         logging.info(f"🚀 Starting database synchronization from path: {root_path}")
-
-        # Phase 1: Collect all configurations from the directory structure.
         usecase_map = self._collect_configs_from_path(root_path)
 
-        # Phase 2: Process each use case.
         if not usecase_map:
             logging.warning("No use cases found to process.")
         else:
@@ -38,7 +35,6 @@ class DatabaseSeeder:
         logging.info("🎉 Database synchronization complete.")
 
     def _collect_configs_from_path(self, root_path: str) -> dict:
-        """Walks the path and collects all agent/task YAML definitions."""
         usecase_map = defaultdict(lambda: {"agents": [], "tasks": []})
         for dirpath, _, filenames in os.walk(root_path):
             norm_dirpath = os.path.normpath(dirpath)
@@ -52,67 +48,71 @@ class DatabaseSeeder:
 
             for filename in filenames:
                 if filename.endswith((".yaml", ".yml")):
+                    key = os.path.splitext(filename)[0]
                     file_path = os.path.join(dirpath, filename)
+
                     if os.path.basename(dirpath) == "agents":
                         agent_req = self.yaml_utils.parse_agent(file_path)
                         agent_req.usecase = usecase
-                        usecase_map[usecase]["agents"].append(agent_req)
+                        usecase_map[usecase]["agents"].append({"key": key, "data": agent_req})
                     elif os.path.basename(dirpath) == "tasks":
                         task_req = self.yaml_utils.parse_task(file_path)
                         task_req.usecase = usecase
-                        usecase_map[usecase]["tasks"].append(task_req)
+                        usecase_map[usecase]["tasks"].append({"key": key, "data": task_req})
         return usecase_map
 
     def _process_usecases(self, usecase_map: dict):
         for usecase, configs in usecase_map.items():
             logging.info(f"--- Processing Usecase: {usecase} ---")
-
-            # Synchronize all agents and collect their IDs
             agent_id_map = self._synchronize_agents(usecase, configs["agents"])
-
-            # Synchronize all tasks and collect their IDs
             task_id_map = self._synchronize_tasks(usecase, configs["tasks"])
-
-            # Synchronize the crew configuration for this use case
             self._synchronize_crew(usecase, agent_id_map, task_id_map)
 
-    def _synchronize_agents(self, usecase: str, agent_requests: list) -> dict:
+    def _synchronize_agents(self, usecase: str, agent_configs: list) -> dict:
         id_map = {}
-        for agent_req in agent_requests:
+        for config in agent_configs:
+            agent_key = config["key"]
+            agent_req = config["data"]
             try:
                 existing_agent = self.agent_repo.find_by_role_and_usecase(agent_req.role, usecase)
                 if not existing_agent:
                     created_agent = self.agent_repo.create_agent(agent_req)
-                    id_map[created_agent.role] = created_agent.id
-                    logging.info(f"  ✅ CREATED Agent '{created_agent.role}'")
+                    # 👇 **CHANGE**: Use the filename-key for the map
+                    id_map[agent_key] = str(created_agent.id)
+                    logging.info(f"  ✅ CREATED Agent '{agent_req.role}'")
                 else:
                     if (existing_agent.goal != agent_req.goal or existing_agent.backstory != agent_req.backstory):
                         self.agent_repo.update_agent(existing_agent.id, agent_req)
-                        logging.info(f"  🔄 UPDATED Agent '{existing_agent.role}'")
+                        logging.info(f"  🔄 UPDATED Agent '{agent_req.role}'")
                     else:
-                        logging.info(f"  ➖ SKIPPED Agent '{existing_agent.role}' (unchanged).")
-                    id_map[existing_agent.role] = existing_agent.id
+                        logging.info(f"  ➖ SKIPPED Agent '{agent_req.role}' (unchanged).")
+                    # 👇 **CHANGE**: Use the filename-key for the map
+                    id_map[agent_key] = str(existing_agent.id)
             except Exception as e:
                 logging.error(f"  ❌ FAILED to process agent '{agent_req.role}': {e}")
         return id_map
 
-    def _synchronize_tasks(self, usecase: str, task_requests: list) -> dict:
+    def _synchronize_tasks(self, usecase: str, task_configs: list) -> dict:
         id_map = {}
-        for task_req in task_requests:
+        for config in task_configs:
+            task_key = config["key"]
+            task_req = config["data"]
             try:
                 existing_task = self.task_repo.find_by_name_and_usecase(task_req.name, usecase)
                 if not existing_task:
                     created_task = self.task_repo.create_task(task_req)
-                    id_map[created_task.name] = created_task.id
-                    logging.info(f"  ✅ CREATED Task '{created_task.name}'")
+                    # 👇 **CHANGE**: Use the filename-key for the map
+                    id_map[task_key] = str(created_task.id)
+                    logging.info(f"  ✅ CREATED Task '{task_req.name}'")
                 else:
                     if (
                             existing_task.description != task_req.description or existing_task.expected_output != task_req.expected_output):
                         self.task_repo.update_task(existing_task.id, task_req)
-                        logging.info(f"  🔄 UPDATED Task '{existing_task.name}'")
+                        logging.info(f"  🔄 UPDATED Task '{task_req.name}'")
                     else:
-                        logging.info(f"  ➖ SKIPPED Task '{existing_task.name}' (unchanged).")
-                    id_map[existing_task.name] = existing_task.id
+                        logging.info(f"  ➖ SKIPPED Task '{task_req.name}' (unchanged).")
+                    # 👇 **CHANGE**: Use the filename-key for the map
+                    id_map[task_key] = str(existing_task.id)
             except Exception as e:
                 logging.error(f"  ❌ FAILED to process task '{task_req.name}': {e}")
         return id_map
