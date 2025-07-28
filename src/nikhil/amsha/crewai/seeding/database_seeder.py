@@ -1,22 +1,17 @@
-# nikhil/amsha/crewai/seeding.py
 import os
 import logging
 from collections import defaultdict
 
-from .repo.agent_repo import AgentRepository
-from .repo.task_repo import TaskRepository
-from .repo.crew_config_repo import CrewConfigRepository
-from .model.crew_config_data import CrewConfigRequest
-from ..utils.yaml_utils import YamlUtils
+from nikhil.amsha.crewai.repo.agent_repo import AgentRepository
+from nikhil.amsha.crewai.repo.task_repo import TaskRepository
+from nikhil.amsha.crewai.repo.crew_config_repo import CrewConfigRepository
+from nikhil.amsha.crewai.model.crew_config_data import CrewConfigRequest
+from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class DatabaseSeeder:
-    """
-    Synchronizes Agent, Task, and Crew configurations from YAML files
-    in a structured directory into a MongoDB database.
-    """
 
     def __init__(self, agent_repo: AgentRepository, task_repo: TaskRepository, crew_repo: CrewConfigRepository):
         self.agent_repo = agent_repo
@@ -25,7 +20,6 @@ class DatabaseSeeder:
         self.yaml_utils = YamlUtils()
 
     def synchronize(self, root_path: str):
-        """Main entry point for the synchronization process."""
         if not root_path or not os.path.isdir(root_path):
             logging.error(f"The provided path '{root_path}' is not a valid directory.")
             return
@@ -70,7 +64,6 @@ class DatabaseSeeder:
         return usecase_map
 
     def _process_usecases(self, usecase_map: dict):
-        """Synchronizes agents, tasks, and the parent crew for each use case."""
         for usecase, configs in usecase_map.items():
             logging.info(f"--- Processing Usecase: {usecase} ---")
 
@@ -84,7 +77,6 @@ class DatabaseSeeder:
             self._synchronize_crew(usecase, agent_id_map, task_id_map)
 
     def _synchronize_agents(self, usecase: str, agent_requests: list) -> dict:
-        """Processes a list of agents for a usecase and returns a name-to-ID map."""
         id_map = {}
         for agent_req in agent_requests:
             try:
@@ -105,7 +97,6 @@ class DatabaseSeeder:
         return id_map
 
     def _synchronize_tasks(self, usecase: str, task_requests: list) -> dict:
-        """Processes a list of tasks for a usecase and returns a name-to-ID map."""
         id_map = {}
         for task_req in task_requests:
             try:
@@ -127,7 +118,6 @@ class DatabaseSeeder:
         return id_map
 
     def _synchronize_crew(self, usecase: str, agent_id_map: dict, task_id_map: dict):
-        """Creates or updates the crew configuration for a usecase."""
         crew_name = f"{usecase.replace('_', ' ').title()} Crew"
         crew_req = CrewConfigRequest(
             name=crew_name,
