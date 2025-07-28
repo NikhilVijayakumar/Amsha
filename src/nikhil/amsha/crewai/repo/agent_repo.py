@@ -28,6 +28,7 @@ class AgentRepository(BaseRepository):
             raise ValueError("Invalid ObjectId format")
         agent_data = self.find_one({"_id": obj_id})
         if agent_data:
+            agent_data["_id"] = str(agent_data["_id"])
             return AgentResponse(**agent_data)
         return None
 
@@ -36,6 +37,7 @@ class AgentRepository(BaseRepository):
         query = {"role": role, "usecase": usecase}
         agent_doc = self.find_one(query)
         if agent_doc:
+            agent_doc["_id"] = str(agent_doc["_id"])
             return AgentResponse(**agent_doc)
         return None
 

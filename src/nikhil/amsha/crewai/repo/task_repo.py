@@ -27,6 +27,7 @@ class TaskRepository(BaseRepository):
             raise ValueError("Invalid ObjectId format")
         task_data = self.find_one({"_id": obj_id})
         if task_data:
+            task_data["_id"] = str(task_data["_id"])
             return TaskResponse(**task_data)
         return None
 
@@ -35,6 +36,7 @@ class TaskRepository(BaseRepository):
         query = {"name": name, "usecase": usecase}
         task_doc = self.find_one(query)
         if task_doc:
+            task_doc["_id"] = str(task_doc["_id"])
             return TaskResponse(**task_doc)
         return None
 
