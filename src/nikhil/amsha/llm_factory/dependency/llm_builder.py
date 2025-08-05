@@ -1,22 +1,25 @@
 # src/nikhil/amsha/llm_factory/dependency/llm_builder.py
-
+from typing import NamedTuple
 
 from crewai import LLM
 
 from nikhil.amsha.llm_factory.domain.llm_type import LLMType
+from nikhil.amsha.llm_factory.domain.models import LLMBuildResult
 from nikhil.amsha.llm_factory.settings.llm_settings import LLMSettings
-
+from nikhil.amsha.llm_factory.utils.llm_utils import LLMUtils
 
 
 class LLMBuilder:
     def __init__(self, settings: LLMSettings):
         self.settings: LLMSettings = settings
 
-    def build(self, llm_type: LLMType, model_key: str = None) -> LLM:
+    def build(self, llm_type: LLMType, model_key: str = None) -> LLMBuildResult:
         model_config = self.settings.get_model_config(llm_type.value, model_key)
         params = self.settings.get_parameters(llm_type.value)
 
-        return LLM(
+        clean_model_name = LLMUtils.extract_model_name(model_config.model)
+
+        llm_instance = LLM(
             model=model_config.model,
             temperature=params.temperature,
             top_p=params.top_p,
@@ -26,8 +29,13 @@ class LLMBuilder:
             stop=params.stop
         )
 
-    def build_creative(self, model_key: str = None) -> LLM:
+        # Return both the LLM and its name in a structured way
+        return LLMBuildResult(llm=llm_instance, model_name=clean_model_name)
+
+    def build_creative(self, model_key: str = None) -> LLMBuildResult:
+        LLMUtils.disable_telemetry()
         return self.build(LLMType.CREATIVE, model_key)
 
-    def build_evaluation(self, model_key: str = None) -> LLM:
+    def build_evaluation(self, model_key: str = None) -> LLMBuildResult:
+        LLMUtils.disable_telemetry()
         return self.build(LLMType.EVALUATION, model_key)

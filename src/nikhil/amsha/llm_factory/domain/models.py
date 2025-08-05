@@ -1,7 +1,9 @@
 # src/nikhil/amsha/llm_factory/domain/model.py
 
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, NamedTuple
+
+from crewai import LLM
 from pydantic import BaseModel
 
 
@@ -23,6 +25,11 @@ class LLMModelConfig(BaseModel):
 class LLMUseCaseConfig(BaseModel):
     default: str
     models: Dict[str, LLMModelConfig]
+
+
+class LLMBuildResult(NamedTuple):
+    llm: LLM
+    model_name: str
 
 
 

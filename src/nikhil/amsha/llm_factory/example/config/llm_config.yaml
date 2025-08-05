@@ -4,7 +4,7 @@ llm:
     models:
       phi:
         base_url: "http://localhost:1234/v1"
-        model: "lm_studio/phi-4"
+        model: "lm_studio/phi-4-reasoning"
         api_key: "your_api_key"
       llama:
         base_url: "http://localhost:1234/v1"
@@ -19,7 +19,7 @@ llm:
         api_key: ""
       qwen:
         base_url: "http://localhost:1234/v1"
-        model: "lm_studio/gemma-3-12b-it"
+        model: "lm_studio/qwen3-14b"
         api_key: "xxxx"
 
 
