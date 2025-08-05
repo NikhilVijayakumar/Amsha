@@ -1,12 +1,11 @@
-# src/nikhil/amsha/llm_factory/dependency/llm_builder.py
-from typing import NamedTuple
+# src/nikhil/amsha/toolkit/llm_factory/dependency/llm_builder.py
 
 from crewai import LLM
 
-from nikhil.amsha.llm_factory.domain.llm_type import LLMType
-from nikhil.amsha.llm_factory.domain.models import LLMBuildResult
-from nikhil.amsha.llm_factory.settings.llm_settings import LLMSettings
-from nikhil.amsha.llm_factory.utils.llm_utils import LLMUtils
+from nikhil.amsha.toolkit.llm_factory.domain.llm_type import LLMType
+from nikhil.amsha.toolkit.llm_factory.domain.models import LLMBuildResult
+from nikhil.amsha.toolkit.llm_factory.settings.llm_settings import LLMSettings
+from nikhil.amsha.toolkit.llm_factory.utils.llm_utils import LLMUtils
 
 
 class LLMBuilder:

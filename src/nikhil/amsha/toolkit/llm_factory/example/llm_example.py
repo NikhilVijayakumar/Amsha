@@ -1,8 +1,8 @@
 import yaml
 from pathlib import Path
 
-from nikhil.amsha.llm_factory.dependency.llm_builder import LLMBuilder
-from nikhil.amsha.llm_factory.settings.llm_settings import LLMSettings
+from nikhil.amsha.toolkit.llm_factory.dependency.llm_builder import LLMBuilder
+from nikhil.amsha.toolkit.llm_factory.settings.llm_settings import LLMSettings
 
 
 def run_example_a(builder: LLMBuilder):

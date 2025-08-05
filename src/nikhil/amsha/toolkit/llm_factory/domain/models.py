@@ -1,4 +1,4 @@
-# src/nikhil/amsha/llm_factory/domain/model.py
+# src/nikhil/amsha/toolkit/llm_factory/domain/model.py
 
 
 from typing import Dict, List, Optional, NamedTuple

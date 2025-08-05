@@ -1,8 +1,8 @@
-# src/nikhil/amsha/llm_factory/settings/llm_settings.py
+# src/nikhil/amsha/toolkit/llm_factory/settings/llm_settings.py
 
 from typing import Dict, Optional
 from pydantic import BaseModel
-from nikhil.amsha.llm_factory.domain.models import LLMUseCaseConfig, LLMParameters, LLMModelConfig
+from nikhil.amsha.toolkit.llm_factory.domain.models import LLMUseCaseConfig, LLMParameters, LLMModelConfig
 
 
 class LLMSettings(BaseModel):
