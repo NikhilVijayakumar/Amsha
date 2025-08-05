@@ -1,4 +1,5 @@
 import os
+import warnings
 
 from crewai import LLM
 from crewai.telemetry import Telemetry
@@ -8,6 +9,13 @@ from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 class LLMConfig:
     def __init__(self, yaml_path: str):
+        warnings.warn(
+            "The 'LLMConfig' class is deprecated and will be removed in a future version. "
+            "Please use the new 'AmshaLLMFactory' by loading settings and injecting them "
+            "into the 'LLMBuilder' for a more robust and testable approach.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.utils = YamlUtils()
         self.config = self.utils.load_llm_config(yaml_path)
         self.model_name = ""
