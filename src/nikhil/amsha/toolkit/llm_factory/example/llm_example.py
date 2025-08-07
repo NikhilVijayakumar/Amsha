@@ -1,10 +1,11 @@
-import yaml
+# main.py
 from pathlib import Path
 
-from nikhil.amsha.toolkit.llm_factory.dependency.llm_builder import LLMBuilder
-from nikhil.amsha.toolkit.llm_factory.settings.llm_settings import LLMSettings
+# Import the container and the builder for type hinting
+from nikhil.amsha.toolkit.llm_factory.dependency.container import Container
+from nikhil.amsha.toolkit.llm_factory.service.llm_builder import LLMBuilder
 
-
+# The example runner functions remain the same.
 def run_example_a(builder: LLMBuilder):
     """Example A: Build the default 'creative' LLM (phi)."""
     print("\n   => Running Example A: Building default 'creative' LLM...")
@@ -33,40 +34,26 @@ def run_example_c(builder: LLMBuilder):
 
 def main():
     """
-    An example script demonstrating how to use the Amsha LLM Factory.
+    An example script demonstrating how to use the Amsha LLM Factory
+    with a Dependency Injection Container.
     """
-    print("--- Running Amsha LLM Factory Example ---")
+    print("--- Running Amsha LLM Factory Example (with DI Container) ---")
 
-    # Define the path to your configuration file
-    # This assumes you run the script from the project root directory
+    container = Container()
+
     config_path = Path("config/llm_config.yaml")
+    container.config.llm.yaml_path.from_value(str(config_path))
+    print(f"   Container configured to use '{config_path}'.")
 
-    if not config_path.exists():
-        print(f"Error: Configuration file not found at '{config_path}'")
-        return
 
-    # --- Step 1: Client Application Loads and Validates Configuration ---
-    print(f"\n1. Loading configuration from '{config_path}'...")
+    print("\n2. Requesting the LLMBuilder from the container...")
     try:
-        with open(config_path, "r") as f:
-            raw_config_data = yaml.safe_load(f)
-
-        # This is the crucial validation step using Pydantic.
-        # If the YAML is malformed, this will raise a detailed error.
-        settings = LLMSettings(**raw_config_data)
-        print("   Configuration loaded and validated successfully.")
+        builder: LLMBuilder = container.llm_builder()
+        print("   LLMBuilder created successfully by the container.")
     except Exception as e:
-        print(f"   Error validating configuration: {e}")
+        print(f"   Error creating builder: {e}")
         return
 
-    # --- Step 2: Client Injects Settings into the Builder ---
-    print("\n2. Initializing the LLMBuilder with the validated settings...")
-    builder = LLMBuilder(settings=settings)
-    print("   LLMBuilder created.")
-
-    # --- Step 3: Run the desired example ---
-    # To run a different example, comment out the current line
-    # and uncomment the one you want to test.
     run_example_a(builder)
     # run_example_b(builder)
     # run_example_c(builder)

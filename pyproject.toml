@@ -19,7 +19,8 @@ dependencies = [
     "nltk == 3.9.1",
     "markdown == 3.8",
     "beautifulsoup4 == 4.13.4",
-    "lxml == 5.4.0"
+    "lxml == 5.4.0",
+    "dependency-injector == 4.48.1"
 ]
 [tool.setuptools]
 package-dir = { "" = "src" }
