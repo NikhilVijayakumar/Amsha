@@ -1,0 +1,6 @@
+backend: "mongo"
+domain_root_path: "./config/crew_configs"
+
+mongo:
+  uri: "mongodb://user:pass@localhost:27017"
+  db_name: "crew_forge_example_db"

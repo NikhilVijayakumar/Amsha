@@ -1,14 +1,16 @@
+# src/nikhil/amsha/toolkit/crew_forge/adapters/mongo/crew_config_repo.py
 from typing import Optional
 
 from pymongo.errors import DuplicateKeyError
 from bson import ObjectId
 
-from nikhil.amsha.crewai.model.crew_config_data import CrewConfigRequest, CrewConfigResponse
-from nikhil.amsha.crewai.model.repo_data import RepoData
-from nikhil.amsha.crewai.repo.base_repo import BaseRepository
+from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigRequest, CrewConfigResponse
+from nikhil.amsha.toolkit.crew_forge.domain.models.repo_data import RepoData
+from nikhil.amsha.toolkit.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
 
 
-class CrewConfigRepository(BaseRepository):
+class CrewConfigRepository(MongoRepository,ICrewConfigRepository):
     def __init__(self, data: RepoData):
         super().__init__(data)
         self.create_unique_compound_index(["name", "usecase"])

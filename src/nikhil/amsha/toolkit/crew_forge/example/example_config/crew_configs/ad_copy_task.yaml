@@ -1,0 +1,4 @@
+task:
+  name: "Ad Copy Generation"
+  description: "Generate five unique pieces of ad copy for a new product."
+  expected_output: "A JSON file containing five ad copy variations."

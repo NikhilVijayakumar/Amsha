@@ -1,23 +1,25 @@
+# src/nikhil/amsha/toolkit/crew_forge/seeding/database_seeder.py
 import os
 import logging
 from collections import defaultdict
 
-from nikhil.amsha.crewai.repo.agent_repo import AgentRepository
-from nikhil.amsha.crewai.repo.task_repo import TaskRepository
-from nikhil.amsha.crewai.repo.crew_config_repo import CrewConfigRepository
-from nikhil.amsha.crewai.model.crew_config_data import CrewConfigRequest
-from nikhil.amsha.utils.yaml_utils import YamlUtils
+from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigRequest
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
+from nikhil.amsha.toolkit.crew_forge.seeding.parser.crew_parser import CrewParser
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class DatabaseSeeder:
 
-    def __init__(self, agent_repo: AgentRepository, task_repo: TaskRepository, crew_repo: CrewConfigRepository):
+    def __init__(self, agent_repo: IAgentRepository, task_repo: ITaskRepository, crew_repo: ICrewConfigRepository):
         self.agent_repo = agent_repo
         self.task_repo = task_repo
         self.crew_repo = crew_repo
-        self.yaml_utils = YamlUtils()
+        self.crew_parser = CrewParser()
 
     def synchronize(self, root_path: str):
         if not root_path or not os.path.isdir(root_path):
@@ -52,11 +54,11 @@ class DatabaseSeeder:
                     file_path = os.path.join(dirpath, filename)
 
                     if os.path.basename(dirpath) == "agents":
-                        agent_req = self.yaml_utils.parse_agent(file_path)
+                        agent_req = self.crew_parser.parse_agent(file_path)
                         agent_req.usecase = usecase
                         usecase_map[usecase]["agents"].append({"key": key, "data": agent_req})
                     elif os.path.basename(dirpath) == "tasks":
-                        task_req = self.yaml_utils.parse_task(file_path)
+                        task_req = self.crew_parser.parse_task(file_path)
                         task_req.usecase = usecase
                         usecase_map[usecase]["tasks"].append({"key": key, "data": task_req})
         return usecase_map
@@ -81,7 +83,7 @@ class DatabaseSeeder:
                     id_map[agent_key] = str(created_agent.id)
                     logging.info(f"  ✅ CREATED Agent '{agent_req.role}'")
                 else:
-                    if (existing_agent.goal != agent_req.goal or existing_agent.backstory != agent_req.backstory):
+                    if existing_agent.goal != agent_req.goal or existing_agent.backstory != agent_req.backstory:
                         self.agent_repo.update_agent(existing_agent.id, agent_req)
                         logging.info(f"  🔄 UPDATED Agent '{agent_req.role}'")
                     else:
@@ -131,7 +133,7 @@ class DatabaseSeeder:
                 self.crew_repo.create_crew_config(crew_req)
                 logging.info(f"  ✅ CREATED Crew '{crew_name}'")
             else:
-                if (existing_crew.agents != crew_req.agents or existing_crew.tasks != crew_req.tasks):
+                if existing_crew.agents != crew_req.agents or existing_crew.tasks != crew_req.tasks:
                     self.crew_repo.update_crew_config(existing_crew.id, crew_req)
                     logging.info(f"  🔄 UPDATED Crew '{crew_name}'")
                 else:

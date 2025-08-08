@@ -1,19 +1,22 @@
-# services/crew_builder_service.py
+# src/nikhil/amsha/toolkit/crew_forge/service/crew_builder_service.py
 import os
 import time
 from crewai import Crew, Agent, Process, Task
-from nikhil.amsha.crewai.model.crew_data import CrewData
+
+from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
 
 
 class CrewBuilderService:
 
 
-    def __init__(self, data: CrewData):
+    def __init__(self, data: CrewData,agent_repo: IAgentRepository,task_repo: ITaskRepository):
         self.llm = data.llm
-        self.agent_repo = data.agent_repo
-        self.task_repo = data.task_repo
         self.output_dir_path = data.output_dir_path
         self.module_name = data.module_name
+        self.agent_repo: IAgentRepository = agent_repo
+        self.task_repo: ITaskRepository = task_repo
         self._agents = []
         self._tasks = []
 

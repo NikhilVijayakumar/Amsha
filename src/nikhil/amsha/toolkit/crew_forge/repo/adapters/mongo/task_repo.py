@@ -1,11 +1,14 @@
+# src/nikhil/amsha/toolkit/crew_forge/adapters/mongo/crew_config_repo.py
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
-from nikhil.amsha.crewai.model.repo_data import RepoData
-from nikhil.amsha.crewai.model.task_data import TaskRequest, TaskResponse
-from nikhil.amsha.crewai.repo.base_repo import BaseRepository
+from nikhil.amsha.toolkit.crew_forge.domain.models.repo_data import RepoData
+from nikhil.amsha.toolkit.crew_forge.domain.models.task_data import TaskRequest, TaskResponse
+from nikhil.amsha.toolkit.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
 
-class TaskRepository(BaseRepository):
+
+class TaskRepository(MongoRepository,ITaskRepository):
     def __init__(self, data: RepoData):
         super().__init__(data)
         # 🛡️ Enforce uniqueness at the database level

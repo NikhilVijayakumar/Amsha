@@ -1,9 +1,11 @@
+# src/nikhil/amsha/toolkit/crew_forge/adapters/mongo/task_repo.py
 import pymongo
 
-from nikhil.amsha.crewai.model.repo_data import RepoData
+from nikhil.amsha.toolkit.crew_forge.domain.models.repo_data import RepoData
+from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_repository import IRepository
 
 
-class BaseRepository:
+class MongoRepository(IRepository):
     def __init__(self, data:RepoData):
         self.client = pymongo.MongoClient(data.mongo_uri)
         self.db = self.client[data.db_name]
