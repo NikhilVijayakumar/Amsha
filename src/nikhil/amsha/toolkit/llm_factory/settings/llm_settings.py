@@ -1,7 +1,9 @@
 # src/nikhil/amsha/toolkit/llm_factory/settings/llm_settings.py
 
 from typing import Dict, Optional
+
 from pydantic import BaseModel
+
 from nikhil.amsha.toolkit.llm_factory.domain.models import LLMUseCaseConfig, LLMParameters, LLMModelConfig
 
 
@@ -24,5 +26,3 @@ class LLMSettings(BaseModel):
 
     def get_parameters(self, use_case: str) -> LLMParameters:
         return self.llm_parameters.get(use_case, LLMParameters())
-
-

@@ -1,7 +1,9 @@
 # src/nikhil/amsha/toolkit/llm_factory/utils/llm_utils.py
 
 import os
+
 from crewai.telemetry import Telemetry
+
 
 class LLMUtils:
 
@@ -21,7 +23,6 @@ class LLMUtils:
         except ImportError:
             print("Telemetry module not found. Skipping telemetry disabling.")
 
-
     @staticmethod
     def extract_model_name(model_string):
         prefixes = ["lm_studio/", "gemini/", "open_ai/"]  # Add any other prefixes here
@@ -29,4 +30,3 @@ class LLMUtils:
             if model_string.startswith(prefix):
                 return model_string[len(prefix):]  # Remove the prefix
         return model_string
-

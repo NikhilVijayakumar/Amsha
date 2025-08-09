@@ -19,6 +19,8 @@ class LLMBuilder:
         clean_model_name = LLMUtils.extract_model_name(model_config.model)
 
         llm_instance = LLM(
+            base_url=model_config.base_url,
+            api_key=model_config.api_key,
             model=model_config.model,
             temperature=params.temperature,
             top_p=params.top_p,

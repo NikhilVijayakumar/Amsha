@@ -5,6 +5,7 @@ from pathlib import Path
 from nikhil.amsha.toolkit.llm_factory.dependency.container import Container
 from nikhil.amsha.toolkit.llm_factory.service.llm_builder import LLMBuilder
 
+
 # The example runner functions remain the same.
 def run_example_a(builder: LLMBuilder):
     """Example A: Build the default 'creative' LLM (phi)."""
@@ -14,6 +15,7 @@ def run_example_a(builder: LLMBuilder):
     print(f"      Full Model Path: {creative_result_default.llm.model}")
     print(f"      Temperature: {creative_result_default.llm.temperature}")
 
+
 def run_example_b(builder: LLMBuilder):
     """Example B: Build a specific 'creative' LLM (llama)."""
     print("\n   => Running Example B: Building specific 'llama' creative LLM...")
@@ -21,6 +23,7 @@ def run_example_b(builder: LLMBuilder):
     print(f"      Model Name: {creative_result_llama.model_name}")
     print(f"      Full Model Path: {creative_result_llama.llm.model}")
     print(f"      Temperature: {creative_result_llama.llm.temperature}")
+
 
 def run_example_c(builder: LLMBuilder):
     """Example C: Build the default 'evaluation' LLM (gemma)."""
@@ -44,7 +47,6 @@ def main():
     config_path = Path("config/llm_config.yaml")
     container.config.llm.yaml_path.from_value(str(config_path))
     print(f"   Container configured to use '{config_path}'.")
-
 
     print("\n2. Requesting the LLMBuilder from the container...")
     try:
