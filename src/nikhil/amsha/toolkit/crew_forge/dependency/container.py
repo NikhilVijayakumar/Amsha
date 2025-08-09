@@ -3,8 +3,8 @@ from dependency_injector import containers, providers
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
 from nikhil.amsha.toolkit.crew_forge.domain.models.sync_config import SyncConfigData
 from nikhil.amsha.toolkit.crew_forge.dependency.mongo_container import MongoRepoContainer
-from nikhil.amsha.toolkit.crew_forge.domain.enum.repo_backend import RepoBackend
 from nikhil.amsha.toolkit.crew_forge.service.config_sync_service import ConfigSyncService
+from nikhil.amsha.toolkit.crew_forge.service.crew_blueprint_service import CrewBluePrintService
 from nikhil.amsha.toolkit.crew_forge.service.crew_builder_service import CrewBuilderService
 
 
@@ -48,7 +48,10 @@ class Container(containers.DeclarativeContainer):
             task_repo=task_repo(),
         ),
         agent_repo=agent_repo,
-        task_repo=task_repo,
-        module_name=config.module_name,
-        output_dir_path=config.output_dir_path,
+        task_repo=task_repo
+    )
+
+    crew_blueprint_service = providers.Callable(
+        lambda crew_repo: CrewBluePrintService(crew_repo=crew_repo()),
+        crew_repo=crew_config_repo,
     )

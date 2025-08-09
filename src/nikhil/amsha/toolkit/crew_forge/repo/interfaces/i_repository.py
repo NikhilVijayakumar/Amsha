@@ -1,5 +1,6 @@
 # src/nikhil/amsha/toolkit/crew_forge/interfaces/i_repository.py
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any, Optional, List
 

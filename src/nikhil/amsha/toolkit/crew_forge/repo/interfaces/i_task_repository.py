@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
@@ -9,6 +10,7 @@ class ITaskRepository(ABC):
     """
     Interface for data access operations related to Tasks.
     """
+
     @abstractmethod
     def create_task(self, task: TaskRequest) -> TaskResponse:
         ...

@@ -3,8 +3,6 @@ from nikhil.amsha.toolkit.crew_forge.domain.models.sync_config import SyncConfig
 from nikhil.amsha.toolkit.crew_forge.seeding.database_seeder import DatabaseSeeder
 
 
-
-
 class ConfigSyncService:
     def __init__(self, data: SyncConfigData):
         self.config = data

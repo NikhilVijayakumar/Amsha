@@ -1,7 +1,6 @@
 # src/nikhil/amsha/toolkit/crew_forge/adapters/mongo/agent_repo.py
-from pymongo.errors import DuplicateKeyError
-
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 
 from nikhil.amsha.toolkit.crew_forge.domain.models.agent_data import AgentRequest, AgentResponse
 from nikhil.amsha.toolkit.crew_forge.domain.models.repo_data import RepoData
@@ -9,7 +8,7 @@ from nikhil.amsha.toolkit.crew_forge.repo.adapters.mongo.mongo_repository import
 from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
 
 
-class AgentRepository(MongoRepository,IAgentRepository):
+class AgentRepository(MongoRepository, IAgentRepository):
     def __init__(self, data: RepoData):
         super().__init__(data)
         # 🛡️ Enforce uniqueness at the database level
@@ -55,7 +54,7 @@ class AgentRepository(MongoRepository,IAgentRepository):
         result = self.update_one({"_id": obj_id}, updated_data)
         if result.modified_count > 0:
             return self.get_agent_by_id(agent_id)
-        return self.get_agent_by_id(agent_id) # Return existing if no fields were changed
+        return self.get_agent_by_id(agent_id)  # Return existing if no fields were changed
 
     def delete_agent(self, agent_id: str) -> bool:
         """Deletes an agent by its ID."""
@@ -63,8 +62,7 @@ class AgentRepository(MongoRepository,IAgentRepository):
             obj_id = ObjectId(agent_id)
         except Exception:
             raise ValueError("Invalid ObjectId format")
-        result = self.delete_one({"_id": obj_id})
-        return result.deleted_count > 0
+        return self.delete_one({"_id": obj_id})
 
     def get_agents_by_usecase(self, usecase: str) -> list[AgentResponse]:
         """Retrieves all agents for a given usecase."""

@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 class RepoBackend(str, Enum):
     MONGO = "mongo"
     IN_MEMORY = "in_memory"

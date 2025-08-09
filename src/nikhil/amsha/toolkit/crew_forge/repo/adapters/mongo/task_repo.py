@@ -8,7 +8,7 @@ from nikhil.amsha.toolkit.crew_forge.repo.adapters.mongo.mongo_repository import
 from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
 
 
-class TaskRepository(MongoRepository,ITaskRepository):
+class TaskRepository(MongoRepository, ITaskRepository):
     def __init__(self, data: RepoData):
         super().__init__(data)
         # 🛡️ Enforce uniqueness at the database level
@@ -53,7 +53,7 @@ class TaskRepository(MongoRepository,ITaskRepository):
         result = self.update_one({"_id": obj_id}, updated_data)
         if result.modified_count > 0:
             return self.get_task_by_id(task_id)
-        return self.get_task_by_id(task_id) # Return existing if no fields were changed
+        return self.get_task_by_id(task_id)  # Return existing if no fields were changed
 
     def delete_task(self, task_id: str) -> bool:
         """Deletes a task by its ID."""
@@ -61,8 +61,7 @@ class TaskRepository(MongoRepository,ITaskRepository):
             obj_id = ObjectId(task_id)
         except Exception:
             raise ValueError("Invalid ObjectId format")
-        result = self.delete_one({"_id": obj_id})
-        return result.deleted_count > 0
+        return self.delete_one({"_id": obj_id})
 
     def get_tasks_by_usecase(self, usecase: str) -> list[TaskResponse]:
         """Retrieves all tasks for a given usecase."""

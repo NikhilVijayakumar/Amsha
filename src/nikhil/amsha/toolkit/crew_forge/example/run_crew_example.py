@@ -1,7 +1,10 @@
+from typing import Optional
+
 import yaml
 from pathlib import Path
 
 from nikhil.amsha.toolkit.crew_forge.dependency.container import Container as CrewContainer
+from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigResponse
 from nikhil.amsha.toolkit.llm_factory.dependency.container import Container as LLMContainer
 
 print("--- Running Integrated Crew Creation Example ---")
@@ -41,13 +44,29 @@ crew_runtime_data = {
 print("\n[Main] Requesting the CrewBuilderService with the real LLM...")
 crew_builder = crew_container.crew_builder_service(**crew_runtime_data)
 
+blueprint_service = crew_container.crew_blueprint_service()
+config_data:Optional[CrewConfigResponse] = blueprint_service.get_config(name="Copy Crew", usecase="copy")
 
-print("\n[Main] Assembling the crew using agent and task IDs...")
+
+
+if not config_data:
+    print("[Main] Error: Crew configuration blueprint not found. Exiting.")
+    exit()
+
+print(f"[Main] Blueprint for crew '{config_data.name}' loaded successfully.")
+agents = config_data.agents
+tasks = config_data.tasks
+agent_id = agents.get("copywriter_agent")
+task_id = tasks.get("ad_copy_task")
+
+print(f"agent_id ={agent_id}\n task_id ={task_id}\n ")
+
 try:
-    crew_builder.add_agent(agent_id="copywriter_agent")
+    crew_builder.add_agent(agent_id=agent_id)
+    agent =crew_builder.get_last_agent()
     crew_builder.add_task(
-        task_id="ad_copy_task",
-        agent_id="copywriter_agent",
+        task_id=task_id,
+        agent=agent,
         output_filename="ad_copy_results"
     )
 

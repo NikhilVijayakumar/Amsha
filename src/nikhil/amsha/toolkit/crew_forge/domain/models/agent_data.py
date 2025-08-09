@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+
 class AgentRequest(BaseModel):
     role: str = Field(..., description="The role or persona of the agent.")
     goal: str = Field(..., description="The primary objective or goal of the agent.")

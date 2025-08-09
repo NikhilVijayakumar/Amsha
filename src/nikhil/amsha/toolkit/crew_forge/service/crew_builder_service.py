@@ -1,6 +1,8 @@
 # src/nikhil/amsha/toolkit/crew_forge/service/crew_builder_service.py
 import os
 import time
+from typing import Optional
+
 from crewai import Crew, Agent, Process, Task
 
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
@@ -10,8 +12,7 @@ from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_task_repository import IT
 
 class CrewBuilderService:
 
-
-    def __init__(self, data: CrewData,agent_repo: IAgentRepository,task_repo: ITaskRepository):
+    def __init__(self, data: CrewData, agent_repo: IAgentRepository, task_repo: ITaskRepository):
         self.llm = data.llm
         self.output_dir_path = data.output_dir_path
         self.module_name = data.module_name
@@ -71,3 +72,9 @@ class CrewBuilderService:
             process=process,
             verbose=True
         )
+
+    def get_last_agent(self) -> Optional[Agent]:
+        """
+        Returns the most recently added agent, or None if no agents have been added. 🧑‍✈️
+        """
+        return self._agents[-1] if self._agents else None

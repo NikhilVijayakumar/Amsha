@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
@@ -9,6 +10,7 @@ class IAgentRepository(ABC):
     """
     Interface for data access operations related to Agents.
     """
+
     @abstractmethod
     def create_agent(self, agent: AgentRequest) -> AgentResponse:
         ...

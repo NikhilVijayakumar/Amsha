@@ -1,8 +1,8 @@
 # src/nikhil/amsha/toolkit/crew_forge/adapters/mongo/crew_config_repo.py
 from typing import Optional
 
-from pymongo.errors import DuplicateKeyError
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigRequest, CrewConfigResponse
 from nikhil.amsha.toolkit.crew_forge.domain.models.repo_data import RepoData
@@ -10,7 +10,7 @@ from nikhil.amsha.toolkit.crew_forge.repo.adapters.mongo.mongo_repository import
 from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
 
 
-class CrewConfigRepository(MongoRepository,ICrewConfigRepository):
+class CrewConfigRepository(MongoRepository, ICrewConfigRepository):
     def __init__(self, data: RepoData):
         super().__init__(data)
         self.create_unique_compound_index(["name", "usecase"])
@@ -57,9 +57,7 @@ class CrewConfigRepository(MongoRepository,ICrewConfigRepository):
             obj_id = ObjectId(crew_config_id)
         except Exception:
             raise ValueError("Invalid ObjectId format for crew_config_id")
-
-        result = self.delete_one({"_id": obj_id})
-        return result.deleted_count > 0
+        return self.delete_one({"_id": obj_id})
 
     def get_crew_configs_by_usecase(self, usecase: str) -> list[CrewConfigResponse]:
         crew_config_list = self.find_many({"usecase": usecase})
