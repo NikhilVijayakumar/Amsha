@@ -1,12 +1,17 @@
-# This file defines a specific job for the crew to execute.
 crew_name: "Copy Crew"
 usecase: "copy"
-
-# Runtime parameters for this specific job
 module_name: "copy"
-output_dir_path: "output/intermediate/ad_copy_run_1" # Made it more specific for this run
 
-# The 'inputs' dictionary will be passed to the crew's kickoff method.
-inputs:
-  # topic: "A new AI-powered coffee machine"
-  # target_audience: "Tech enthusiasts and busy professionals"
+crews:
+  copy_crew:
+#    input:
+#      source: "file"
+#      path: "E:/Python/data/raw/features.json"
+    steps:
+      - task_key: "ad_copy_task"
+        agent_key: "copywriter_agent"
+
+
+pipeline:
+  - "copy_crew"
+

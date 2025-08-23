@@ -7,7 +7,7 @@ from nikhil.amsha.toolkit.llm_factory.settings.llm_settings import LLMSettings
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
-class Container(containers.DeclarativeContainer):
+class LLMContainer(containers.DeclarativeContainer):
     """The Dependency Injection Container."""
 
     config = providers.Configuration()

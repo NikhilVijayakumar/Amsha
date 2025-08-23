@@ -1,4 +1,4 @@
-# src/nikhil/amsha/toolkit/crew_forge/dependency/container.py
+# src/nikhil/amsha/toolkit/crew_forge/dependency/crew_forge_container.py
 from dependency_injector import containers, providers
 
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
@@ -9,7 +9,7 @@ from nikhil.amsha.toolkit.crew_forge.service.crew_blueprint_service import CrewB
 from nikhil.amsha.toolkit.crew_forge.service.crew_builder_service import CrewBuilderService
 
 
-class Container(containers.DeclarativeContainer):
+class CrewForgeContainer(containers.DeclarativeContainer):
     """Main DI container for the application."""
     config = providers.Configuration()
 
@@ -56,3 +56,5 @@ class Container(containers.DeclarativeContainer):
         lambda crew_repo: CrewBluePrintService(crew_repo=crew_repo()),
         crew_repo=crew_config_repo,
     )
+
+
