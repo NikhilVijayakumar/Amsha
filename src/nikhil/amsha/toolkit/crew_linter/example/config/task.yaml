@@ -1,0 +1,50 @@
+task:
+  name: "Generate Analyzing Flashcards"
+  description: |
+                  Generate flashcards designed for **Analyzing** (Bloom's Taxonomy), where the user must break down structures, processes, spot flaws, or compare and contrast related ideas. The Feynman integration involves simplifying complex analyses, explaining how components interact, or breaking down arguments to their essentials.
+
+                  Input:
+                  - Flashcard Data: {flashcard_data} (A JSON object containing:
+                      * `topic`: String, the broad topic.
+                      * `keywords`: List of strings, key terms.
+                      * `notes`: String, the detailed content.                     
+
+                  Steps:
+                  1.  Receive the `flashcard_data` input.
+                  2.  Initialize an empty list for flashcards.
+                  3.  Analyze the topic,keywords, and notes. Based on analysis identify concepts that involve breaking down information, identifying relationships, comparing different approaches, or detecting logical fallacies.
+                  4.  For each identified analysis-oriented concept:
+                      a.  **Breakdown/Component Focus:**
+                          * `front_prompt`: "Break down [Process/System] into its core components and explain how they interact."
+                          * `back_answer`: A detailed breakdown of the components and their interdependencies, explaining their roles as derived from the notes.
+                      b.  **Comparison/Contrast Focus:**
+                          * `front_prompt`: "Compare and contrast [Concept A] and [Concept B], highlighting their key differences and similarities."
+                          * `back_answer`: A clear articulation of points of comparison and contrast, drawn from the notes.
+                      c.  **Flaw/Assumption Identification:**
+                          * `front_prompt`: "Identify a potential flawed assumption or a weak point in [Method/Argument]."
+                          * `back_answer`: A clear explanation of the identified flaw or assumption, referencing concepts from the notes.
+                      d.  Assign `topic` from input and set `bloom_level` to "Analyzing".
+                      e.  Generate a unique `id` 
+                      f.  Add the structured flashcard to the list.
+                  5.  Output the list of generated flashcards.
+
+  expected_output: |
+                      A JSON array of flashcard objects, prompting analytical thinking.
+                      ```json
+                      [
+                        {
+                          "id": "integrated_analyze_001",                         
+                          "topic": "Database Normalization",
+                          "bloom_level": "Analyzing",
+                          "front_prompt": "Compare and contrast 2NF (Second Normal Form) and 3NF (Third Normal Form) in database design.",
+                          "back_answer": "2NF eliminates partial dependencies (non-key attributes dependent on only part of a composite primary key). 3NF goes further by eliminating transitive dependencies (non-key attributes dependent on other non-key attributes). Essentially, if a table is in 3NF, it is also in 2NF, but not vice-versa."
+                        },
+                        {
+                          "id": "integrated_analyze_002",                         
+                          "topic": "Memory Management",
+                          "bloom_level": "Analyzing",
+                          "front_prompt": "What are the advantages and disadvantages of using virtual memory?",
+                          "back_answer": "Advantages: Allows running more/larger programs than physical RAM, provides memory protection between processes. Disadvantages: Slower due to disk I/O (page faults), can lead to 'thrashing' if too much swapping occurs, requires complex OS management."
+                        }
+                      ]
+                      ```
