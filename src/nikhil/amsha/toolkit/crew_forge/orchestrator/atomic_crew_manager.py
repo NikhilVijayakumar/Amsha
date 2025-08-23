@@ -18,6 +18,7 @@ class AtomicCrewManager:
 
         # Load app config for DI
         app_config = YamlUtils.yaml_safe_load(app_config_path)
+        self.app_config = app_config
         self.crew_container.config.from_dict(app_config)
 
         # Fetch the single master blueprint using top-level keys from job_config
@@ -42,7 +43,7 @@ class AtomicCrewManager:
         crew_runtime_data = {
             "llm": self.llm,
             "module_name": self.job_config.get("module_name", ""),
-            "output_dir_path": self.job_config.get("output_dir_path", f"output/{crew_name}")
+            "output_dir_path": self.app_config.get("output_dir_path", f"output/{crew_name}")
         }
         crew_builder = self.crew_container.crew_builder_service(**crew_runtime_data)
 
