@@ -46,19 +46,39 @@ class AmshaCrewForgeApplication:
         return llm_builder.build_evaluation().llm
 
     def _prepare_inputs_for(self, crew_name: str) -> dict:
-        """Prepares inputs for a specific crew defined in the job config."""
+        """
+        Prepares the inputs dictionary for a specific crew by resolving values
+        from the job config.
+        """
         crew_def = self.job_config["crews"][crew_name]
-        input_def = crew_def.get("input", {})
+        inputs_def = crew_def.get("input", {})  # Get the inputs dictionary
+        final_inputs = {}
 
-        if input_def.get("source") == "file":
-            file_path = Path(input_def["path"])
-            # This logic can be expanded to handle text, json, etc.
-            with open(file_path, 'r') as f:
-                return json.load(f)
-        elif input_def.get("source") == "direct":
-            return input_def.get("value", {})
+        print(f"📦 [App] Preparing inputs for '{crew_name}'...")
 
-        return {}
+        # Loop through each placeholder and its defined value
+        for placeholder, value_def in inputs_def.items():
+
+            # Case 1: The value is a dictionary defining a file source
+            if isinstance(value_def, dict) and value_def.get("source") == "file":
+                file_path = Path(value_def["path"])
+                file_format = value_def.get("format", "text")
+                print(f"  -> Loading '{placeholder}' from file: {file_path}")
+
+                if file_format == "json":
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        final_inputs[placeholder] = json.load(f)
+                else:  # Plain text
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        final_inputs[placeholder] = f.read()
+
+            # Case 2: The value is provided directly (e.g., a string)
+            else:
+                print(f"  -> Loading '{placeholder}' directly from config.")
+                final_inputs[placeholder] = value_def
+
+        print(f"  -> Final prepared inputs: {list(final_inputs.keys())}")
+        return final_inputs
 
 
 
