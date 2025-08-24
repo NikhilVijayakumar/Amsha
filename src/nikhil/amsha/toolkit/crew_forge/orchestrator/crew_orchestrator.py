@@ -27,4 +27,8 @@ class CrewOrchestrator:
         print(f"[Orchestrator] Crew '{crew_name}' finished.")
         return result
 
+    def get_last_output_file(self):
+        return self.manager.output_file
+
+
 

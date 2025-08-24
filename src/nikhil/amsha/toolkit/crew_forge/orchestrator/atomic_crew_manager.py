@@ -24,6 +24,7 @@ class AtomicCrewManager:
         app_config = YamlUtils.yaml_safe_load(app_config_path)
         self.app_config = app_config
         self.crew_container.config.from_dict(app_config)
+        self.output_file = None
 
         # Fetch the single master blueprint using top-level keys from job_config
         self.blueprint_service = self.crew_container.crew_blueprint_service()
@@ -77,13 +78,13 @@ class AtomicCrewManager:
                 knowledge_sources=agent_text_source
             )
 
-
-
             crew_builder.add_task(
                 task_id=task_id,
                 agent=crew_builder.get_last_agent(),
                 output_filename=f"{crew_name}_{task_key}_results"
             )
+
+        self.output_file = crew_builder.get_last_file()
 
         crew_knowledge_paths = set()
 
@@ -99,4 +100,7 @@ class AtomicCrewManager:
 
         print(f"[Manager] Finished building '{crew_name}'.")
         return crew_builder.build(knowledge_sources=crew_text_source)
+
+
+
 

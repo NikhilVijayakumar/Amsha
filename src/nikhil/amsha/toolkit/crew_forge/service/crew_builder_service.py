@@ -20,6 +20,7 @@ class CrewBuilderService:
         self.task_repo: ITaskRepository = task_repo
         self._agents = []
         self._tasks = []
+        self.output_files = []
 
         timestamp = time.strftime("%Y%m%d%H%M%S")
         self.output_dir = os.path.join(
@@ -60,7 +61,9 @@ class CrewBuilderService:
             agent=agent
         )
         if output_filename:
-            task.output_file = os.path.join(self.output_dir, f"{output_filename}.json")
+            output_file = os.path.join(self.output_dir, f"{output_filename}.json")
+            self.output_files.append(output_file)
+            task.output_file = output_file
 
         self._tasks.append(task)
         return self
@@ -85,8 +88,8 @@ class CrewBuilderService:
         """
         return self._agents[-1] if self._agents else None
 
-    def get_last_task(self) -> Optional[Agent]:
+    def get_last_file(self) -> Optional[Agent]:
         """
-        Returns the most recently added agent, or None if no agents have been added. 🧑‍✈️
+        Returns the most recently added output files, or None if no output files have been added. 🧑‍✈
         """
-        return self._tasks[-1] if self._tasks else None
+        return self.output_files[-1] if self.output_files else None
