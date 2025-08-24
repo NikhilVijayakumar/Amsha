@@ -1,4 +1,7 @@
 from typing import Optional, Dict, Any
+
+from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
+
 from nikhil.amsha.toolkit.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigResponse
 from nikhil.amsha.utils.yaml_utils import YamlUtils
@@ -9,6 +12,7 @@ class AtomicCrewManager:
     Acts as a factory to build specific, atomic crews based on a master blueprint
     and a job configuration file.
     """
+
 
     def __init__(self, llm, app_config_path: str, job_config: Dict[str, Any]):
         print("[Manager] Initializing Factory...")
@@ -39,7 +43,7 @@ class AtomicCrewManager:
         if not crew_def:
             raise ValueError(f"Definition for atomic crew '{crew_name}' not found in job_config.")
 
-        # Setup a new, clean crew builder for this specific atomic crew
+        # Set up a new, clean crew builder for this specific atomic crew
         crew_runtime_data = {
             "llm": self.llm,
             "module_name": self.job_config.get("module_name", ""),
@@ -47,20 +51,6 @@ class AtomicCrewManager:
         }
         crew_builder = self.crew_container.crew_builder_service(**crew_runtime_data)
 
-        # 1. Collect all unique agents for this crew and add them
-        agent_keys = {step['agent_key'] for step in crew_def['steps']}
-        agent_objects_map = {}
-        for agent_key in agent_keys:
-            agent_id = self.master_blueprint.agents.get(agent_key)
-            if not agent_id:
-                raise ValueError(f"Agent '{agent_key}' not found in master blueprint.")
-
-            crew_builder.add_agent(agent_id=agent_id)
-            # We need a way to get the created agent object to link it to a task
-            # Assuming crew_builder has a method like get_agent_by_id or similar
-            agent_objects_map[agent_key] = crew_builder.get_last_agent()  # Placeholder for actual lookup
-
-        # 2. Add tasks and correctly associate them with their agents
         for step in crew_def['steps']:
             task_key = step['task_key']
             agent_key = step['agent_key']
@@ -69,14 +59,44 @@ class AtomicCrewManager:
             if not task_id:
                 raise ValueError(f"Task '{task_key}' not found in master blueprint.")
 
-            # Get the correct agent object we already created
-            agent_for_task = agent_objects_map[agent_key]
+            agent_id = self.master_blueprint.agents.get(agent_key)
+            if not agent_id:
+                raise ValueError(f"Agent '{agent_id}' not found in master blueprint.")
+
+            agent_knowledge_paths = set()
+            for path in step.get('knowledge_sources', []):
+                agent_knowledge_paths.add(path)
+            if agent_knowledge_paths:
+                agent_text_source = TextFileKnowledgeSource(
+                    file_paths=list(agent_knowledge_paths)
+                )
+            else:
+                agent_text_source = None
+            crew_builder.add_agent(
+                agent_id=agent_id,
+                knowledge_sources=agent_text_source
+            )
+
+
 
             crew_builder.add_task(
                 task_id=task_id,
-                agent=agent_for_task,
+                agent=crew_builder.get_last_agent(),
                 output_filename=f"{crew_name}_{task_key}_results"
             )
 
+        crew_knowledge_paths = set()
+
+        # 2. Add crew-level knowledge sources
+        for path in crew_def.get('knowledge_sources', []):
+            crew_knowledge_paths.add(path)
+        if crew_knowledge_paths:
+            crew_text_source = TextFileKnowledgeSource(
+                file_paths=list(crew_knowledge_paths)
+            )
+        else:
+            crew_text_source = None
+
         print(f"[Manager] Finished building '{crew_name}'.")
-        return crew_builder.build()
+        return crew_builder.build(knowledge_sources=crew_text_source)
+

@@ -30,7 +30,7 @@ class CrewBuilderService:
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
-    def add_agent(self, agent_id: str, tools: list = None) -> 'CrewBuilderService':
+    def add_agent(self, agent_id: str,knowledge_sources=None, tools: list = None) -> 'CrewBuilderService':
         agent_details = self.agent_repo.get_agent_by_id(agent_id)
         if not agent_details:
             raise ValueError(f"Agent with ID '{agent_id}' not found.")
@@ -42,6 +42,9 @@ class CrewBuilderService:
             llm=self.llm,
             tools=tools or []
         )
+        if knowledge_sources:
+            agent.knowledge_sources = knowledge_sources
+
         self._agents.append(agent)
         return self
 
@@ -62,19 +65,28 @@ class CrewBuilderService:
         self._tasks.append(task)
         return self
 
-    def build(self, process: Process = Process.sequential) -> Crew:
+    def build(self, process: Process = Process.sequential,knowledge_sources=None) -> Crew:
         if not self._agents or not self._tasks:
             raise ValueError("A crew must have at least one agent and one task.")
 
-        return Crew(
+        crew= Crew(
             agents=self._agents,
             tasks=self._tasks,
             process=process,
             verbose=True
         )
+        if knowledge_sources:
+            crew.knowledge_sources = knowledge_sources
+        return crew
 
     def get_last_agent(self) -> Optional[Agent]:
         """
         Returns the most recently added agent, or None if no agents have been added. 🧑‍✈️
         """
         return self._agents[-1] if self._agents else None
+
+    def get_last_task(self) -> Optional[Agent]:
+        """
+        Returns the most recently added agent, or None if no agents have been added. 🧑‍✈️
+        """
+        return self._tasks[-1] if self._tasks else None
