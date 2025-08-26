@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from nikhil.amsha.toolkit.crew_forge.orchestrator.atomic_crew_manager import AtomicCrewManager
 from nikhil.amsha.toolkit.crew_forge.orchestrator.crew_orchestrator import CrewOrchestrator
@@ -25,13 +25,16 @@ class AmshaCrewForgeApplication:
         self.llm_type = llm_type
         self.config_paths = config_paths
         self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
+        self.model_name:Optional[str] = None
         llm = self._initialize_llm()
         manager = AtomicCrewManager(
             llm=llm,
+            model_name = self.model_name,
             app_config_path=config_paths["app"],
             job_config=self.job_config
         )
         self.orchestrator = CrewOrchestrator(manager)
+
 
     def _initialize_llm(self) -> Any:
         """Sets up the DI container for the LLM and builds the instance."""
@@ -42,8 +45,12 @@ class AmshaCrewForgeApplication:
         )
         llm_builder = llm_container.llm_builder()
         if self.llm_type == LLMType.CREATIVE:
-            return llm_builder.build_creative().llm
-        return llm_builder.build_evaluation().llm
+            build_llm = llm_builder.build_creative()
+        else:
+            build_llm = llm_builder.build_evaluation()
+        self.model_name = build_llm.model_name
+        return build_llm.llm
+
 
     def _prepare_inputs_for(self, crew_name: str) -> dict:
         """

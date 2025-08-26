@@ -14,17 +14,18 @@ class AtomicCrewManager:
     """
 
 
-    def __init__(self, llm, app_config_path: str, job_config: Dict[str, Any]):
+    def __init__(self, llm, app_config_path: str, job_config: Dict[str, Any], model_name:str):
         print("[Manager] Initializing Factory...")
         self.llm = llm
         self.job_config = job_config
         self.crew_container = CrewForgeContainer()
+        self.model_name = model_name
 
         # Load app config for DI
         app_config = YamlUtils.yaml_safe_load(app_config_path)
         self.app_config = app_config
         self.crew_container.config.from_dict(app_config)
-        self.output_file = None
+        self.output_file:Optional[str] = None
 
         # Fetch the single master blueprint using top-level keys from job_config
         self.blueprint_service = self.crew_container.crew_blueprint_service()
@@ -37,7 +38,7 @@ class AtomicCrewManager:
             raise ValueError("Master blueprint specified in job_config not found in the database.")
         print("[Manager] Master blueprint loaded successfully.")
 
-    def build_atomic_crew(self, crew_name: str):
+    def build_atomic_crew(self, crew_name: str,filename_suffix:Optional[str]=None):
         """Builds a single, atomic crew from a subset of the master blueprint."""
         print(f"[Manager] Building atomic crew: '{crew_name}'...")
         crew_def = self.job_config["crews"].get(crew_name)
@@ -77,12 +78,18 @@ class AtomicCrewManager:
                 agent_id=agent_id,
                 knowledge_sources=agent_text_source
             )
-
-            crew_builder.add_task(
-                task_id=task_id,
-                agent=crew_builder.get_last_agent(),
-                output_filename=f"{crew_name}_{task_key}_results"
-            )
+            if filename_suffix:
+                crew_builder.add_task(
+                    task_id=task_id,
+                    agent=crew_builder.get_last_agent(),
+                    output_filename=f"{self.model_name}_{task_key}_{filename_suffix}"
+                )
+            else:
+                crew_builder.add_task(
+                    task_id=task_id,
+                    agent=crew_builder.get_last_agent(),
+                    output_filename=f"{self.model_name}_{task_key}"
+                )
 
         self.output_file = crew_builder.get_last_file()
 

@@ -1,5 +1,6 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
+from nikhil.amsha.toolkit.crew_forge.Utils.json_cleaner_utils import JsonCleanerUtils
 from nikhil.amsha.toolkit.crew_forge.orchestrator.amsha_crew_forge_application import AmshaCrewForgeApplication
 from nikhil.amsha.toolkit.llm_factory.domain.llm_type import LLMType
 
@@ -39,7 +40,10 @@ class CopyApplication(AmshaCrewForgeApplication):
                 crew_name=crew_name,
                 inputs=next_input
             )
-
+            output_file = self.orchestrator.get_last_output_file()
+            if output_file:
+                cleaner = JsonCleanerUtils(output_file)
+                cleaner.process_file()
             # Store the result and set it as the input for the next loop iteration
             pipeline_results[crew_name] = result
             next_input = result

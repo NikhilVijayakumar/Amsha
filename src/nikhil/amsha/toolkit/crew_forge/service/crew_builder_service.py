@@ -88,7 +88,7 @@ class CrewBuilderService:
         """
         return self._agents[-1] if self._agents else None
 
-    def get_last_file(self) -> Optional[Agent]:
+    def get_last_file(self) -> Optional[str]:
         """
         Returns the most recently added output files, or None if no output files have been added. 🧑‍✈
         """
