@@ -74,15 +74,15 @@ class AmshaCrewForgeApplication:
 
                 if file_format == "json":
                     with open(file_path, 'r', encoding='utf-8') as f:
-                        final_inputs[placeholder] = json.load(f)
+                        final_inputs = json.load(f)
                 else:  # Plain text
                     with open(file_path, 'r', encoding='utf-8') as f:
-                        final_inputs[placeholder] = f.read()
+                        final_inputs = f.read()
 
             # Case 2: The value is provided directly (e.g., a string)
             else:
                 print(f"  -> Loading '{placeholder}' directly from config.")
-                final_inputs[placeholder] = value_def
+                final_inputs = value_def
 
         print(f"  -> Final prepared inputs: {list(final_inputs.keys())}")
         return final_inputs
