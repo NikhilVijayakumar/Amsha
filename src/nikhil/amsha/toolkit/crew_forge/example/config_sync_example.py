@@ -1,6 +1,6 @@
 import yaml
 
-from nikhil.amsha.toolkit.crew_forge.dependency.container import Container
+from nikhil.amsha.toolkit.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 
 print("--- Running Config Sync Example ---")
 
@@ -9,7 +9,7 @@ with open("config/app_config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 # 2. Initialize the DI container
-container = Container()
+container = CrewForgeContainer()
 
 # 3. Wire the configuration into the container
 container.config.from_dict(config)
