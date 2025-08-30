@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+from nikhil.amsha.toolkit.crew_forge.Utils.json_cleaner_utils import JsonCleanerUtils
 from nikhil.amsha.toolkit.crew_forge.orchestrator.atomic_crew_manager import AtomicCrewManager
 from nikhil.amsha.toolkit.crew_forge.orchestrator.crew_orchestrator import CrewOrchestrator
 from nikhil.amsha.toolkit.llm_factory.dependency.llm_container import LLMContainer
@@ -86,6 +87,56 @@ class AmshaCrewForgeApplication:
 
         print(f"  -> Final prepared inputs: {list(final_inputs.keys())}")
         return final_inputs
+
+
+
+    def clean_json(self, output_filename: str, max_llm_retries: int = 3) -> bool:
+        """
+        Cleans and validates a JSON file, using an LLM for fixes with a retry limit.
+
+        Args:
+            output_filename: The path to the JSON file to be cleaned.
+            max_llm_retries: The maximum number of times to call the LLM to fix the file.
+
+        Returns:
+            The true or false.
+        """
+        current_file = Path(output_filename)
+
+        for attempt in range(max_llm_retries + 1):
+            print(f"--- Cleaning Attempt {attempt + 1}/{max_llm_retries + 1} for {current_file.name} ---")
+
+            # 1. Always try the fast, local cleaner first.
+            cleaner = JsonCleanerUtils(output_filename)
+            if cleaner.process_file():
+                print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
+                return True
+
+            # 2. If it fails, check if we have any LLM retries left.
+            if attempt >= max_llm_retries:
+                print(f"❌ Max retries reached. Could not fix the file.")
+                break  # Exit the loop after the last failed attempt
+
+            # 3. If retries are available, use the LLM to try and fix the file.
+            print(
+                f"⚠️ Initial cleaning failed. Attempting to fix with LLM (Attempt {attempt + 1}/{max_llm_retries})...")
+            try:
+                raw_content = current_file.read_text(encoding='utf-8')
+                json_input = {"raw_llm_output": raw_content}
+
+                # The LLM crew overwrites the existing file with its fix
+                self.orchestrator.json_crew(
+                    inputs=json_input,
+                    output_filename=output_filename
+                )
+                print("🤖 LLM fix applied. Re-validating in the next loop...")
+
+            except Exception as e:
+                print(f"❌ An error occurred during the LLM fix: {e}")
+                # If the LLM crew itself fails, we should stop.
+                return False
+
+        return False
 
 
 
