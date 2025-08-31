@@ -73,6 +73,7 @@ class JsonCleanerUtils:
     @staticmethod
     def _clean_and_parse_string(content: str) -> Optional[Any]:
         """(Unchanged) Parses a JSON string, removing markdown fences."""
+        print(f"_clean_and_parse_string:content\n{content}")
         try:
             return json.loads(content)
         except json.JSONDecodeError:
@@ -81,7 +82,9 @@ class JsonCleanerUtils:
                 try:
                     return json.loads(cleaned_str)
                 except json.JSONDecodeError:
+                    print("json.JSONDecodeError None")
                     return None
+        print("except not match json.JSONDecodeError None")
         return None
 
     def process_file(self) -> bool:
@@ -102,6 +105,7 @@ class JsonCleanerUtils:
         """
 
         parsed_data = self._clean_and_parse_string(content)
+        print(f"process_content:parsed_data\n{parsed_data}")
 
         if parsed_data:
             self.output_file_path.write_text(json.dumps(parsed_data, indent=4), encoding='utf-8')
