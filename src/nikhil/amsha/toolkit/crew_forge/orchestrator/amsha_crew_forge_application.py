@@ -112,6 +112,7 @@ class AmshaCrewForgeApplication:
             print(f"--- Cleaning Attempt {attempt + 1}/{max_llm_retries + 1} for {output_filename} ---")
             try:
                 # 1. Always try the fast, local cleaner first.
+                print(f"raw_content:{raw_content}")
                 if cleaner.process_content(raw_content):
                     print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
                     return True
