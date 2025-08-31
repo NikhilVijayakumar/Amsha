@@ -94,6 +94,13 @@ class JsonCleanerUtils:
             print(f"❌ Error: Input file not found at {self.input_file_path}")
             return False
 
+        return self.process_content(content)
+
+    def process_content(self,content:str) -> bool:
+        """
+        Main method to execute the full read, clean, and write process.
+        """
+
         parsed_data = self._clean_and_parse_string(content)
 
         if parsed_data:
