@@ -14,18 +14,21 @@ class CrewBuilderService:
 
     def __init__(self, data: CrewData, agent_repo: IAgentRepository, task_repo: ITaskRepository):
         self.llm = data.llm
-        self.output_dir_path = data.output_dir_path
         self.module_name = data.module_name
+        if data.output_dir_path:
+            timestamp = time.strftime("%Y%m%d%H%M%S")
+            self.output_dir_path = data.output_dir_path
+            self.output_dir = os.path.join(
+                f"{self.output_dir_path}/output/{self.module_name}/output_{timestamp}/")
+            self._create_output_dir()
         self.agent_repo: IAgentRepository = agent_repo
         self.task_repo: ITaskRepository = task_repo
         self._agents = []
         self._tasks = []
         self.output_files = []
 
-        timestamp = time.strftime("%Y%m%d%H%M%S")
-        self.output_dir = os.path.join(
-            f"{self.output_dir_path}/output/{self.module_name}/output_{timestamp}/")
-        self._create_output_dir()
+
+
 
     def _create_output_dir(self):
         if not os.path.exists(self.output_dir):

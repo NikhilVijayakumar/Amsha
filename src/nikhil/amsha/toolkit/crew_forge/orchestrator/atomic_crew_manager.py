@@ -128,7 +128,7 @@ class AtomicCrewManager:
         crew_runtime_data = {
             "llm": self.llm,
             "module_name": "Json Validator Crew",
-            "output_dir_path": output_filename
+            "output_dir_path": None
         }
         crew_builder = self.crew_container.crew_builder_service(**crew_runtime_data)
 
