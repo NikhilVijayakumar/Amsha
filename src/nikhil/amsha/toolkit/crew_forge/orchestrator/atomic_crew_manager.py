@@ -109,6 +109,7 @@ class AtomicCrewManager:
         return crew_builder.build(knowledge_sources=crew_text_source)
 
     def build_json_crew(self,output_filename):
+        print(f"AtomicCrewManager:{output_filename}")
         json_validator = self.job_config.get("json_validator", {})
         task_key = json_validator['task_key']
         agent_key = json_validator['agent_key']

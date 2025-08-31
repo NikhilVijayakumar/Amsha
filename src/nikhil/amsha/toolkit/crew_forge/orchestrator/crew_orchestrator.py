@@ -28,6 +28,7 @@ class CrewOrchestrator:
         return result
 
     def json_crew(self,inputs: Dict[str, Any],output_filename):
+        print(f"CrewOrchestrator:{output_filename}")
         crew_to_run = self.manager.build_json_crew(output_filename)
         result = crew_to_run.kickoff(inputs=inputs)
         print(f"[json_crew] finished.")

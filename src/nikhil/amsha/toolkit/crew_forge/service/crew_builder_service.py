@@ -50,6 +50,7 @@ class CrewBuilderService:
         return self
 
     def add_task(self, task_id: str, agent: Agent, output_filename: str = None,validation:bool=False) -> 'CrewBuilderService':
+        print(f"CrewBuilderService:{output_filename}")
         task_details = self.task_repo.get_task_by_id(task_id)
         if not task_details:
             raise ValueError(f"Task with ID '{task_id}' not found.")
