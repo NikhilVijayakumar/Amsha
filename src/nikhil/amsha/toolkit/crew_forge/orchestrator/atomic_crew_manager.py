@@ -138,7 +138,8 @@ class AtomicCrewManager:
         crew_builder.add_task(
             task_id=task_id,
             agent=crew_builder.get_last_agent(),
-            output_filename=output_filename
+            output_filename=output_filename,
+            validation=True
         )
         return crew_builder.build()
 

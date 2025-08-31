@@ -49,7 +49,7 @@ class CrewBuilderService:
         self._agents.append(agent)
         return self
 
-    def add_task(self, task_id: str, agent: Agent, output_filename: str = None) -> 'CrewBuilderService':
+    def add_task(self, task_id: str, agent: Agent, output_filename: str = None,validation:bool=False) -> 'CrewBuilderService':
         task_details = self.task_repo.get_task_by_id(task_id)
         if not task_details:
             raise ValueError(f"Task with ID '{task_id}' not found.")
@@ -61,7 +61,10 @@ class CrewBuilderService:
             agent=agent
         )
         if output_filename:
-            output_file = os.path.join(self.output_dir, f"{output_filename}.json")
+            if validation:
+                output_file = output_filename
+            else:
+                output_file = os.path.join(self.output_dir, f"{output_filename}.json")
             self.output_files.append(output_file)
             task.output_file = output_file
 
