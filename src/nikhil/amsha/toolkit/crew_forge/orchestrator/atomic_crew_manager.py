@@ -112,18 +112,22 @@ class AtomicCrewManager:
         json_validator = self.job_config.get("json_validator", {})
         task_key = json_validator['task_key']
         agent_key = json_validator['agent_key']
-        task_id = self.master_blueprint.tasks.get(task_key)
+        blueprint = self.blueprint_service.get_config(
+            name="Json Validator Crew",
+            usecase="Json Validator"
+        )
+        task_id = blueprint.tasks.get(task_key)
         if not task_id:
             raise ValueError(f"Task '{task_key}' not found in master blueprint.")
 
-        agent_id = self.master_blueprint.agents.get(agent_key)
+        agent_id = blueprint.agents.get(agent_key)
         if not agent_id:
             raise ValueError(f"Agent '{agent_id}' not found in master blueprint.")
 
         crew_runtime_data = {
             "llm": self.llm,
-            "module_name": self.job_config.get("module_name", ""),
-            "output_dir_path": self.app_config.get("output_dir_path", f"output/{crew_name}")
+            "module_name": "Json Validator Crew",
+            "output_dir_path": output_filename
         }
         crew_builder = self.crew_container.crew_builder_service(**crew_runtime_data)
 
