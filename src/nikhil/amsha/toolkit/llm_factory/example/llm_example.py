@@ -1,8 +1,9 @@
 # main.py
 from pathlib import Path
 
+from nikhil.amsha.toolkit.llm_factory.dependency.llm_container import LLMContainer
 # Import the container and the builder for type hinting
-from nikhil.amsha.toolkit.llm_factory.dependency.container import Container
+
 from nikhil.amsha.toolkit.llm_factory.service.llm_builder import LLMBuilder
 
 
@@ -42,7 +43,7 @@ def main():
     """
     print("--- Running Amsha LLM Factory Example (with DI Container) ---")
 
-    container = Container()
+    container = LLMContainer()
 
     config_path = Path("config/llm_config.yaml")
     container.config.llm.yaml_path.from_value(str(config_path))
