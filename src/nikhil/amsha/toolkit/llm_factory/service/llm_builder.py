@@ -21,6 +21,7 @@ class LLMBuilder:
         llm_instance = LLM(
             base_url=model_config.base_url,
             api_key=model_config.api_key,
+            api_version =model_config.api_version,
             model=model_config.model,
             temperature=params.temperature,
             top_p=params.top_p,

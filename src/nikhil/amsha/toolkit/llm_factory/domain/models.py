@@ -20,6 +20,7 @@ class LLMModelConfig(BaseModel):
     base_url: str
     model: str
     api_key: Optional[str] = None
+    api_version : Optional[str] = None
 
 
 class LLMUseCaseConfig(BaseModel):
