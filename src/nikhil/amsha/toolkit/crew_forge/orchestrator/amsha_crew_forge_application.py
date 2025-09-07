@@ -85,7 +85,7 @@ class AmshaCrewForgeApplication:
                 print(f"  -> Loading '{placeholder}' directly from config.")
                 final_inputs = value_def
 
-        print(f"  -> Final prepared inputs: {list(final_inputs.keys())}")
+
         return final_inputs
 
 
