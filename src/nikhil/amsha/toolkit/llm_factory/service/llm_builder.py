@@ -17,19 +17,31 @@ class LLMBuilder:
         params = self.settings.get_parameters(llm_type.value)
 
         clean_model_name = LLMUtils.extract_model_name(model_config.model)
-
-        llm_instance = LLM(
-            base_url=model_config.base_url,
-            api_key=model_config.api_key,
-            api_version =model_config.api_version,
-            model=model_config.model,
-            temperature=params.temperature,
-            top_p=params.top_p,
-            max_completion_tokens=params.max_completion_tokens,
-            presence_penalty=params.presence_penalty,
-            frequency_penalty=params.frequency_penalty,
-            stop=params.stop
-        )
+        if model_config.base_url is None:
+            llm_instance = LLM(
+                api_key=model_config.api_key,
+                api_version =model_config.api_version,
+                model=model_config.model,
+                temperature=params.temperature,
+                top_p=params.top_p,
+                max_completion_tokens=params.max_completion_tokens,
+                presence_penalty=params.presence_penalty,
+                frequency_penalty=params.frequency_penalty,
+                stop=params.stop
+            )
+        else:
+            llm_instance = LLM(
+                base_url=model_config.base_url,
+                api_key=model_config.api_key,
+                api_version=model_config.api_version,
+                model=model_config.model,
+                temperature=params.temperature,
+                top_p=params.top_p,
+                max_completion_tokens=params.max_completion_tokens,
+                presence_penalty=params.presence_penalty,
+                frequency_penalty=params.frequency_penalty,
+                stop=params.stop
+            )
 
         # Return both the LLM and its name in a structured way
         return LLMBuildResult(llm=llm_instance, model_name=clean_model_name)

@@ -53,6 +53,46 @@ class AmshaCrewForgeApplication:
         return build_llm.llm
 
 
+    def _prepare_multiple_inputs_for(self, crew_name: str) -> dict:
+        """
+        Prepares the inputs dictionary for a specific crew by resolving values
+        from a list of sources in the job config.
+        """
+        crew_def = self.job_config["crews"][crew_name]
+        # Expect a list of inputs, defaulting to an empty list
+        inputs_def = crew_def.get("input", [])
+        final_inputs = {}
+
+        print(f"📦 [App] Preparing inputs for '{crew_name}'...")
+
+        # Loop through each input definition in the list
+        for input_item in inputs_def:
+            key_name = input_item["key_name"]  # The key for the final dictionary
+
+            # Case 1: The value is from a file source
+            if input_item.get("source") == "file":
+                file_path = Path(input_item["path"])
+                file_format = input_item.get("format", "text")
+                print(f"  -> Loading '{key_name}' from file: {file_path}")
+
+                if file_format == "json":
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        # Correctly assign the loaded data to its key
+                        final_inputs[key_name] = json.load(f)
+                else:  # Plain text
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        # Correctly assign the loaded data to its key
+                        final_inputs[key_name] = f.read()
+
+            # Case 2: The value is provided directly in the config
+            elif input_item.get("source") == "direct":
+                print(f"  -> Loading '{key_name}' directly from config.")
+                final_inputs[key_name] = input_item["value"]
+
+        print(f"  -> Final prepared inputs: {list(final_inputs.keys())}")
+        return final_inputs
+
+
     def _prepare_inputs_for(self, crew_name: str) -> dict:
         """
         Prepares the inputs dictionary for a specific crew by resolving values
