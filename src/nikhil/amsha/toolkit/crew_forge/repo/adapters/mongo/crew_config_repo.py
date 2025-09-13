@@ -1,5 +1,5 @@
 # src/nikhil/amsha/toolkit/crew_forge/adapters/mongo/crew_config_repo.py
-from typing import Optional
+from typing import Optional, List
 
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
@@ -72,3 +72,14 @@ class CrewConfigRepository(MongoRepository, ICrewConfigRepository):
             crew_config_data["_id"] = str(crew_config_data["_id"])
             return CrewConfigResponse(**crew_config_data)
         return None
+
+    def get_all_crew_configs(self) -> List[CrewConfigResponse]:
+        """Retrieves all crew configurations from the repository."""
+        # Pass an empty dictionary as the filter to match all documents
+        crew_config_list = self.find_many({})
+
+        # Convert ObjectId to string for each document
+        for crew_config_data in crew_config_list:
+            crew_config_data["_id"] = str(crew_config_data["_id"])
+
+        return [CrewConfigResponse(**crew_config_data) for crew_config_data in crew_config_list]

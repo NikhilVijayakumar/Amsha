@@ -34,3 +34,7 @@ class ICrewConfigRepository(ABC):
     @abstractmethod
     def get_crew_configs_by_usecase(self, usecase: str) -> List[CrewConfigResponse]:
         ...
+
+    @abstractmethod
+    def get_all_crew_configs(self) -> List[CrewConfigResponse]:
+        ...

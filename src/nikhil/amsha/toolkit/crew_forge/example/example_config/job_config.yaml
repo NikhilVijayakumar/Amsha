@@ -1,6 +1,7 @@
 crew_name: "Copy Crew"
 usecase: "copy"
 module_name: "copy"
+output_filepath: "E:/Python/Amsha/.Amsha/output/intermediate/crew/crew_configurations.json"
 
 crews:
   copy_crew:
