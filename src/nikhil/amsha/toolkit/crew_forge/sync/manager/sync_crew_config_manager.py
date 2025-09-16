@@ -1,8 +1,6 @@
 import json
 import os
 from typing import List, Dict, Any
-
-# Your existing imports
 from nikhil.amsha.toolkit.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigResponse
 from nikhil.amsha.utils.yaml_utils import YamlUtils
@@ -11,10 +9,6 @@ from nikhil.amsha.utils.yaml_utils import YamlUtils
 class SyncCrewConfigManager:
 
     def __init__(self,app_config_path: str, job_config_path: str):
-        """
-        Initializes the sync manager by loading the YAML config, extracting the
-        output path, and fetching all crew configurations from the database.
-        """
         print("[SyncCrewConfig] Initializing...")
 
 
@@ -41,10 +35,6 @@ class SyncCrewConfigManager:
         print(f"[SyncCrewConfig] Found {len(self.master_blueprint)} crew configurations to process.")
 
     def _process_blueprint(self, crew_config: CrewConfigResponse) -> Dict[str, Any]:
-        """
-        Transforms a single CrewConfigResponse object into a dictionary,
-        converting the agents and tasks dictionaries into lists of their keys.
-        """
         return {
             "name": crew_config.name,
             "usecase": crew_config.usecase,
@@ -53,10 +43,6 @@ class SyncCrewConfigManager:
         }
 
     def sync(self):
-        """
-        Processes all loaded crew configurations and saves the transformed data
-        to the JSON file specified in the initial job config.
-        """
         if not self.master_blueprint:
             print("[SyncCrewConfig] No crew configurations found. Nothing to sync.")
             return
@@ -65,17 +51,9 @@ class SyncCrewConfigManager:
         processed_configs = [self._process_blueprint(config) for config in self.master_blueprint]
 
         try:
-            # --- START: MODIFIED SECTION ---
-            # Get the directory part of the output file path.
-            # For a path like "output/data/crews.json", this will be "output/data".
             output_dir = os.path.dirname(self.output_filepath)
-
-            # If output_dir is not an empty string (i.e., the file is not in the root),
-            # create the directory. os.makedirs() will create all necessary parent
-            # directories. `exist_ok=True` prevents an error if the directory already exists.
             if output_dir:
                 os.makedirs(output_dir, exist_ok=True)
-            # --- END: MODIFIED SECTION ---
 
             print(f"[SyncCrewConfig] Saving processed configurations to '{self.output_filepath}'...")
             with open(self.output_filepath, 'w') as json_file:

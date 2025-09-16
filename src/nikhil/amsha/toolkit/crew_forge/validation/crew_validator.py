@@ -1,23 +1,17 @@
 import os
 import json
 import logging
-import shutil
 from collections import defaultdict
 from datetime import datetime
 
 from nikhil.amsha.toolkit.crew_forge.seeding.parser.crew_parser import CrewParser
 
-# Assuming CrewParser is in this path. Adjust the import as needed.
-# from nikhil.amsha.toolkit.crew_forge.seeding.parser.crew_parser import CrewParser
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class CrewConfigValidator:
-    """
-    Validates a directory of crew configuration files (agents and tasks)
-    and produces a JSON report without interacting with a database.
-    """
 
     def __init__(self):
         # In a real scenario, you would use your actual parser.
@@ -25,17 +19,7 @@ class CrewConfigValidator:
         self.crew_parser = CrewParser()  # Using a mock for this runnable example
 
     def validate(self, root_path: str, output_dir_path: str = None) -> dict:
-        """
-        Main method to run the validation process.
 
-        Args:
-            root_path: The root directory containing the use case folders.
-            output_dir_path (optional): The directory path to save the JSON report.
-                                        If None, the report is not saved to a file.
-
-        Returns:
-            A dictionary containing the validation report.
-        """
         report = {"summary": {}, "details": {}}
         if not root_path or not os.path.isdir(root_path):
             logging.error(f"The provided path '{root_path}' is not a valid directory.")
@@ -61,7 +45,6 @@ class CrewConfigValidator:
         return report
 
     def _save_report_to_file(self, report: dict, output_dir_path: str):
-        """Saves the report dictionary as a timestamped JSON file."""
         try:
             # Ensure the output directory exists
             os.makedirs(output_dir_path, exist_ok=True)
@@ -81,7 +64,6 @@ class CrewConfigValidator:
             logging.error(f"❌ FAILED to save validation report to directory '{output_dir_path}': {e}")
 
     def _collect_files_to_validate(self, root_path: str) -> dict:
-        """Walks the directory and collects agent/task file paths."""
         usecase_map = defaultdict(lambda: {"agents": [], "tasks": []})
         for dirpath, _, filenames in os.walk(root_path):
             norm_dirpath = os.path.normpath(dirpath)
@@ -103,7 +85,6 @@ class CrewConfigValidator:
         return usecase_map
 
     def _process_and_validate_files(self, usecase_files: dict) -> dict:
-        """Tries to parse each file and records the outcome."""
         details = {}
         for usecase, files in usecase_files.items():
             details[usecase] = {"agents": [], "tasks": []}
@@ -125,7 +106,6 @@ class CrewConfigValidator:
 
     @staticmethod
     def _generate_summary(report_details: dict) -> dict:
-        """Aggregates the detailed results into a high-level summary."""
         total_files, valid_files, invalid_files = 0, 0, 0
         all_agents_valid, all_tasks_valid = True, True
 
