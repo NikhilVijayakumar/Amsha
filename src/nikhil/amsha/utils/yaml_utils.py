@@ -6,7 +6,7 @@ import yaml
 class YamlUtils:
 
     @staticmethod
-    def yaml_safe_load(self, config_path: str) -> Dict[str, Any]:
+    def yaml_safe_load(config_path: str) -> Dict[str, Any]:
         """Loads and validates the YAML configuration file."""
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
