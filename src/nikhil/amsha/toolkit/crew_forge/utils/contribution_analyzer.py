@@ -1,4 +1,6 @@
 # analyzer.py
+import os
+
 import pandas as pd
 from typing import Dict, Any
 from nikhil.amsha.utils.json_utils import JsonUtils
@@ -96,7 +98,7 @@ class ContributionAnalyzer:
                 }
                 for f in features_list
             ]
-
+            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
             df = pd.DataFrame(rows_for_excel)
             df.to_excel(output_filename, index=False, engine='openpyxl')
             print(f"  -> ✅ Successfully saved Excel summary to: {output_filename}")
