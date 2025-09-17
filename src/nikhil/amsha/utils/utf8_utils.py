@@ -3,7 +3,7 @@ import os
 import tempfile
 import shutil
 
-class FileUtils:
+class Utf8Utils:
     def __init__(self, file_path: str):
         self.file_path = file_path
 
