@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Any, Optional
 
 from nikhil.amsha.toolkit.crew_forge.utils.json_cleaner_utils import JsonCleanerUtils
@@ -13,12 +14,14 @@ class CopyApplication(AmshaCrewForgeApplication):
         """
         Initializes the application with necessary configuration paths.
         """
+        os.environ["CREWAI_STORAGE_DIR"] = os.path.abspath("./knowledge")
         super().__init__(config_paths, llm_type)
 
     def run(self) -> Any:
         """
         Reads the 'pipeline' from the job_config and executes each crew in sequence.
         """
+
         print("🚀 [CopyApplication] Starting configured pipeline workflow...")
 
         pipeline_steps = self.job_config.get("pipeline", [])

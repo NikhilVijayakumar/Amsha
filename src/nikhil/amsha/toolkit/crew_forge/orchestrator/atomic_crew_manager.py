@@ -1,9 +1,10 @@
 from typing import Optional, Dict, Any
 
-from crewai.knowledge.source.crew_docling_source import CrewDoclingSource
+
 
 from nikhil.amsha.toolkit.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigResponse
+from nikhil.amsha.toolkit.crew_forge.orchestrator.amsha_crew_docling_source import AmshaCrewDoclingSource
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
@@ -70,7 +71,7 @@ class AtomicCrewManager:
                 print(f"knowledge_sources:{path}")
                 agent_knowledge_paths.add(path)
             if agent_knowledge_paths:
-                agent_text_source = CrewDoclingSource(
+                agent_text_source = AmshaCrewDoclingSource(
                     file_paths=list(agent_knowledge_paths)
                 )
             else:
@@ -101,7 +102,7 @@ class AtomicCrewManager:
             print(f"knowledge_sources:{path}")
             crew_knowledge_paths.add(path)
         if crew_knowledge_paths:
-            crew_text_source = CrewDoclingSource(
+            crew_text_source = AmshaCrewDoclingSource(
                 file_paths=list(crew_knowledge_paths)
             )
         else:
