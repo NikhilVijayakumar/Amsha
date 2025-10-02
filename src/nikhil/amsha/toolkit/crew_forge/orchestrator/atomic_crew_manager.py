@@ -67,6 +67,7 @@ class AtomicCrewManager:
 
             agent_knowledge_paths = set()
             for path in step.get('knowledge_sources', []):
+                print(f"knowledge_sources:{path}")
                 agent_knowledge_paths.add(path)
             if agent_knowledge_paths:
                 agent_text_source = TextFileKnowledgeSource(
@@ -97,6 +98,7 @@ class AtomicCrewManager:
 
         # 2. Add crew-level knowledge sources
         for path in crew_def.get('knowledge_sources', []):
+            print(f"knowledge_sources:{path}")
             crew_knowledge_paths.add(path)
         if crew_knowledge_paths:
             crew_text_source = TextFileKnowledgeSource(
