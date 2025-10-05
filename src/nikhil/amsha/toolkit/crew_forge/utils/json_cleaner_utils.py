@@ -72,20 +72,53 @@ class JsonCleanerUtils:
 
     @staticmethod
     def _clean_and_parse_string(content: str) -> Optional[Any]:
-        """(Unchanged) Parses a JSON string, removing markdown fences."""
-        print(f"_clean_and_parse_string:content\n{content}")
+        """
+        Cleans and parses JSON strings, even if:
+        - There’s junk text above ```json or ``` fences.
+        - There are multiple JSON objects concatenated (e.g., {...}{...}).
+        - There are stray quotes or escape errors in keys/values.
+        """
+
+        import json, re
+
+        # If content contains ```json, keep only what comes after it.
+        if "```json" in content:
+            # Keep only the text after the first ```json
+            content = content.split("```json", 1)[1]
+            # Remove any trailing ``` at the end
+            content = re.sub(r"```$", "", content.strip(), flags=re.MULTILINE)
+        elif "```" in content:
+            # Handle ``` without 'json'
+            content = content.split("```", 1)[1]
+            content = re.sub(r"```$", "", content.strip(), flags=re.MULTILINE)
+
+        # Remove any markdown fences that survived
+        content = re.sub(r"^```(?:json)?", "", content, flags=re.MULTILINE).strip()
+        content = re.sub(r"```$", "", content, flags=re.MULTILINE).strip()
+
+        # Try direct JSON parsing
         try:
             return json.loads(content)
         except json.JSONDecodeError:
-            match = re.search(r"```(?:json)?\s*\n(.*?)\n\s*```", content, re.DOTALL)
-            if match and (cleaned_str := match.group(1)):
-                try:
-                    return json.loads(cleaned_str)
-                except json.JSONDecodeError:
-                    print("json.JSONDecodeError None")
-                    return None
-        print("except not match json.JSONDecodeError None")
-        return None
+            pass
+
+        # Handle multiple concatenated JSON objects like {...}{...}
+        json_objects = re.findall(r"\{.*?\}", content, re.DOTALL)
+        if json_objects:
+            try:
+                parsed_objects = [json.loads(obj) for obj in json_objects]
+                # If there’s only one valid JSON, return that; else return a list
+                return parsed_objects[0] if len(parsed_objects) == 1 else parsed_objects
+            except json.JSONDecodeError:
+                pass
+
+        # Try to fix minor double-quote issues (e.g., '"Cliffhanger" Hook')
+        fixed = re.sub(r'"\s*([\'"])', '"', content)
+        try:
+            return json.loads(fixed)
+        except json.JSONDecodeError:
+            print("❌ JSON cleaning failed. Could not parse content.")
+            return None
 
     def process_file(self) -> bool:
         """
