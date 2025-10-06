@@ -61,12 +61,12 @@ class EvaluationProcessor:
         final_percentage = (total_weighted_score / max_possible_score) * 100 if max_possible_score > 0 else 0
 
         percentage_based_ranges = [
-            {"scoreRange": [0, 39], "description": "Weak"},
-            {"scoreRange": [40, 69], "description": "Moderate"},
-            {"scoreRange": [70, 90], "description": "Strong"},
-            {"scoreRange": [91, 100], "description": "Excellent"}
+            {"scoreRange": [0.0, 39.99], "description": "Weak"},
+            {"scoreRange": [40.0, 69.99], "description": "Moderate"},
+            {"scoreRange": [70.0, 90.99], "description": "Strong"},
+            {"scoreRange": [91.0, 100.0], "description": "Excellent"}
         ]
-        description, range_str = self._get_score_description(final_percentage, percentage_based_ranges)
+        description, range_str = self._get_score_description(round(final_percentage, 2), percentage_based_ranges)
 
         updated_result = evaluation_result.copy()
         updated_result[result_evaluation_key] = updated_evaluations
