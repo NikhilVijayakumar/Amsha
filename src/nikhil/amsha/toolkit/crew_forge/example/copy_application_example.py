@@ -1,12 +1,13 @@
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
-from nikhil.amsha.toolkit.crew_forge.utils.json_cleaner_utils import JsonCleanerUtils
-from nikhil.amsha.toolkit.crew_forge.orchestrator.amsha_crew_forge_application import AmshaCrewForgeApplication
+from nikhil.amsha.toolkit.crew_forge.orchestrator.db.amsha_crew_db_application import AmshaCrewDBApplication
+from nikhil.amsha.toolkit.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
+
 from nikhil.amsha.toolkit.llm_factory.domain.llm_type import LLMType
 
 
-class CopyApplication(AmshaCrewForgeApplication):
+class CopyApplication(AmshaCrewDBApplication):
     """
     Encapsulates the entire process of setting up and running a crew pipeline.
     """
@@ -14,7 +15,6 @@ class CopyApplication(AmshaCrewForgeApplication):
         """
         Initializes the application with necessary configuration paths.
         """
-        os.environ["CREWAI_STORAGE_DIR"] = os.path.abspath("./knowledge")
         super().__init__(config_paths, llm_type)
 
     def run(self) -> Any:

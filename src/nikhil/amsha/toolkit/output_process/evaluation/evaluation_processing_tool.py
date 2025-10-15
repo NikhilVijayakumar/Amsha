@@ -7,7 +7,7 @@ from nikhil.amsha.utils.json_utils import JsonUtils
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
-class EvaluationProcessor:
+class EvaluationProcessingTool:
     """
     A class to process and score LLM evaluation files based on a YAML configuration.
     """

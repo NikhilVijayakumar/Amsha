@@ -5,14 +5,15 @@ from typing import Optional
 
 from crewai import Crew, Agent, Process, Task
 
+from nikhil.amsha.toolkit.crew_forge.domain.models.agent_data import AgentRequest
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
-from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
-from nikhil.amsha.toolkit.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
+from nikhil.amsha.toolkit.crew_forge.domain.models.task_data import TaskRequest
+
 
 
 class CrewBuilderService:
 
-    def __init__(self, data: CrewData, agent_repo: IAgentRepository, task_repo: ITaskRepository):
+    def __init__(self, data: CrewData):
         self.llm = data.llm
         self.module_name = data.module_name
         if data.output_dir_path:
@@ -21,8 +22,6 @@ class CrewBuilderService:
             self.output_dir = os.path.join(
                 f"{self.output_dir_path}/output/{self.module_name}/output_{timestamp}/")
             self._create_output_dir()
-        self.agent_repo: IAgentRepository = agent_repo
-        self.task_repo: ITaskRepository = task_repo
         self._agents = []
         self._tasks = []
         self.output_files = []
@@ -34,10 +33,10 @@ class CrewBuilderService:
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
-    def add_agent(self, agent_id: str,knowledge_sources=None, tools: list = None) -> 'CrewBuilderService':
-        agent_details = self.agent_repo.get_agent_by_id(agent_id)
+    def add_agent(self, agent_details: AgentRequest,knowledge_sources=None, tools: list = None) -> 'CrewBuilderService':
+
         if not agent_details:
-            raise ValueError(f"Agent with ID '{agent_id}' not found.")
+            self._agents.append(agent_details)
 
         agent = Agent(
             role=agent_details.role,
@@ -52,11 +51,11 @@ class CrewBuilderService:
         self._agents.append(agent)
         return self
 
-    def add_task(self, task_id: str, agent: Agent, output_filename: str = None,validation:bool=False) -> 'CrewBuilderService':
+    def add_task(self, task_details: TaskRequest, agent: Agent, output_filename: str = None,validation:bool=False) -> 'CrewBuilderService':
         print(f"CrewBuilderService:{output_filename}")
-        task_details = self.task_repo.get_task_by_id(task_id)
+
         if not task_details:
-            raise ValueError(f"Task with ID '{task_id}' not found.")
+            raise ValueError(f"Task with name '{task_details.name}' not found.")
 
         task = Task(
             name=task_details.name,

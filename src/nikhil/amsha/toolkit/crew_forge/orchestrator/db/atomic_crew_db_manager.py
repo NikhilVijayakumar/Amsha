@@ -1,14 +1,14 @@
 from typing import Optional, Dict, Any
 
-
-
 from nikhil.amsha.toolkit.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigResponse
-from nikhil.amsha.toolkit.crew_forge.orchestrator.amsha_crew_docling_source import AmshaCrewDoclingSource
+from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
+from nikhil.amsha.toolkit.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
+from nikhil.amsha.toolkit.crew_forge.service.atomic_db_builder import AtomicDbBuilderService
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
-class AtomicCrewManager:
+class AtomicCrewDBManager:
     """
     Acts as a factory to build specific, atomic crews based on a master blueprint
     and a job configuration file.
@@ -21,6 +21,7 @@ class AtomicCrewManager:
         self.job_config = job_config
         self.crew_container = CrewForgeContainer()
         self.model_name = model_name
+
 
         # Load app config for DI
         app_config = YamlUtils.yaml_safe_load(app_config_path)
@@ -47,12 +48,15 @@ class AtomicCrewManager:
             raise ValueError(f"Definition for atomic crew '{crew_name}' not found in job_config.")
 
         # Set up a new, clean crew builder for this specific atomic crew
-        crew_runtime_data = {
-            "llm": self.llm,
-            "module_name": self.job_config.get("module_name", ""),
-            "output_dir_path": self.app_config.get("output_dir_path", f"output/{crew_name}")
-        }
-        crew_builder = self.crew_container.crew_builder_service(**crew_runtime_data)
+
+        crew_data = CrewData( llm= self.llm,
+            module_name= self.job_config.get("module_name", ""),
+            output_dir_path = self.app_config.get("output_dir_path", f"output/{crew_name}"))
+
+
+
+        crew_builder:AtomicDbBuilderService = self.crew_container.atomic_db_builder()
+        crew_builder.initialize_builder(crew_data)
 
         for step in crew_def['steps']:
             task_key = step['task_key']
@@ -111,41 +115,7 @@ class AtomicCrewManager:
         print(f"[Manager] Finished building '{crew_name}'.")
         return crew_builder.build(knowledge_sources=crew_text_source)
 
-    def build_json_crew(self,output_filename):
-        print(f"AtomicCrewManager:{output_filename}")
-        json_validator = self.job_config.get("json_validator", {})
-        task_key = json_validator['task_key']
-        agent_key = json_validator['agent_key']
-        blueprint = self.blueprint_service.get_config(
-            name="Json Validator Crew",
-            usecase="Json Validator"
-        )
-        task_id = blueprint.tasks.get(task_key)
-        if not task_id:
-            raise ValueError(f"Task '{task_key}' not found in master blueprint.")
 
-        agent_id = blueprint.agents.get(agent_key)
-        if not agent_id:
-            raise ValueError(f"Agent '{agent_id}' not found in master blueprint.")
-
-        crew_runtime_data = {
-            "llm": self.llm,
-            "module_name": "Json Validator Crew",
-            "output_dir_path": None
-        }
-        crew_builder = self.crew_container.crew_builder_service(**crew_runtime_data)
-
-        crew_builder.add_agent(
-            agent_id=agent_id
-        )
-
-        crew_builder.add_task(
-            task_id=task_id,
-            agent=crew_builder.get_last_agent(),
-            output_filename=output_filename,
-            validation=True
-        )
-        return crew_builder.build()
 
 
 

@@ -1,7 +1,7 @@
 # orchestrator.py (Refactored)
 from typing import Dict, Any, Optional
 
-from nikhil.amsha.toolkit.crew_forge.orchestrator.atomic_crew_manager import AtomicCrewManager
+from nikhil.amsha.toolkit.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
 
 
 class CrewOrchestrator:
@@ -9,7 +9,7 @@ class CrewOrchestrator:
     Orchestrates the execution of a SINGLE atomic crew. It receives a pre-built
     manager and is completely decoupled from configuration files.
     """
-    def __init__(self, manager: AtomicCrewManager):
+    def __init__(self, manager: AtomicCrewDBManager):
         """Initializes the orchestrator with an injected manager."""
         print("--- [Orchestrator] Initializing pure runner ---")
         self.manager = manager
@@ -25,13 +25,6 @@ class CrewOrchestrator:
         result = crew_to_run.kickoff(inputs=inputs)
 
         print(f"[Orchestrator] Crew '{crew_name}' finished.")
-        return result
-
-    def json_crew(self,inputs: Dict[str, Any],output_filename):
-        print(f"CrewOrchestrator:{output_filename}")
-        crew_to_run = self.manager.build_json_crew(output_filename)
-        result = crew_to_run.kickoff(inputs=inputs)
-        print(f"[json_crew] finished.")
         return result
 
 

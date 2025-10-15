@@ -1,4 +1,4 @@
-from nikhil.amsha.toolkit.crew_forge.validation.crew_validator import CrewConfigValidator
+from nikhil.amsha.toolkit.output_process.validation import CrewConfigValidator
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 if __name__ == '__main__':

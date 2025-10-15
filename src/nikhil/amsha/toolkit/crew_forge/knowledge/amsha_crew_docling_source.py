@@ -16,7 +16,6 @@ except ImportError:
 from pydantic import Field
 
 from crewai.knowledge.source.base_knowledge_source import BaseKnowledgeSource
-from crewai.utilities.constants import KNOWLEDGE_DIRECTORY
 from crewai.utilities.logger import Logger
 
 

@@ -79,8 +79,6 @@ class JsonCleanerUtils:
         - There are stray quotes or escape errors in keys/values.
         """
 
-        import json, re
-
         # If content contains ```json, keep only what comes after it.
         if "```json" in content:
             # Keep only the text after the first ```json

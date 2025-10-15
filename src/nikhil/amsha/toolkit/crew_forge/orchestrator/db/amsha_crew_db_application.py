@@ -2,15 +2,15 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-from nikhil.amsha.toolkit.crew_forge.utils.json_cleaner_utils import JsonCleanerUtils
-from nikhil.amsha.toolkit.crew_forge.orchestrator.atomic_crew_manager import AtomicCrewManager
-from nikhil.amsha.toolkit.crew_forge.orchestrator.crew_orchestrator import CrewOrchestrator
+from nikhil.amsha.toolkit.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
+from nikhil.amsha.toolkit.crew_forge.orchestrator.db.crew_db_orchestrator import CrewOrchestrator
+from nikhil.amsha.toolkit.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from nikhil.amsha.toolkit.llm_factory.dependency.llm_container import LLMContainer
 from nikhil.amsha.toolkit.llm_factory.domain.llm_type import LLMType
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
-class AmshaCrewForgeApplication:
+class AmshaCrewDBApplication:
     """
     A reusable base class that handles all the boilerplate setup for running a crew.
 
@@ -28,7 +28,7 @@ class AmshaCrewForgeApplication:
         self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
         self.model_name:Optional[str] = None
         llm = self._initialize_llm()
-        manager = AtomicCrewManager(
+        manager = AtomicCrewDBManager(
             llm=llm,
             model_name = self.model_name,
             app_config_path=config_paths["app"],
@@ -147,38 +147,6 @@ class AmshaCrewForgeApplication:
         if cleaner.process_file():
             print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
             return True
-        # raw_content = current_file.read_text(encoding='utf-8')
-        # for attempt in range(max_llm_retries + 1):
-        #     print(f"--- Cleaning Attempt {attempt + 1}/{max_llm_retries + 1} for {output_filename} ---")
-        #     try:
-        #         # 1. Always try the fast, local cleaner first.
-        #         print(f"raw_content:{raw_content}")
-        #         if cleaner.process_content(raw_content):
-        #             print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
-        #             return True
-        #
-        #         # 2. If it fails, check if we have any LLM retries left.
-        #         if attempt >= max_llm_retries:
-        #             print(f"❌ Max retries reached. Could not fix the file.")
-        #             break  # Exit the loop after the last failed attempt
-        #
-        #         # 3. If retries are available, use the LLM to try and fix the file.
-        #         print(
-        #             f"⚠️ Initial cleaning failed. Attempting to fix with LLM (Attempt {attempt + 1}/{max_llm_retries})...")
-        #         json_input = {"raw_llm_output": raw_content}
-        #
-        #         # The LLM crew overwrites the existing file with its fix
-        #         raw_content = self.orchestrator.json_crew(
-        #             inputs=json_input,
-        #             output_filename=output_filename
-        #         )
-        #         print(f"🤖 LLM fix applied. Re-validating in the next loop...\n{raw_content}")
-        #
-        #     except Exception as e:
-        #         print(f"❌ An error occurred during the LLM fix: {e}")
-                # If the LLM crew itself fails, we should stop.
-
-
         return False
 
 
