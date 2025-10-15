@@ -59,7 +59,7 @@ class CrewForgeContainer(containers.DeclarativeContainer):
         AtomicDbBuilderService,
         agent_repo=agent_repo(),
         task_repo=task_repo(),
-
+        data=providers.Factory(CrewData)
     )
 
     atomic_yaml_builder = providers.Factory(

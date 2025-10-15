@@ -55,8 +55,8 @@ class AtomicCrewDBManager:
 
 
 
-        crew_builder:AtomicDbBuilderService = self.crew_container.atomic_db_builder()
-        crew_builder.initialize_builder(crew_data)
+        crew_builder:AtomicDbBuilderService = self.crew_container.atomic_db_builder(data=crew_data)
+
 
         for step in crew_def['steps']:
             task_key = step['task_key']

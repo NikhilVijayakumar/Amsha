@@ -13,13 +13,12 @@ from nikhil.amsha.toolkit.crew_forge.service.crew_builder_service import CrewBui
 
 class AtomicDbBuilderService:
 
-    def __init__(self, agent_repo: IAgentRepository,task_repo: ITaskRepository):
+    def __init__(self,data: CrewData, agent_repo: IAgentRepository,task_repo: ITaskRepository):
         self.builder = None
         self.agent_repo: IAgentRepository = agent_repo
         self.task_repo: ITaskRepository = task_repo
+        self.builder: CrewBuilderService = CrewBuilderService(data)
 
-    def initialize_builder(self, data: CrewData):
-        self.builder:CrewBuilderService = CrewBuilderService(data)
 
     def add_agent(self, agent_id: str,knowledge_sources=None, tools: list = None) :
         agent_details = self.agent_repo.get_agent_by_id(agent_id)
