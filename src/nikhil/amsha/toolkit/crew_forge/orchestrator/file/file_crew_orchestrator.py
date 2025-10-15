@@ -2,14 +2,15 @@
 from typing import Dict, Any, Optional
 
 from nikhil.amsha.toolkit.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
+from nikhil.amsha.toolkit.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 
 
-class CrewOrchestrator:
+class FileCrewOrchestrator:
     """
     Orchestrates the execution of a SINGLE atomic crew. It receives a pre-built
     manager and is completely decoupled from configuration files.
     """
-    def __init__(self, manager: AtomicCrewDBManager):
+    def __init__(self, manager: AtomicCrewFileManager):
         """Initializes the orchestrator with an injected manager."""
         print("--- [Orchestrator] Initializing pure runner ---")
         self.manager = manager

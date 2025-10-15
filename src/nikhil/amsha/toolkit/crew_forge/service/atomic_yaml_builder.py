@@ -3,14 +3,18 @@ from typing import Optional
 
 from crewai import Crew, Agent, Process
 
+from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
+from nikhil.amsha.toolkit.crew_forge.seeding.parser.crew_parser import CrewParser
+from nikhil.amsha.toolkit.crew_forge.service.crew_builder_service import CrewBuilderService
+
 
 class AtomicYamlBuilderService:
 
-    def __init__(self,parser,agent_yaml_file,task_yaml_file,builder):
-        self.parser = parser
-        self.agent_yaml_file =agent_yaml_file
-        self.task_yaml_file = task_yaml_file
-        self.builder = builder
+    def __init__(self,data: CrewData,parser:CrewParser,agent_yaml_file:str,task_yaml_file:str):
+        self.parser:CrewParser = parser
+        self.agent_yaml_file:str =agent_yaml_file
+        self.task_yaml_file:str = task_yaml_file
+        self.builder:CrewBuilderService = CrewBuilderService(data)
 
     def add_agent(self,knowledge_sources=None, tools: list = None):
         agent_details = self.parser.parse_agent(self.agent_yaml_file)

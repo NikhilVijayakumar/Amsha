@@ -3,14 +3,16 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 from nikhil.amsha.toolkit.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
-from nikhil.amsha.toolkit.crew_forge.orchestrator.db.db_crew_orchestrator import DbCrewOrchestrator
+from nikhil.amsha.toolkit.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
+from nikhil.amsha.toolkit.crew_forge.orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
+
 from nikhil.amsha.toolkit.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from nikhil.amsha.toolkit.llm_factory.dependency.llm_container import LLMContainer
 from nikhil.amsha.toolkit.llm_factory.domain.llm_type import LLMType
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
-class AmshaCrewDBApplication:
+class AmshaCrewFileApplication:
     """
     A reusable base class that handles all the boilerplate setup for running a crew.
 
@@ -28,13 +30,13 @@ class AmshaCrewDBApplication:
         self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
         self.model_name:Optional[str] = None
         llm = self._initialize_llm()
-        manager = AtomicCrewDBManager(
+        manager = AtomicCrewFileManager(
             llm=llm,
             model_name = self.model_name,
             app_config_path=config_paths["app"],
             job_config=self.job_config
         )
-        self.orchestrator = DbCrewOrchestrator(manager)
+        self.orchestrator = FileCrewOrchestrator(manager)
 
 
     def _initialize_llm(self) -> Any:
