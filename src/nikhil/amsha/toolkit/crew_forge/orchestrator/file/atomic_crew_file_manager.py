@@ -1,7 +1,6 @@
 from typing import Optional, Dict, Any
 
 from nikhil.amsha.toolkit.crew_forge.dependency.crew_forge_container import CrewForgeContainer
-from nikhil.amsha.toolkit.crew_forge.domain.models.crew_config_data import CrewConfigResponse
 from nikhil.amsha.toolkit.crew_forge.domain.models.crew_data import CrewData
 from nikhil.amsha.toolkit.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
 from nikhil.amsha.toolkit.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
@@ -29,16 +28,7 @@ class AtomicCrewFileManager:
         self.crew_container.config.from_dict(app_config)
         self.output_file:Optional[str] = None
 
-        # Fetch the single master blueprint using top-level keys from job_config
-        self.blueprint_service = self.crew_container.crew_blueprint_service()
-        self.master_blueprint: Optional[CrewConfigResponse] = self.blueprint_service.get_config(
-            name=self.job_config["crew_name"],
-            usecase=self.job_config["usecase"]
-        )
 
-        if not self.master_blueprint:
-            raise ValueError("Master blueprint specified in job_config not found in the database.")
-        print("[Manager] Master blueprint loaded successfully.")
 
     def build_atomic_crew(self, crew_name: str,filename_suffix:Optional[str]=None):
         """Builds a single, atomic crew from a subset of the master blueprint."""
