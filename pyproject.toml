@@ -24,7 +24,8 @@ dependencies = [
     "chardet == 5.2.0",
     "pandas == 2.3.2",
     "openpyxl == 3.1.5",
-    "docling == 2.55.0"
+    "docling == 2.55.0",
+    "dvc-gdrive == 3.0.1"
 ]
 [tool.setuptools]
 package-dir = { "" = "src" }
