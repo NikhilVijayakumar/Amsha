@@ -1,7 +1,7 @@
 from nikhil.amsha.toolkit.mlops.dvc_setup import DVCSetup
 
 if __name__ == "__main__":
-    CONFIG_FILE_PATH = "../../crew_forge/example/config/app_config.yaml"
+    CONFIG_FILE_PATH = "config/app_config.yaml"
 
     print("=============================================")
     print("      DVC Environment Setup Tool")
