@@ -55,3 +55,7 @@ Thumbs.db
 
 
 /.Amsha/output/.gitignore
+/config/app_config.yaml
+/src/nikhil/amsha/toolkit/crew_forge/example/config/.gitignore
+/src/nikhil/amsha/toolkit/crew_forge/example/knowledge/.crewai_user.json
+/src/nikhil/amsha/toolkit/crew_forge/example/knowledge/latest_kickoff_task_outputs.db
