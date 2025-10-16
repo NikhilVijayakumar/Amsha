@@ -52,8 +52,5 @@ Thumbs.db
 # *.flv
 # *.mov
 # *.wmv
-/src/nikhil/amsha/toolkit/crew_forge/example/config/
-/src/nikhil/amsha/toolkit/crew_forge/example/output/
-/.Amsha/
-/src/nikhil/amsha/toolkit/crew_forge/example/knowledge/.crewai_user.json
-/src/nikhil/amsha/toolkit/crew_forge/example/knowledge/latest_kickoff_task_outputs.db
+
+
