@@ -3,7 +3,6 @@ from typing import List, Dict, Any
 
 import numpy as np
 import pandas as pd
-from nikhil.amsha.toolkit.crew_forge.utils.reporting_tool import ReportingTool
 from nikhil.amsha.utils.json_utils import JsonUtils
 from nikhil.amsha.utils.yaml_utils import YamlUtils
 
@@ -82,14 +81,22 @@ class EvaluationReportTool:
         for input_file in input_files:
             try:
                 print(f"  -> Loading data from: {input_file}")
+
+                # 🔑 FIX 1: Extract the 'eval_model' name from the input filename
+                basename = os.path.basename(input_file)
+                eval_model_name = basename.replace('aggregated_results_', '').replace('.json', '')
+
                 full_data = JsonUtils.load_json_from_file(input_file)
-                # The core data is always under 'gradedEvaluations'
                 evaluations_list = full_data.get('gradedEvaluations', [])
 
                 if evaluations_list:
+                    # 🔑 FIX 2: Add the 'eval_model' name to each dictionary
+                    for record in evaluations_list:
+                        record['eval_model'] = eval_model_name
+
                     # Append all list items to the master list
                     all_evaluations.extend(evaluations_list)
-                    print(f"     -> Added {len(evaluations_list)} evaluations.")
+                    print(f"     -> Added {len(evaluations_list)} evaluations (as '{eval_model_name}').")
                 else:
                     print(f"     -> ⚠️ No 'gradedEvaluations' found in {input_file}.")
 
@@ -101,18 +108,25 @@ class EvaluationReportTool:
             return
 
         # Convert the consolidated list of dicts into a single DataFrame
+        # This df_full now contains the new 'eval_model' column
         df_full = pd.DataFrame(all_evaluations)
 
         # --- STEP 2: Pre-process and Pivot for Summary ---
 
-        # Columns to keep for the summary pivot
-        summary_cols = ['fileName', 'plotTitle', 'finalScore']
+        # 🔑 FIX 3: Add 'eval_model' to the columns to keep
+        summary_cols = ['fileName', 'plotTitle', 'finalScore', 'eval_model']
         df_summary_base = df_full[summary_cols].copy()
 
-        # Extract the model names for columns and pivot
-        # Group 1: eval_model, Group 2: gen_model
-        df_summary_base[['eval_model', 'gen_model']] = df_summary_base['fileName'].str.extract(
-            r'(.+?)_evaluate_seed_plot_task_(.+?).json', expand=True
+        # 🔑 FIX 4: Use a new regex to extract 'gen_model' from 'fileName'
+        # The 'eval_model' column already exists and is correct.
+        # This regex captures everything after the first underscore and before '.json'
+        df_summary_base['gen_model'] = df_summary_base['fileName'].str.extract(
+            r'[^_]+_(.+)\.json$', expand=False
+        )
+
+        # Fallback for any regex misses
+        df_summary_base['gen_model'] = df_summary_base['gen_model'].fillna(
+            df_summary_base['fileName'].str.replace('.json', '', regex=False)
         )
 
         # Ensure the score column is numeric before aggregation
@@ -121,7 +135,7 @@ class EvaluationReportTool:
         # Pivot to get evaluation models as columns
         pivot_df = df_summary_base.pivot_table(
             index=['gen_model', 'plotTitle'],
-            columns='eval_model',
+            columns='eval_model',  # This will now correctly use 'gemini', 'gpt', etc.
             values='finalScore',
             aggfunc='first'
         ).reset_index()
@@ -131,8 +145,15 @@ class EvaluationReportTool:
         pivot_df.columns.name = None
 
         # --- STEP 3: Calculate Total Score and Apply Relative Grading ---
+        # 'score_cols' will now correctly be ['gemini', 'gpt', 'llama', 'qwen']
         score_cols = [col for col in pivot_df.columns if col not in ['Generation Model', 'Plot Title']]
-        pivot_df['totalFinalScore'] = pivot_df[score_cols].sum(axis=1).round(2)
+
+        # This will now work as intended
+        if not score_cols:
+            print("  -> ⚠️ No score columns found after pivot. Cannot calculate total score.")
+            pivot_df['totalFinalScore'] = 0.0
+        else:
+            pivot_df['totalFinalScore'] = pivot_df[score_cols].sum(axis=1).round(2)
 
         # Apply relative grading on the totalFinalScore
         summary_final_df = self._apply_relative_grading(pivot_df)
@@ -140,16 +161,19 @@ class EvaluationReportTool:
         # Reorder columns for the final Summary sheet
         summary_cols_order = ['Generation Model', 'Plot Title', 'totalFinalScore', 'Relative Grade',
                               'Grade Point'] + score_cols
+        # Filter for columns that actually exist, in case one was empty
+        summary_cols_order = [col for col in summary_cols_order if col in summary_final_df.columns]
         summary_final_df = summary_final_df[summary_cols_order]
 
         # --- STEP 4: Prepare Individual DataFrames for Sheets (based on EVAL model) ---
-        eval_models = df_summary_base['eval_model'].unique()
+        # 🔑 FIX 5: This logic is now much simpler and more robust
+        eval_models = df_full['eval_model'].unique()
         individual_dfs: Dict[str, pd.DataFrame] = {}
         for model in eval_models:
             # Filter rows for the current evaluation model
-            model_df = df_full[df_summary_base['eval_model'] == model].copy()
-            # Drop the intermediate model columns added in df_summary_base
-            model_df.drop(columns=['eval_model', 'gen_model'], errors='ignore', inplace=True)
+            model_df = df_full[df_full['eval_model'] == model].copy()
+            # Drop the intermediate model column
+            model_df.drop(columns=['eval_model'], errors='ignore', inplace=True)
             individual_dfs[model] = model_df
 
         # --- STEP 5: Save to Excel ---
@@ -158,14 +182,20 @@ class EvaluationReportTool:
             with pd.ExcelWriter(output_excel, engine='openpyxl') as writer:
                 # Save individual reports (one sheet per evaluation model)
                 for model, df in individual_dfs.items():
+                    if df.empty:
+                        print(f"  -> ⚠️ Skipping empty sheet for model: '{model}'")
+                        continue
                     # Sheet name limited to 31 chars
-                    sheet_name = model[:31].replace('-', '_').replace('.', '_')
+                    sheet_name = str(model)[:31].replace('-', '_').replace('.', '_')
                     df.to_excel(writer, sheet_name=sheet_name, index=False)
                     print(f"  -> Wrote sheet: '{sheet_name}' ({model})")
 
                 # Save the final summary
-                summary_final_df.to_excel(writer, sheet_name='Final_Summary', index=False)
-                print("  -> Wrote sheet: 'Final_Summary' with aggregated scores and relative grading.")
+                if not summary_final_df.empty:
+                    summary_final_df.to_excel(writer, sheet_name='Final_Summary', index=False)
+                    print("  -> Wrote sheet: 'Final_Summary' with aggregated scores and relative grading.")
+                else:
+                    print("  -> ⚠️ Skipping empty 'Final_Summary' sheet.")
 
             print(f"  -> ✅ Success! Consolidated Excel report saved to '{output_excel}'")
         except Exception as e:
@@ -174,22 +204,16 @@ class EvaluationReportTool:
         # --- STEP 6: Save to JSON ---
         if output_json:
             try:
-                # Convert the final summary DataFrame to a dictionary (records format is suitable for list of objects)
+                # Convert the final summary DataFrame to a dictionary
                 final_summary_data = summary_final_df.to_dict('records')
 
-                # We can't easily consolidate aggregationSummary from multiple files, so we'll
-                # just output the new, final summary data.
                 output_data = {
                     "reportDescription": "Summary of generation models graded by multiple evaluation models.",
                     "gradedSummaryByGenerationModel": final_summary_data
                 }
 
                 os.makedirs(os.path.dirname(output_json), exist_ok=True)
-                JsonUtils.save_json_to_file(output_data,output_json )
+                JsonUtils.save_json_to_file(output_data, output_json)
                 print(f"  -> ✅ Success! Summary JSON saved to '{output_json}'")
             except Exception as e:
                 print(f"  -> ❌ Error saving JSON file: {e}")
-
-
-
-
