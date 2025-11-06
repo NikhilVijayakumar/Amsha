@@ -14,8 +14,10 @@ class EvaluationAggregationTool:
     normal distribution, and calculates an overall CGPA.
     """
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str,score_summary="scoreSummary",title="plot_title"):
         self.config = YamlUtils.yaml_safe_load(config_path)
+        self.score_summary = score_summary
+        self.title = title
 
     def run(self):
         print("🚀 Starting evaluation aggregation process...")
@@ -75,11 +77,11 @@ class EvaluationAggregationTool:
             if filename.endswith('.json'):
                 filepath = os.path.join(input_dir, filename)
                 data = JsonUtils.load_json_from_file(filepath)
-                if 'scoreSummary' in data and 'plot_title' in data:
+                if self.score_summary in data and self.title in data:
                     record = {
                         'fileName': filename,
-                        'plotTitle': data.get('plot_title'),
-                        **data.get('scoreSummary', {})
+                        'title': data.get(self.title),
+                        **data.get(self.score_summary, {})
                     }
                     evaluations.append(record)
         print(f"  -> Found and loaded {len(evaluations)} evaluation files.")
