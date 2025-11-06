@@ -80,7 +80,7 @@ class EvaluationAggregationTool:
                 if self.score_summary in data and self.title in data:
                     record = {
                         'fileName': filename,
-                        'title': data.get(self.title),
+                        self.title: data.get(self.title),
                         **data.get(self.score_summary, {})
                     }
                     evaluations.append(record)
