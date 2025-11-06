@@ -119,7 +119,7 @@ class EvaluationAggregationTool:
 
             # --- MODIFIED LINE: Added 'finalScore' to the list of columns to ensure order ---
             excel_df = df[
-                ['fileName', 'plotTitle', 'finalScorePercentage', 'relativeGrade', 'gradePoint', 'finalScore']]
+                ['fileName', self.title, 'finalScorePercentage', 'relativeGrade', 'gradePoint', 'finalScore']]
 
             with pd.ExcelWriter(output_filename, engine='openpyxl') as writer:
                 excel_df.to_excel(writer, sheet_name='Relative Grade Details', index=False)
