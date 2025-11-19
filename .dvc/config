@@ -1,4 +1,9 @@
 [core]
-    remote = gdrive_storage
+    remote = s3_storage
 ['remote "gdrive_storage"']
     url = gdrive://1prM4H9e3ACVJlVCRiBQiiNq6ss-8IOfF
+['remote "s3_storage"']
+    url = s3://amsha/dvc_store
+    endpointurl = http://localhost:9000
+    region = us-east-1
+    use_ssl = false

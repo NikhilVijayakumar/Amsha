@@ -59,3 +59,4 @@ Thumbs.db
 /src/nikhil/amsha/toolkit/crew_forge/example/config/.gitignore
 /src/nikhil/amsha/toolkit/crew_forge/example/knowledge/.crewai_user.json
 /src/nikhil/amsha/toolkit/crew_forge/example/knowledge/latest_kickoff_task_outputs.db
+/config/llm_config.yaml
