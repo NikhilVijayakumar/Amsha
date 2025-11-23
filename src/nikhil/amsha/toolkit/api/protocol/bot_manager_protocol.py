@@ -1,18 +1,20 @@
 # src.nikhil.amsha.toolkit.api.protocol.bot_manager_protocol
-from typing import Protocol, Iterable, AsyncIterable, Any, Union
+from typing import Protocol, Iterable, AsyncIterable, Any, Union, TypeVar
+from enum import Enum
 
-from nikhil.amsha.toolkit.api.protocol.task_config_protocol import TaskConfigProtocol
+# Define TypeVars constrained by the base Enum type
+UT = TypeVar('UT', bound=Enum) # Utility Task Type
+AT = TypeVar('AT', bound=Enum) # Application Task Type
 
 
-class BotManagerProtocol(Protocol):
-    def run(self, utility_task: TaskConfigProtocol.UtilsType) -> Any:
-        """Synchronous execution of a utility task that returns a final result."""
+class BotManagerProtocol(Protocol[UT, AT]):
+    """
+    Protocol for the Bot Manager, parameterized by the Utility and Application Enum types.
+    """
+    def run(self, utility_task: UT) -> Any:
+        """Synchronous execution of a utility task (typed by UT)."""
         ...
 
-    def stream_run(self, application_task: TaskConfigProtocol.ApplicationType) -> Union[Iterable[str], AsyncIterable[str]]:
-        """
-        Streamable execution of an application task.
-        Returns either a sync or async iterable yielding string chunks.
-        """
+    def stream_run(self, application_task: AT) -> Union[Iterable[str], AsyncIterable[str]]:
+        """Streamable execution of an application task (typed by AT)."""
         ...
-
