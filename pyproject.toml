@@ -1,6 +1,6 @@
 [project]
 name = "Amsha"
-version = "1.5.0"
+version = "1.5.1"
 description = "Common config and crew AI helpers"
 dependencies = [
     "PyYAML==6.0.2",
