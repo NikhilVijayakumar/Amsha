@@ -1,7 +1,8 @@
-# your_library/api_factory.py
+# src.nikhil.amsha.toolkit.api.factory.api_factory.py
 import inspect
 
-from fastapi import APIRouter, HTTPException
+import fastapi
+from fastapi import APIRouter, HTTPException, FastAPI
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
@@ -10,8 +11,8 @@ from nikhil.amsha.toolkit.api.protocol.task_config_protocol import TaskConfigPro
 
 
 def _sse_format(data: str) -> str:
-    # Basic SSE formatting (client expects "data: <line>\n\n")
-    return f"data: {data}\n\n"
+    # Basic SSE formatting (client expects "data: <line>.n.n")
+    return f"data: {data}.n.n"
 
 def create_bot_api(
     bot_manager: BotManagerProtocol,
@@ -34,17 +35,17 @@ def create_bot_api(
     ExecutionTarget = task_config.ExecutionTarget
 
     class UtilityRequest(BaseModel):
-        task_name: str
-        target: str
+        task_name: UtilsType
 
     class ApplicationRequest(BaseModel):
-        task_name: str
-        target: str
+        task_name: ApplicationType
+
 
     @router.post("/run/utility")
     async def run_utility(req: UtilityRequest):
         try:
-            result = bot_manager.run(req.target, req.task_name)
+
+            result = bot_manager.run(req.task_name)
             return {"status": "success", "result": result}
         except Exception as e:
             # map to HTTP 500 with type name
@@ -56,7 +57,7 @@ def create_bot_api(
         Streams responses as SSE. Accepts both sync and async iterables from bot_manager.stream_run.
         """
         try:
-            stream = bot_manager.stream_run(req.target, req.task_name)
+            stream = bot_manager.stream_run(req.task_name)
 
             async def event_generator():
                 # If async generator / async iterable:
@@ -101,14 +102,13 @@ def create_bot_api(
     return router
 
 
-def create_fastapi_app(bot_manager: BotManagerProtocol, task_config: TaskConfigProtocol) -> "fastapi.FastAPI":
+def create_fastapi_app(bot_manager: BotManagerProtocol, task_config: TaskConfigProtocol,prefix="api") -> "fastapi.FastAPI":
     """
     Convenience helper to create a full FastAPI app including the bot router and
     a simple health endpoint. Client can call this to get an app object to run.
-    """
-    from fastapi import FastAPI
+    """   
     app = FastAPI()
-    app.include_router(create_bot_api(bot_manager, task_config), prefix="/api")
+    app.include_router(create_bot_api(bot_manager, task_config), prefix=f"/{prefix}")
     @app.get("/health")
     async def health():
         return {"status": "ok"}
