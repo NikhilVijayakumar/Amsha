@@ -20,14 +20,15 @@ class LLMBuilder:
         if model_config.base_url is None:
             llm_instance = LLM(
                 api_key=model_config.api_key,
-                api_version =model_config.api_version,
+                api_version=model_config.api_version,
                 model=model_config.model,
                 temperature=params.temperature,
                 top_p=params.top_p,
                 max_completion_tokens=params.max_completion_tokens,
                 presence_penalty=params.presence_penalty,
                 frequency_penalty=params.frequency_penalty,
-                stop=params.stop
+                stop=params.stop,
+                stream=True
             )
         else:
             llm_instance = LLM(
@@ -40,10 +41,10 @@ class LLMBuilder:
                 max_completion_tokens=params.max_completion_tokens,
                 presence_penalty=params.presence_penalty,
                 frequency_penalty=params.frequency_penalty,
-                stop=params.stop
+                stop=params.stop,
+                stream=True
             )
-
-        # Return both the LLM and its name in a structured way
+            # Return both the LLM and its name in a structured way
         return LLMBuildResult(llm=llm_instance, model_name=clean_model_name)
 
     def build_creative(self, model_key: str = None) -> LLMBuildResult:
