@@ -1,0 +1,100 @@
+# LLM Configuration for Amsha
+# Used by llm_factory and AI audit script
+# Copy this to config/llm_config.yaml and customize
+
+llm:
+  creative:
+    default: gpt  # Change to your preferred model
+    models:
+      # LM Studio models (local)
+      phi:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/phi-4-reasoning"
+        api_key: "not-needed"  # LM Studio doesn't require auth
+      llama:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/meta-llama-3.1-8b-instruct"
+        api_key: "not-needed"
+      
+      # Gemini (Google - Free tier available)
+      gemini:
+        model: "gemini/gemini-1.5-flash"  # or gemini-pro
+        api_key: "your-gemini-api-key-here"
+      
+      # Azure OpenAI (if you have access)
+      gpt-4o:
+        base_url: "https://your-resource.openai.azure.com/"
+        model: "azure/gpt-4o"
+        api_key: "your-azure-key-here"
+        api_version: "2024-08-01-preview"
+
+    gpt:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/openai/gpt-oss-20b"
+        api_key: "lm_studio"
+
+  evaluation:
+    default: gpt  # For AI audit, use LM Studio gpt model
+    models:
+      # LM Studio for evaluation (User's gpt-oss-20b model)
+      # Context: 16k tokens - Good for small to medium files
+      gpt:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/openai/gpt-oss-20b"
+        api_key: "lm_studio"
+      
+      # LM Studio for evaluation (smaller, faster models)
+      # Context: 16k tokens
+      gemma:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/gemma-3-12b-it"
+        api_key: "not-needed"
+      
+      # Gemini for evaluation
+      # Context: 1M tokens! - Can handle very large files and full repo scans
+      # Use this for best full-repo audit performance
+      gemini:
+        model: "gemini/gemini-1.5-flash"
+        api_key: "your-gemini-api-key"
+
+        gpt:
+            base_url: "http://localhost:1234/v1"
+            model: "lm_studio/openai/gpt-oss-20b"
+            api_key: "lm_studio"
+
+llm_parameters:
+  creative:
+    temperature: 1.0
+    top_p: 0.9
+    max_completion_tokens: 4096
+    presence_penalty: 0.6
+    frequency_penalty: 0.4
+    stop: ["###"]
+  
+  evaluation:
+    # AI audit uses evaluation parameters (stricter, lower temperature)
+    temperature: 0.3  # Lower for more consistent reviews
+    top_p: 0.5
+    max_completion_tokens: 1000
+    presence_penalty: 0.0
+    frequency_penalty: 0.0
+    stop: ["###"]
+
+# Chunk size configuration for AI audit
+# The audit tool will automatically chunk files/diffs based on model context
+# 
+# Default behavior (if not specified):
+#   - LM Studio (16k context): ~12k token chunks (safe)
+#   - Gemini (1M context): ~200k token chunks (can handle full modules!)
+#   - OpenAI GPT-4 (128k context): ~100k token chunks
+#
+# Override per model by adding 'max_tokens' to model config:
+# evaluation:
+#   models:
+#     gemini:
+#       model: "gemini/gemini-1.5-flash"
+#       max_tokens: 200000  # Use 200k chunks for Gemini
+#
+# Or use --max-tokens CLI flag:
+#   amsha-audit --full-repo --max-tokens 50000
+

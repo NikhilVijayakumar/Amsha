@@ -106,7 +106,7 @@ def create_fastapi_app(bot_manager: BotManagerProtocol, task_config: TaskConfigP
     """
     Convenience helper to create a full FastAPI app including the bot router and
     a simple health endpoint. Client can call this to get an app object to run.
-    """   
+    """
     app = FastAPI()
     app.include_router(create_bot_api(bot_manager, task_config), prefix=f"/{prefix}")
     @app.get("/health")

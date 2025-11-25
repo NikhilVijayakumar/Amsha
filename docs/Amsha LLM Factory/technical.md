@@ -1,4 +1,4 @@
-# Technical Requirements: Amsha LLM Factory 
+# Technical Requirements: Amsha LLM Factory
 
 | |                |
 | :--- |:---------------|

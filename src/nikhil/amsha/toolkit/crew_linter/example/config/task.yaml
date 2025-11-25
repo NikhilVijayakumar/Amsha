@@ -7,7 +7,7 @@ task:
                   - Flashcard Data: {flashcard_data} (A JSON object containing:
                       * `topic`: String, the broad topic.
                       * `keywords`: List of strings, key terms.
-                      * `notes`: String, the detailed content.                     
+                      * `notes`: String, the detailed content.
 
                   Steps:
                   1.  Receive the `flashcard_data` input.
@@ -24,7 +24,7 @@ task:
                           * `front_prompt`: "Identify a potential flawed assumption or a weak point in [Method/Argument]."
                           * `back_answer`: A clear explanation of the identified flaw or assumption, referencing concepts from the notes.
                       d.  Assign `topic` from input and set `bloom_level` to "Analyzing".
-                      e.  Generate a unique `id` 
+                      e.  Generate a unique `id`
                       f.  Add the structured flashcard to the list.
                   5.  Output the list of generated flashcards.
 
@@ -33,14 +33,14 @@ task:
                       ```json
                       [
                         {
-                          "id": "integrated_analyze_001",                         
+                          "id": "integrated_analyze_001",
                           "topic": "Database Normalization",
                           "bloom_level": "Analyzing",
                           "front_prompt": "Compare and contrast 2NF (Second Normal Form) and 3NF (Third Normal Form) in database design.",
                           "back_answer": "2NF eliminates partial dependencies (non-key attributes dependent on only part of a composite primary key). 3NF goes further by eliminating transitive dependencies (non-key attributes dependent on other non-key attributes). Essentially, if a table is in 3NF, it is also in 2NF, but not vice-versa."
                         },
                         {
-                          "id": "integrated_analyze_002",                         
+                          "id": "integrated_analyze_002",
                           "topic": "Memory Management",
                           "bloom_level": "Analyzing",
                           "front_prompt": "What are the advantages and disadvantages of using virtual memory?",

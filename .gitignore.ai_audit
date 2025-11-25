@@ -1,0 +1,2 @@
+# .ai_audit.env should not be committed (contains API keys)
+.ai_audit.env

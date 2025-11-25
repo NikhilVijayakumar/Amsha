@@ -30,6 +30,25 @@ dependencies = [
     "sse-starlette == 3.0.3",
     "fastapi == 0.121.3"
 ]
+
+[project.scripts]
+amsha-audit = "nikhil.amsha.toolkit.code_audit.cli:main"
+
+[project.optional-dependencies]
+audit = [
+    "google-generativeai >= 0.3.2",
+]
+dev = [
+    "pre-commit >= 3.6.0",
+    "mypy >= 1.8.0",
+    "black >= 24.2.0",
+    "flake8 >= 7.0.0",
+    "isort >= 5.13.2",
+    "pytest >= 7.4.0",
+    "google-generativeai >= 0.3.2",
+    "openai >= 1.10.0",
+]
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 

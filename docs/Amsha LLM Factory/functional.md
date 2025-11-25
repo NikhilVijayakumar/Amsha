@@ -1,4 +1,4 @@
-# Functional Requirements: Amsha LLM Factory 
+# Functional Requirements: Amsha LLM Factory
 
 | |                |
 | :--- |:---------------|

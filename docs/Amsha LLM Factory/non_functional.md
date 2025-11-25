@@ -1,4 +1,4 @@
-# Non-Functional Requirements: Amsha LLM Factory 
+# Non-Functional Requirements: Amsha LLM Factory
 
 | |                |
 | :--- |:---------------|
