@@ -45,63 +45,24 @@ This document tracks all external framework dependencies in Amsha, assesses thei
 
 ---
 
-### 2. DVC-S3 (3.0.1)
-**Category:** Data Versioning  
-**Risk Level:** 🟡 **MEDIUM** - Infrastructure dependency
+### 2. Vak (git+https://github.com/your-org/vak.git@main)
+**Category:** Core Dependency
+**Risk Level:** 🔴 **HIGH** - Core business logic dependency
 
 **Usage:**
-- Data versioning in `toolkit/mlops/`
-- S3/MinIO integration
-- Git integration for `.dvc` files
+- Core functionality shared across projects.
 
-**Isolation Status:** ❌ **None**
-- Direct subprocess calls to `dvc` CLI
-- No abstraction layer
-- MLOps module tightly coupled
+**Isolation Status:** ⚠️ **Partial**
+- Integrated as a direct dependency.
 
 **Migration Path:**
-1. Create `IDataVersioner` interface
-2. Create `DVCVersioner` adapter implementing interface
-3. Create `GitLFSVersioner` as alternative
-4. Update `DVCSetup` and `DVCDataTracker` to use interface
-
-**Alternative Frameworks:**
-- Git LFS (Large File Storage)
-- Pachyderm
-- DeltaLake
-- Custom S3 versioning
+- N/A (Core dependency)
 
 **Action Items:**
-- [ ] Create `IDataVersioner` interface (Q1 2025)
-- [ ] Implement DVC adapter (Q1 2025)
-- [ ] Research Git LFS migration (Q2 2025)
+- [ ] Monitor for updates.
 
 ---
 
-### 3. BERTopic (0.17.0)
-**Category:** NLP/Topic Modeling  
-**Risk Level:** 🟢 **LOW** - Isolated feature
-
-**Usage:**
-- Topic modeling in `crew_linter/analysis/`
-- Guardrails for output validation
-
-**Isolation Status:** ✅ **Good**
-- Used only in `BERTopicModeler` and `BERTopicGuardrail`
-- Domain models are framework-agnostic
-- Easily swappable with LDA or NMF
-
-**Migration Path:**
-- Already well-isolated via strategy pattern
-- Multiple topic modelers available (LDA, NMF, BERTopic)
-
-**Alternative Frameworks:**
-- Gensim LDA (already implemented)
-- Gensim NMF (already implemented)
-- Top2Vec
-- Custom clustering
-
-**Action Items:**
 - ✅ Well isolated, no action needed
 
 ---
@@ -135,31 +96,8 @@ This document tracks all external framework dependencies in Amsha, assesses thei
 
 ---
 
-### 5. FastAPI (0.121.3)
-**Category:** Web Framework  
-**Risk Level:** 🟢 **LOW** - API layer only
-
-**Usage:**
-- API factory in `toolkit/api/`
-- REST endpoints
-- SSE streaming
-
-**Isolation Status:** ✅ **Excellent**
-- Only used in API layer (outer architecture layer)
-- Business logic independent of FastAPI
-- Protocol-based design allows framework swap
-
-**Migration Path:**
-- Already well-isolated
-- Could swap for Flask, Django, or other framework
-
-**Alternative Frameworks:**
-- Flask
-- Django REST Framework
-- Starlette (lighter weight)
-
-**Action Items:**
-- ✅ Well isolated, no action needed
+- ✅ Well isolated via repository pattern
+- [ ] Consider adding SQL adapter for broader adoption (Q4 2025)
 
 ---
 

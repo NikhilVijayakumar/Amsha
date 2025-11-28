@@ -1,5 +1,0 @@
-similarity_guardrail:
-  ratio: 80
-  partial_ratio: 85
-  token_sort_ratio: 80
-  threshold_cosine: 0.8

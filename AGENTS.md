@@ -13,7 +13,7 @@ This project follows **Clean Architecture**. You must strictly adhere to the Dep
 *   **Domain (`src/nikhil/amsha/toolkit/*/domain`)**: Pure Python objects (Pydantic models). NO external framework dependencies.
 *   **Repository Interfaces (`repo/interfaces`)**: Abstract contracts only. NO implementation details.
 *   **Application/Service**: Business logic. Depends ONLY on domain models and repository interfaces.
-*   **Infrastructure (`repo/adapters`, `api`, `mlops`)**: Concrete implementations (MongoDB, S3, FastAPI).
+*   **Infrastructure (`repo/adapters`)**: Concrete implementations (MongoDB).
 
 **Layer Dependencies (Inner → Outer):**
 ```
@@ -139,22 +139,6 @@ class AtomicDbBuilderService:
 ---
 
 ## 6. Async/Await Guidelines
-
-**Current State:** Async is used selectively (API layer only).
-
-**Rules:**
-
-1.  **Required for:**
-    -   FastAPI endpoints (already async)
-    -   Streaming operations (`EventSourceResponse`)
-
-2.  **Optional/Future for:**
-    -   Repository implementations (currently synchronous MongoDB operations)
-    -   Service layer (can be made async when repos are async)
-
-3.  **Pattern:**
-    -   Keep sync and async versions if needed
-    -   Use `async def` for IO-bound operations (network, database)
     -   Don't use async for CPU-bound operations (topic modeling, text processing)
 
 **Example:**
