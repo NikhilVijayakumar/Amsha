@@ -62,3 +62,4 @@ Thumbs.db
 /config/llm_config.yaml
 /.ai_audit.env
 /.Amsha/
+/config/job_config.yaml

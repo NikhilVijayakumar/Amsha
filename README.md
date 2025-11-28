@@ -1,15 +1,37 @@
 # Amsha
 
-Amsha is a lightweight library designed to provide common configuration and helper utilities for CrewAI orchestration. It serves as a foundational component for building scalable and maintainable AI agent systems.
+**Amsha** is a powerful, lightweight library designed to streamline **CrewAI** orchestration. It serves as a foundational "Crew Forge," providing essential boilerplate, configuration management, and helper utilities to build scalable and maintainable AI agent systems.
 
-## Key Features
+Whether you are managing agents via configuration files or orchestrating them dynamically from a MongoDB database, Amsha provides the tools to simplify your workflow.
 
-*   **Lightweight Core**: Focused on essential utilities and configurations, keeping the footprint small.
-*   **Vak Integration**: Core dependency on [Vak](https://github.com/your-org/vak) for enhanced functionality.
-*   **CrewAI Helpers**: Simplifies the setup and management of CrewAI agents and tasks.
-*   **MongoDB Support**: Includes adapters for persisting agent and task configurations in MongoDB.
+---
 
-## Installation
+## 🚀 Key Features
+
+### 🛠️ Crew Forge & Orchestration
+Amsha abstracts away the repetitive boilerplate code required to set up CrewAI agents and tasks.
+*   **Boilerplate Generation**: Quickly spin up crews with standardized structures.
+*   **Dual Orchestration Modes**:
+    *   **File-Based**: Define agents and tasks in YAML files for version-controlled, file-driven workflows.
+    *   **DB-Based**: Fetch agent and task definitions dynamically from MongoDB, allowing for centralized management and updates without code changes.
+
+### 📚 Advanced Knowledge Management
+Amsha integrates powerful knowledge source management capabilities.
+*   **Multi-Format Support**: Uses `AmshaCrewDoclingSource` (powered by [Docling](https://github.com/DS4SD/docling)) to ingest knowledge. **(Currently tested with Markdown)**.
+*   **Markdown Conversion**: Automatically converts various document formats into Markdown for optimal LLM consumption.
+*   **Flexible Sources**: Supports both local file paths and URLs.
+
+### 🔄 Input & Data Handling
+*   **Flexible Inputs**: seamlessly handle inputs from multiple sources—direct configuration values, text files, or JSON data.
+*   **MongoDB Sync**: The `SyncCrewConfigManager` allows you to sync your local crew configurations to a MongoDB database, keeping your deployment environment up-to-date with your local development.
+
+### 🔌 Core Integrations
+*   **Vak Integration**: Built on top of the [Vak](https://github.com/NikhilVijayakumar/Vak) library for robust core functionalities.
+*   **MongoDB**: Native adapters for persisting and retrieving agent and task configurations.
+
+---
+
+## 📦 Installation
 
 Amsha requires Python 3.10+ and can be installed via pip.
 
@@ -17,64 +39,102 @@ Amsha requires Python 3.10+ and can be installed via pip.
 pip install amsha
 ```
 
-### Dependencies
-
-Amsha depends on several key libraries, including:
-*   `crewai`
-*   `pymongo`
-*   `pydantic`
-*   `Vak` (Internal dependency)
-
-See `pyproject.toml` for the full list of dependencies.
-
-## Usage
-
-### Basic Configuration
-
-Amsha uses `pydantic` models for strict type validation of agent and task configurations.
-
-```python
-from amsha.models import AgentRequest, TaskRequest
-
-# Define an agent
-agent = AgentRequest(
-    role="Researcher",
-    goal="Discover new trends",
-    backstory="An expert in market analysis."
-)
-
-# Define a task
-task = TaskRequest(
-    name="Market Research",
-    description="Analyze the latest market trends.",
-    expected_output="A comprehensive report."
-)
+**Note**: To use the advanced document processing features, ensure you have `docling` installed:
+```bash
+uv add docling
+# or
+pip install docling
 ```
 
-### Using Repositories
+---
 
-Amsha provides repository interfaces for managing configurations.
+## 📖 Usage
+
+### 1. Orchestration (File-Based)
+
+Use `AmshaCrewFileApplication` to run crews defined in YAML configuration files.
 
 ```python
-from amsha.repositories import AgentRepository, RepoData
+from nikhil.amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
+from nikhil.vak.domain.llm_factory.domain.llm_type import LLMType
 
-repo_data = RepoData(
-    mongo_uri="mongodb://localhost:27017/",
-    db_name="crewai_db",
-    collection_name="agents"
-)
-agent_repo = AgentRepository(repo_data)
+# Define paths to your configuration files
+config_paths = {
+    "app": "config/app_config.yaml",
+    "job": "config/job_config.yaml",
+    "llm": "config/llm_config.yaml"
+}
 
-# Create an agent in the database
-agent_repo.create_agent(agent)
+# Initialize and run
+app = AmshaCrewFileApplication(config_paths=config_paths, llm_type=LLMType.CREATIVE)
+# The application will automatically load agents/tasks from the YAMLs defined in job_config
 ```
 
-## Documentation
+### 2. Orchestration (DB-Based)
+
+Use `AmshaCrewDBApplication` to run crews with definitions fetched from MongoDB.
+
+```python
+from nikhil.amsha.crew_forge.orchestrator.db.amsha_crew_db_application import AmshaCrewDBApplication
+from nikhil.vak.domain.llm_factory.domain.llm_type import LLMType
+
+# Initialize with DB-specific logic
+app = AmshaCrewDBApplication(config_paths=config_paths, llm_type=LLMType.CREATIVE)
+```
+
+### 3. Knowledge Management
+
+Easily attach knowledge sources to your agents or crews using `AmshaCrewDoclingSource`.
+
+```python
+from nikhil.amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
+
+# Create a knowledge source from a Markdown file
+knowledge_source = AmshaCrewDoclingSource(
+    file_paths=[
+        "path/to/document.md"
+    ]
+)
+
+# This source can now be passed to your CrewAI agents
+```
+
+### 4. Syncing Configurations to MongoDB
+
+Keep your database in sync with your local YAML configurations.
+
+```python
+from nikhil.amsha.crew_forge.sync.manager.sync_crew_config_manager import SyncCrewConfigManager
+
+sync_manager = SyncCrewConfigManager(
+    app_config_path="config/app_config.yaml",
+    job_config_path="config/job_config.yaml"
+)
+
+# Syncs the configurations to the output path specified in job_config
+sync_manager.sync()
+```
+
+---
+
+## ⚙️ Configuration Structure
+
+Amsha relies on a structured configuration approach:
+
+*   **`app_config.yaml`**: Global application settings (directories, logging, etc.).
+*   **`job_config.yaml`**: Defines the pipeline, including which crews to run, their steps, and input/output handling.
+*   **`llm_config.yaml`**: Configuration for the LLM Factory (provider, model, API keys).
+
+---
+
+## 📄 Documentation
 
 For more detailed information on coding standards and architecture, please refer to:
 *   [AGENTS.md](AGENTS.md): Coding Constitution & Standards
 *   [DEPENDENCIES.md](DEPENDENCIES.md): Framework Dependencies & Isolation Strategies
 
-## License
+---
+
+## 📜 License
 
 [Insert License Information Here]

@@ -65,4 +65,9 @@ if __name__ == "__main__":
 
     # The main script is now incredibly simple and clean.
     app = CopyApplication(config_paths=configs,llm_type=LLMType.CREATIVE)
-    app.run()
+    try:
+        app.run()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"Error running application: {e}")

@@ -2,6 +2,7 @@
 from typing import Dict, Any, Optional
 
 from nikhil.amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
+from nikhil.amsha.crew_forge.utils.token_monitor import TokenMonitor
 
 
 class FileCrewOrchestrator:
@@ -22,7 +23,15 @@ class FileCrewOrchestrator:
         crew_to_run = self.manager.build_atomic_crew(crew_name,filename_suffix)
 
         print(f"[Orchestrator] Kicking off crew with inputs: {inputs}")
+        
+        monitor = TokenMonitor()
+        monitor.start_monitoring()
+        
         result = crew_to_run.kickoff(inputs=inputs)
+        
+        monitor.stop_monitoring()
+        monitor.log_usage(result)
+        print(monitor.get_summary())
 
         print(f"[Orchestrator] Crew '{crew_name}' finished.")
         return result
