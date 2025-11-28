@@ -61,3 +61,4 @@ Thumbs.db
 /src/nikhil/amsha/crew_forge/example/knowledge/latest_kickoff_task_outputs.db
 /config/llm_config.yaml
 /.ai_audit.env
+/.Amsha/

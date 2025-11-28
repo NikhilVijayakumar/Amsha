@@ -1,5 +1,5 @@
 from nikhil.amsha.output_process.validation import CrewConfigValidator
-from nikhil.amsha.utils.yaml_utils import YamlUtils
+from nikhil.vak.utils.yaml_utils import YamlUtils
 
 if __name__ == '__main__':
     config = YamlUtils().yaml_safe_load("config/validation_config.yaml")
