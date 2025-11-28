@@ -8,8 +8,9 @@ try:
 except ImportError:
     GPU_AVAILABLE = False
 
-class TokenMonitor:
-    def __init__(self):
+class CrewPerformanceMonitor:
+    def __init__(self, model_name: Optional[str] = None):
+        self.model_name = model_name
         self.total_tokens = 0
         self.prompt_tokens = 0
         self.completion_tokens = 0
@@ -39,7 +40,7 @@ class TokenMonitor:
                     mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
                     self.gpu_stats[f"gpu_{i}_start_mem"] = mem_info.used
             except Exception as e:
-                print(f"[TokenMonitor] GPU monitoring failed to start: {e}")
+                print(f"[CrewPerformanceMonitor] GPU monitoring failed to start: {e}")
 
     def stop_monitoring(self):
         """Stops the monitoring of time and resources."""
@@ -58,7 +59,7 @@ class TokenMonitor:
                     self.gpu_stats[f"gpu_{i}_utilization"] = utilization.gpu
                 pynvml.nvmlShutdown()
             except Exception as e:
-                print(f"[TokenMonitor] GPU monitoring failed to stop: {e}")
+                print(f"[CrewPerformanceMonitor] GPU monitoring failed to stop: {e}")
 
     def log_usage(self, result: Any):
         """
@@ -78,7 +79,7 @@ class TokenMonitor:
                 self.prompt_tokens = getattr(usage, 'prompt_tokens', 0)
                 self.completion_tokens = getattr(usage, 'completion_tokens', 0)
         else:
-            print("[TokenMonitor] Warning: 'token_usage' not found in result.")
+            print("[CrewPerformanceMonitor] Warning: 'token_usage' not found in result.")
 
     def get_summary(self) -> str:
         """Returns a formatted summary of the monitoring data."""
@@ -97,8 +98,11 @@ class TokenMonitor:
                                 f"Mem Change {end_mem - start_mem:.2f} MB "
                                 f"(Start: {start_mem:.2f} MB, End: {end_mem:.2f} MB)\n")
         
+        model_info = f"Model: {self.model_name}\n" if self.model_name else ""
+
         summary = (
             f"\n--- Execution Performance Summary ---\n"
+            f"{model_info}"
             f"Total Tokens: {self.total_tokens}\n"
             f"  - Prompt Tokens: {self.prompt_tokens}\n"
             f"  - Completion Tokens: {self.completion_tokens}\n"

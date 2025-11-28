@@ -2,7 +2,7 @@
 from typing import Dict, Any, Optional
 
 from nikhil.amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
-from nikhil.amsha.crew_forge.utils.token_monitor import TokenMonitor
+from nikhil.amsha.crew_forge.utils.crew_performance_monitor import CrewPerformanceMonitor
 
 
 class FileCrewOrchestrator:
@@ -14,6 +14,7 @@ class FileCrewOrchestrator:
         """Initializes the orchestrator with an injected manager."""
         print("--- [Orchestrator] Initializing pure runner ---")
         self.manager = manager
+        self.last_monitor: Optional[CrewPerformanceMonitor] = None
 
     def run_crew(self, crew_name: str, inputs: Dict[str, Any],filename_suffix:Optional[str]=None):
         """
@@ -24,14 +25,15 @@ class FileCrewOrchestrator:
 
         print(f"[Orchestrator] Kicking off crew with inputs: {inputs}")
         
-        monitor = TokenMonitor()
-        monitor.start_monitoring()
+        # Initialize monitor with model name from manager
+        self.last_monitor = CrewPerformanceMonitor(model_name=self.manager.model_name)
+        self.last_monitor.start_monitoring()
         
         result = crew_to_run.kickoff(inputs=inputs)
         
-        monitor.stop_monitoring()
-        monitor.log_usage(result)
-        print(monitor.get_summary())
+        self.last_monitor.stop_monitoring()
+        self.last_monitor.log_usage(result)
+        print(self.last_monitor.get_summary())
 
         print(f"[Orchestrator] Crew '{crew_name}' finished.")
         return result
@@ -39,6 +41,10 @@ class FileCrewOrchestrator:
 
     def get_last_output_file(self)->Optional[str]:
         return self.manager.output_file
+
+    def get_last_performance_stats(self) -> Optional[CrewPerformanceMonitor]:
+        """Returns the performance monitor from the last run."""
+        return self.last_monitor
 
 
 

@@ -2,25 +2,18 @@ import unittest
 import time
 import sys
 from unittest.mock import MagicMock, patch
-from nikhil.amsha.crew_forge.utils.token_monitor import TokenMonitor
+from nikhil.amsha.crew_forge.utils.crew_performance_monitor import CrewPerformanceMonitor
 
-class TestTokenMonitor(unittest.TestCase):
+class TestCrewPerformanceMonitor(unittest.TestCase):
     def test_monitor_flow(self):
         # Mock pynvml module
         with patch.dict(sys.modules, {'pynvml': MagicMock()}):
-            # Re-import or reload if needed, but since we patch sys.modules before TokenMonitor usage might be tricky if already imported.
-            # Easier to patch the TokenMonitor's pynvml reference if it was imported at top level.
-            # But TokenMonitor imports inside try/except block.
             
-            # Let's patch where it is used in TokenMonitor if possible, or just mock the pynvml calls if it was successfully imported.
-            # If pynvml is not installed in test env, TokenMonitor.GPU_AVAILABLE will be False.
-            # We can force GPU_AVAILABLE to True for testing logic.
-            
-            monitor = TokenMonitor()
+            monitor = CrewPerformanceMonitor(model_name="test-model-v1")
             
             # Force GPU availability for test
-            with patch('nikhil.amsha.crew_forge.utils.token_monitor.GPU_AVAILABLE', True):
-                with patch('nikhil.amsha.crew_forge.utils.token_monitor.pynvml') as mock_pynvml:
+            with patch('nikhil.amsha.crew_forge.utils.crew_performance_monitor.GPU_AVAILABLE', True):
+                with patch('nikhil.amsha.crew_forge.utils.crew_performance_monitor.pynvml') as mock_pynvml:
                     # Setup mocks
                     mock_pynvml.nvmlDeviceGetCount.return_value = 1
                     mock_handle = MagicMock()
@@ -58,6 +51,7 @@ class TestTokenMonitor(unittest.TestCase):
                     # Test summary generation
                     summary = monitor.get_summary()
                     print(summary)
+                    self.assertIn("Model: test-model-v1", summary)
                     self.assertIn("Total Tokens: 100", summary)
                     self.assertIn("GPU Usage:", summary)
                     self.assertIn("GPU 0: Util 50%", summary)
