@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from typing import Dict, Any
 from nikhil.amsha.utils.json_utils import JsonUtils
-from nikhil.vak.utils.yaml_utils import YamlUtils
+from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
 class ContributionAnalyzer:

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 from nikhil.amsha.utils.json_utils import JsonUtils
-from nikhil.vak.utils.yaml_utils import YamlUtils
+from nikhil.amsha.utils.yaml_utils import YamlUtils
 
 
 class ReportingTool:

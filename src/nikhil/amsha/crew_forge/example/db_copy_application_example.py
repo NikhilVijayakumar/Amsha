@@ -3,7 +3,7 @@ from typing import Dict, Any
 from nikhil.amsha.crew_forge.orchestrator.db.amsha_crew_db_application import AmshaCrewDBApplication
 from nikhil.amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 
-from nikhil.vak.domain.llm_factory.domain.llm_type import LLMType
+from nikhil.amsha.llm_factory.domain.llm_type import LLMType
 
 
 class CopyApplication(AmshaCrewDBApplication):

@@ -5,12 +5,6 @@ from nikhil.amsha.llm_factory.dependency.llm_container import LLMContainer
 from nikhil.amsha.llm_factory.service.llm_builder import LLMBuilder
 
 
-# Import the container and the builder for type hinting
-
-
-
-
-# The example runner functions remain the same.
 def run_example_a(builder: LLMBuilder):
     """Example A: Build the default 'creative' LLM (phi)."""
     print("   => Running Example A: Building default 'creative' LLM...")
@@ -59,7 +53,7 @@ def main():
         creative_result = container.creative_llm()
         print(f"   Creative LLM created: {creative_result.model_name}")
         print(f"   Full Model Path: {creative_result.llm.model}")
-        
+
         # Test the creative LLM
         print("   Testing Creative LLM with prompt 'Hello, who are you?'...")
         response = creative_result.llm.call(messages=[{"role": "user", "content": "Hello, who are you?"}])
