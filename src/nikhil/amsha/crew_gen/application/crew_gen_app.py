@@ -1,8 +1,9 @@
 from typing import Dict, Any
 
-from nikhil.vak.domain.llm_factory.domain.llm_type import LLMType
+
 
 from nikhil.amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
+from nikhil.amsha.llm_factory.domain.llm_type import LLMType
 
 
 class CrewGenApplication(AmshaCrewFileApplication):
@@ -42,15 +43,15 @@ class CrewGenApplication(AmshaCrewFileApplication):
             pipeline_results[crew_name] = results_for_list
         return pipeline_results
 
-
-if __name__ == "__main__":
-    # Configuration is now neatly defined in one place.
-    configs = {
-        "llm": Settings.LLM_CONFIG,
-        "app": Settings.APP_CONFIG,
-        "job": "config/job_config.yaml"
-    }
-
-    # The main script is now incredibly simple and clean.
-    app = CrewGenApplication(config_paths=configs,llm_type=LLMType.CREATIVE)
-    app.run()
+#
+# if __name__ == "__main__":
+#     # Configuration is now neatly defined in one place.
+#     configs = {
+#         "llm": Settings.LLM_CONFIG,
+#         "app": Settings.APP_CONFIG,
+#         "job": "config/job_config.yaml"
+#     }
+#
+#     # The main script is now incredibly simple and clean.
+#     app = CrewGenApplication(config_paths=configs,llm_type=LLMType.CREATIVE)
+#     app.run()

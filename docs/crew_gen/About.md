@@ -8,7 +8,7 @@ It incorporates the **Atomic Flow Architecture**, replacing the monolithic inter
 
 **Module:** `nikhil.amsha.crew_gen`
 **Version:** 1.1.0 (Atomic Flow Architecture)
-**Dependencies:** `Vak` (Configuration/DI), `Amsha Core` (Orchestration)
+**Dependencies:** `Amsha LLM Factory` (Configuration/DI), `Amsha Core` (Orchestration)
 
 ## 1\. Executive Summary
 
@@ -197,6 +197,6 @@ def run_crewgen(
 For CrewGen to be considered successful, the generated code must pass these checks:
 
 1.  **Structure Compliance:** Does the output match the `Blueprint`?
-2.  **Vak Compliance:** Does the generated Python inject `LLMContainer` correctly?
+2.  **Amsha Compliance:** Does the generated Python inject `LLMContainer` correctly?
 3.  **Isolation:** Are the Agents, Tasks, and Metrics in their dedicated `config/` subfolders?
 4.  **Runnable:** Can the generated twins be instantiated without `ImportError`?

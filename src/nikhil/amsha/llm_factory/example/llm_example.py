@@ -1,4 +1,4 @@
-# src/nikhil/vak/domain/llm_factory/example/llm_example.py
+# src/nikhil/amsha/llm_factory/example/llm_example.py
 from pathlib import Path
 
 from nikhil.amsha.llm_factory.dependency.llm_container import LLMContainer
@@ -41,10 +41,10 @@ def run_example_c(builder: LLMBuilder):
 
 def main():
     """
-    An example script demonstrating how to use the Vak LLM Factory
+    An example script demonstrating how to use the Amsha LLM Factory
     with a Dependency Injection Container.
     """
-    print("--- Running Vak LLM Factory Example (with DI Container) ---")
+    print("--- Running Amsha LLM Factory Example (with DI Container) ---")
 
     container = LLMContainer()
 

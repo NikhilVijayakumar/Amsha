@@ -11,7 +11,7 @@
 
 ### 1. Introduction
 
-This document outlines the functional requirements for **Amsha**, a lightweight library designed to provide common configuration and helper utilities for CrewAI orchestration. It serves as a foundational component for building scalable and maintainable AI agent systems, with a core dependency on **Vak**. The primary goal is to simplify the setup and management of CrewAI agents and tasks while enabling a "Configuration as Code" workflow.
+This document outlines the functional requirements for **Amsha**, a lightweight library designed to provide common configuration and helper utilities for CrewAI orchestration. It serves as a foundational component for building scalable and maintainable AI agent systems. The primary goal is to simplify the setup and management of CrewAI agents and tasks while enabling a "Configuration as Code" workflow.
 
 The intended audience for this document includes project stakeholders, software architects, and the developers who will use this library to build their applications.
 
@@ -42,7 +42,7 @@ As CrewAI applications scale, managing the definitions of numerous agents, tasks
 
 #### 3.2. Scope
 
-The scope of **Amsha** is focused on providing essential utilities for configuration management and CrewAI orchestration. It leverages **Vak** for core functionality and supports both file-based and database-driven workflows.
+The scope of **Amsha** is focused on providing essential utilities for configuration management and CrewAI orchestration. It supports both file-based and database-driven workflows.
 
 -----
 

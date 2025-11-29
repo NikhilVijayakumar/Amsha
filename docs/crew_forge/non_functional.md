@@ -11,7 +11,7 @@
 
 ### 1. Introduction
 
-This document defines the non-functional requirements (NFRs) for the **Amsha** library. While the Functional Requirements document specifies *what* the system does, this document specifies *how well* the system performs its functions. These NFRs outline the quality attributes, operational constraints, and standards the library must adhere to, emphasizing its lightweight nature and integration with **Vak**.
+This document defines the non-functional requirements (NFRs) for the **Amsha** library. While the Functional Requirements document specifies *what* the system does, this document specifies *how well* the system performs its functions. These NFRs outline the quality attributes, operational constraints, and standards the library must adhere to, emphasizing its lightweight nature.
 
 -----
 
@@ -46,7 +46,7 @@ This document defines the non-functional requirements (NFRs) for the **Amsha** l
 #### 2.4 Security
 
 -   **NFR-SEC-01: No Secret Storage:** The library's code and its in-memory processes must not store or log sensitive information such as passwords, API keys, or full database connection strings.
--   **NFR-SEC-02: Secure Dependencies:** The library must only depend on well-maintained packages from trusted public repositories (e.g., PyPI) and the internal **Vak** library. It should be periodically scanned for known vulnerabilities in its dependency tree.
+-   **NFR-SEC-02: Secure Dependencies:** The library must only depend on well-maintained packages from trusted public repositories (e.g., PyPI). It should be periodically scanned for known vulnerabilities in its dependency tree.
 
 -----
 

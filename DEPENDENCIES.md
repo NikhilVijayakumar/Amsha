@@ -45,21 +45,7 @@ This document tracks all external framework dependencies in Amsha, assesses thei
 
 ---
 
-### 2. Vak (git+https://github.com/your-org/vak.git@main)
-**Category:** Core Dependency
-**Risk Level:** 🔴 **HIGH** - Core business logic dependency
 
-**Usage:**
-- Core functionality shared across projects.
-
-**Isolation Status:** ⚠️ **Partial**
-- Integrated as a direct dependency.
-
-**Migration Path:**
-- N/A (Core dependency)
-
-**Action Items:**
-- [ ] Monitor for updates.
 
 ---
 
@@ -136,11 +122,14 @@ These are stable, well-maintained libraries with minimal breaking change risk:
 | Library | Version | Purpose | Risk | Isolation |
 |---------|---------|---------|------|-----------|
 | Pydantic | 2.11.9 | Data validation | 🟢 LOW | ✅ Core pattern |
-| PyYAML | 6.0.2 | Config parsing | 🟢 LOW | ✅ Utils only |
+| PyYAML | 6.0.3 | Config parsing | 🟢 LOW | ✅ Utils only |
 | BeautifulSoup | 4.13.4 | HTML parsing | 🟢 LOW | ✅ Preprocessing |
 | NetworkX | 3.4.2 | Graph analysis | 🟢 LOW | ✅ Guardrails only |
 | NLTK | 3.9.1 | NLP utilities | 🟢 LOW | ✅ Preprocessing |
 | scikit-learn | 1.6.1 | ML utilities | 🟢 LOW | ✅ Analysis only |
+| docling | 2.53.0 | Document parsing | 🟢 LOW | ✅ Knowledge Source |
+| psutil | 7.1.3 | System monitoring | 🟢 LOW | ✅ Utilities |
+| nvidia-ml-py | 13.580.82 | GPU monitoring | 🟢 LOW | ✅ Utilities |
 
 ---
 

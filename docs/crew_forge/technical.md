@@ -11,48 +11,10 @@
 
 ### 1. Introduction
 
-This document provides the technical specification for the **Amsha** library. It is intended for software developers who will be building, maintaining, or contributing to the library. This document outlines the technology stack, architectural design, data models, and patterns chosen to fulfill the requirements, highlighting the integration with **Vak**.
+This document provides the technical specification for the **Amsha** library. It is intended for software developers who will be building, maintaining, or contributing to the library. This document outlines the technology stack, architectural design, data models, and patterns chosen to fulfill the requirements.
 
 -----
 
-### 2. Technology Stack
-
--   **TR-TECH-01: Language:** The library will be developed in **Python 3.10** or higher.
--   **TR-TECH-02: Core Dependencies:**
-    * **Pydantic:** To be used for all data modeling, validation, and settings management.
-    * **PyYAML:** To be used for safely parsing the YAML configuration files.
-    * **Vak:** Core dependency for shared functionality.
--   **TR-TECH-03: Initial Database Adapter:** The initial release will provide a concrete repository implementation for **MongoDB**, using the `pymongo` library.
--   **TR-TECH-04: Testing Framework:**
-    * **pytest:** The primary framework for writing and executing all tests.
-    * **pytest-cov:** For measuring code coverage.
-
------
-
-### 3. Architectural Design
-
-The library will be built using a layered, modular architecture to ensure maintainability, testability, and extensibility.
-
-#### 3.1. High-Level Architecture
-
-The architecture follows the principles of Clean Architecture, separating concerns into distinct layers:
-
-1.  **Service Layer:** Contains the high-level business logic and orchestration. This layer is the primary public interface for the library.
-2.  **Repository Interface Layer:** Defines the abstract contracts (`IAgentRepository`, `ITaskRepository`, etc.) for data persistence. This layer decouples the Service Layer from the Data Layer.
-3.  **Data Adapter Layer:** Contains the concrete implementations of the repository interfaces for specific databases (e.g., `MongoAgentRepository`).
-
-#### 3.2. Core Components
-
--   **Repository Interfaces:** Abstract base classes defining CRUD operations.
--   **Repository Implementations:** Concrete classes containing database-specific logic.
--   **`ConfigSyncService`:** Orchestrates the synchronization process (if applicable).
--   **`Vak` Integration:** Utilizes `Vak` for core shared utilities and patterns.
--   **Pydantic Models:** Data models defining the structure of Agents, Tasks, and Crews.
-
-#### 3.3. Design Patterns
-
--   **TR-ARCH-01: Adapter Pattern:** The repository layer implements the Adapter pattern.
--   **TR-ARCH-02: Repository Pattern:** Data access logic is fully encapsulated within repository classes.
 -   **TR-ARCH-03: Dependency Injection:** Services (`ConfigSyncService`) will receive their dependencies (repository instances) through their constructor (`__init__`). This decouples components and is critical for enabling unit testing with mocks or fakes.
 
 -----
