@@ -1,0 +1,8 @@
+task:
+  description: >
+    Write the code for the EVALUATION CREW (The Judge).
+    Refer to 'evaluation_standard.md' in your knowledge base.
+    Crucial: The Task must produce a JSON output with "score" and "critique".
+    Use the `AmshaCodeWriterTool` to save the files.
+  expected_output: >
+    Confirmation that files were written.
