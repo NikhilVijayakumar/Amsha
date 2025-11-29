@@ -81,34 +81,72 @@ class CrewPerformanceMonitor:
         else:
             print("[CrewPerformanceMonitor] Warning: 'token_usage' not found in result.")
 
-    def get_summary(self) -> str:
-        """Returns a formatted summary of the monitoring data."""
+    def get_metrics(self) -> Dict[str, Any]:
+        """
+        Returns a dictionary containing calculated metrics.
+        Useful for logging to external systems (MLflow, DBs, JSON).
+        """
         duration = self.end_time - self.start_time
         memory_diff_mb = (self.end_memory_usage - self.start_memory_usage) / (1024 * 1024)
-        
-        gpu_summary = ""
+
+        metrics = {
+            "general": {
+                "model_name": self.model_name,
+                "total_tokens": self.total_tokens,
+                "prompt_tokens": self.prompt_tokens,
+                "completion_tokens": self.completion_tokens,
+                "duration_seconds": round(duration, 4),
+                "cpu_usage_end_percent": self.end_cpu_percent,
+                "memory_usage_change_mb": round(memory_diff_mb, 2),
+                "memory_usage_start_bytes": self.start_memory_usage,
+                "memory_usage_end_bytes": self.end_memory_usage,
+            },
+            "gpu": {}
+        }
+
         if GPU_AVAILABLE and self.gpu_stats:
-            gpu_summary = "\nGPU Usage:\n"
-            count = len([k for k in self.gpu_stats if "utilization" in k])
-            for i in range(count):
+            # Identify how many GPUs were tracked by looking at utilization keys
+            gpu_indices = [k.split('_')[1] for k in self.gpu_stats.keys() if 'utilization' in k]
+
+            for i in gpu_indices:
                 start_mem = self.gpu_stats.get(f"gpu_{i}_start_mem", 0) / (1024 * 1024)
                 end_mem = self.gpu_stats.get(f"gpu_{i}_end_mem", 0) / (1024 * 1024)
                 util = self.gpu_stats.get(f"gpu_{i}_utilization", 0)
-                gpu_summary += (f"  - GPU {i}: Util {util}%, "
-                                f"Mem Change {end_mem - start_mem:.2f} MB "
-                                f"(Start: {start_mem:.2f} MB, End: {end_mem:.2f} MB)\n")
-        
-        model_info = f"Model: {self.model_name}\n" if self.model_name else ""
+
+                metrics["gpu"][f"gpu_{i}"] = {
+                    "utilization_percent": util,
+                    "memory_change_mb": round(end_mem - start_mem, 2),
+                    "memory_start_mb": round(start_mem, 2),
+                    "memory_end_mb": round(end_mem, 2)
+                }
+
+        return metrics
+
+    def get_summary(self) -> str:
+        """Returns a formatted summary string of the monitoring data."""
+        metrics = self.get_metrics()
+        gen = metrics["general"]
+        gpu_data = metrics["gpu"]
+
+        gpu_summary = ""
+        if gpu_data:
+            gpu_summary = "\nGPU Usage:\n"
+            for gpu_name, stats in gpu_data.items():
+                gpu_summary += (f"  - {gpu_name.upper()}: Util {stats['utilization_percent']}%, "
+                                f"Mem Change {stats['memory_change_mb']} MB "
+                                f"(Start: {stats['memory_start_mb']} MB, End: {stats['memory_end_mb']} MB)\n")
+
+        model_info = f"Model: {gen['model_name']}\n" if gen['model_name'] else ""
 
         summary = (
             f"\n--- Execution Performance Summary ---\n"
             f"{model_info}"
-            f"Total Tokens: {self.total_tokens}\n"
-            f"  - Prompt Tokens: {self.prompt_tokens}\n"
-            f"  - Completion Tokens: {self.completion_tokens}\n"
-            f"Time Taken: {duration:.2f} seconds\n"
-            f"CPU Usage: {self.end_cpu_percent}% (End)\n"
-            f"Memory Usage Change: {memory_diff_mb:.2f} MB"
+            f"Total Tokens: {gen['total_tokens']}\n"
+            f"  - Prompt Tokens: {gen['prompt_tokens']}\n"
+            f"  - Completion Tokens: {gen['completion_tokens']}\n"
+            f"Time Taken: {gen['duration_seconds']:.2f} seconds\n"
+            f"CPU Usage: {gen['cpu_usage_end_percent']}% (End)\n"
+            f"Memory Usage Change: {gen['memory_usage_change_mb']} MB"
             f"{gpu_summary}"
             f"-------------------------------------\n"
         )
