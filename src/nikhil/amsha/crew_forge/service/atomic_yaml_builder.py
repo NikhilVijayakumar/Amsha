@@ -3,9 +3,9 @@ from typing import Optional
 
 from crewai import Crew, Agent, Process
 
-from nikhil.amsha.crew_forge.domain.models.crew_data import CrewData
-from nikhil.amsha.crew_forge.seeding.parser.crew_parser import CrewParser
-from nikhil.amsha.crew_forge.service.crew_builder_service import CrewBuilderService
+from amsha.crew_forge.domain.models.crew_data import CrewData
+from amsha.crew_forge.seeding.parser.crew_parser import CrewParser
+from amsha.crew_forge.service.crew_builder_service import CrewBuilderService
 
 
 class AtomicYamlBuilderService:

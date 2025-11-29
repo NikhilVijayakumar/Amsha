@@ -1,8 +1,8 @@
 # src/nikhil/amsha/llm_factory/example/llm_example.py
 from pathlib import Path
 
-from nikhil.amsha.llm_factory.dependency.llm_container import LLMContainer
-from nikhil.amsha.llm_factory.service.llm_builder import LLMBuilder
+from amsha.llm_factory.dependency.llm_container import LLMContainer
+from amsha.llm_factory.service.llm_builder import LLMBuilder
 
 
 def run_example_a(builder: LLMBuilder):

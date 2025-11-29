@@ -2,10 +2,10 @@
 
 from dependency_injector import containers, providers
 
-from nikhil.amsha.crew_forge.repo.adapters.mongo.agent_repo import AgentRepository
-from nikhil.amsha.crew_forge.repo.adapters.mongo.task_repo import TaskRepository
-from nikhil.amsha.crew_forge.repo.adapters.mongo.crew_config_repo import CrewConfigRepository
-from nikhil.amsha.crew_forge.domain.models.repo_data import RepoData
+from amsha.crew_forge.domain.models.repo_data import RepoData
+from amsha.crew_forge.repo.adapters.mongo.agent_repo import AgentRepository
+from amsha.crew_forge.repo.adapters.mongo.crew_config_repo import CrewConfigRepository
+from amsha.crew_forge.repo.adapters.mongo.task_repo import TaskRepository
 
 
 class MongoRepoContainer(containers.DeclarativeContainer):

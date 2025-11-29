@@ -3,8 +3,7 @@
 import os
 from typing import Dict, Any, List, Tuple, Union
 
-from nikhil.amsha.utils.json_utils import JsonUtils
-from nikhil.amsha.utils.yaml_utils import YamlUtils
+from amsha.utils.yaml_utils import YamlUtils
 
 
 class EvaluationProcessingTool:

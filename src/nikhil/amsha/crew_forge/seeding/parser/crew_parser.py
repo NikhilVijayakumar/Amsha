@@ -1,8 +1,8 @@
 import re
 
-from nikhil.amsha.crew_forge.domain.models.agent_data import AgentRequest
-from nikhil.amsha.crew_forge.domain.models.task_data import TaskRequest
-from nikhil.amsha.utils.yaml_utils import YamlUtils
+from amsha.crew_forge.domain.models.agent_data import AgentRequest
+from amsha.crew_forge.domain.models.task_data import TaskRequest
+from amsha.utils.yaml_utils import YamlUtils
 
 
 class CrewParser:

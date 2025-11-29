@@ -2,9 +2,9 @@
 # container.py
 from dependency_injector import containers, providers
 
-from nikhil.amsha.llm_factory.service.llm_builder import LLMBuilder
-from nikhil.amsha.llm_factory.settings.llm_settings import LLMSettings
-from nikhil.amsha.utils.yaml_utils import YamlUtils
+from amsha.llm_factory.service.llm_builder import LLMBuilder
+from amsha.llm_factory.settings.llm_settings import LLMSettings
+from amsha.utils.yaml_utils import YamlUtils
 
 
 class LLMContainer(containers.DeclarativeContainer):

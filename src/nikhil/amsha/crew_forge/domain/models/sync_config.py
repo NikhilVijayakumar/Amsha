@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 
-from nikhil.amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
+from amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
+from amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
+from amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
 
 
 class SyncConfigData(BaseModel):

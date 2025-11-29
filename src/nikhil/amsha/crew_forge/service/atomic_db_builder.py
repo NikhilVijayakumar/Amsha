@@ -3,12 +3,12 @@ from typing import Optional
 
 from crewai import Crew, Agent, Process
 
-from nikhil.amsha.crew_forge.domain.models.agent_data import AgentRequest
-from nikhil.amsha.crew_forge.domain.models.crew_data import CrewData
-from nikhil.amsha.crew_forge.domain.models.task_data import TaskRequest
-from nikhil.amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
-from nikhil.amsha.crew_forge.service.crew_builder_service import CrewBuilderService
+from amsha.crew_forge.domain.models.agent_data import AgentRequest
+from amsha.crew_forge.domain.models.crew_data import CrewData
+from amsha.crew_forge.domain.models.task_data import TaskRequest
+from amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
+from amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
+from amsha.crew_forge.service.crew_builder_service import CrewBuilderService
 
 
 class AtomicDbBuilderService:

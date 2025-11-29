@@ -4,9 +4,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime
 
-from nikhil.amsha.crew_forge.seeding.parser.crew_parser import CrewParser
-
-
+from amsha.crew_forge.seeding.parser.crew_parser import CrewParser
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

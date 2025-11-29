@@ -1,8 +1,8 @@
 # src/nikhil/amsha/toolkit/crew_forge/adapters/mongo/task_repo.py
 import pymongo
 
-from nikhil.amsha.crew_forge.domain.models.repo_data import RepoData
-from nikhil.amsha.crew_forge.repo.interfaces.i_repository import IRepository
+from amsha.crew_forge.domain.models.repo_data import RepoData
+from amsha.crew_forge.repo.interfaces.i_repository import IRepository
 
 
 class MongoRepository(IRepository):

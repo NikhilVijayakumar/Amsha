@@ -4,10 +4,10 @@ from typing import Optional, List
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
-from nikhil.amsha.crew_forge.domain.models.crew_config_data import CrewConfigRequest, CrewConfigResponse
-from nikhil.amsha.crew_forge.domain.models.repo_data import RepoData
-from nikhil.amsha.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
+from amsha.crew_forge.domain.models.crew_config_data import CrewConfigRequest, CrewConfigResponse
+from amsha.crew_forge.domain.models.repo_data import RepoData
+from amsha.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
+from amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
 
 
 class CrewConfigRepository(MongoRepository, ICrewConfigRepository):

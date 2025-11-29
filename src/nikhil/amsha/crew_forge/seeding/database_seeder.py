@@ -3,11 +3,11 @@ import logging
 import os
 from collections import defaultdict
 
-from nikhil.amsha.crew_forge.domain.models.crew_config_data import CrewConfigRequest
-from nikhil.amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
-from nikhil.amsha.crew_forge.seeding.parser.crew_parser import CrewParser
+from amsha.crew_forge.domain.models.crew_config_data import CrewConfigRequest
+from amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
+from amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
+from amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
+from amsha.crew_forge.seeding.parser.crew_parser import CrewParser
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

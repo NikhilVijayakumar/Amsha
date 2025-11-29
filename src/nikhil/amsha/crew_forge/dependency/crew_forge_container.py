@@ -1,15 +1,15 @@
 # src/nikhil/amsha/toolkit/crew_forge/dependency/crew_forge_container.py
 from dependency_injector import containers, providers
 
-from nikhil.amsha.crew_forge.domain.models.crew_data import CrewData
-from nikhil.amsha.crew_forge.domain.models.sync_config import SyncConfigData
-from nikhil.amsha.crew_forge.dependency.mongo_container import MongoRepoContainer
-from nikhil.amsha.crew_forge.seeding.parser.crew_parser import CrewParser
-from nikhil.amsha.crew_forge.service.atomic_db_builder import AtomicDbBuilderService
-from nikhil.amsha.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
-from nikhil.amsha.crew_forge.service.config_sync_service import ConfigSyncService
-from nikhil.amsha.crew_forge.service.crew_blueprint_service import CrewBluePrintService
-from nikhil.amsha.crew_forge.service.crew_builder_service import CrewBuilderService
+from amsha.crew_forge.dependency.mongo_container import MongoRepoContainer
+from amsha.crew_forge.domain.models.crew_data import CrewData
+from amsha.crew_forge.domain.models.sync_config import SyncConfigData
+from amsha.crew_forge.seeding.parser.crew_parser import CrewParser
+from amsha.crew_forge.service.atomic_db_builder import AtomicDbBuilderService
+from amsha.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
+from amsha.crew_forge.service.config_sync_service import ConfigSyncService
+from amsha.crew_forge.service.crew_blueprint_service import CrewBluePrintService
+from amsha.crew_forge.service.crew_builder_service import CrewBuilderService
 
 
 class CrewForgeContainer(containers.DeclarativeContainer):

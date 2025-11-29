@@ -4,8 +4,8 @@ import pandas as pd
 from pathlib import Path
 from typing import List, Dict, Any
 
-from nikhil.amsha.utils.json_utils import JsonUtils
-from nikhil.amsha.utils.yaml_utils import YamlUtils
+from amsha.utils.json_utils import JsonUtils
+from amsha.utils.yaml_utils import YamlUtils
 
 
 class ReportingTool:

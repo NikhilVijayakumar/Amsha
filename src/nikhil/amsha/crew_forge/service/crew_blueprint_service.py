@@ -1,8 +1,8 @@
 # src/nikhil/amsha/toolkit/crew_forge/service/crew_blueprint_service.py
 from typing import Optional, List
 
-from nikhil.amsha.crew_forge.domain.models.crew_config_data import CrewConfigResponse
-from nikhil.amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
+from amsha.crew_forge.domain.models.crew_config_data import CrewConfigResponse
+from amsha.crew_forge.repo.interfaces.i_crew_config_repository import ICrewConfigRepository
 
 
 class CrewBluePrintService:

@@ -1,7 +1,10 @@
-import chardet
+
 import os
 import tempfile
 import shutil
+
+from requests.compat import chardet
+
 
 class Utf8Utils:
     def __init__(self, file_path: str):

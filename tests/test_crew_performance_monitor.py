@@ -2,7 +2,7 @@ import unittest
 import time
 import sys
 from unittest.mock import MagicMock, patch
-from nikhil.amsha.crew_forge.utils.crew_performance_monitor import CrewPerformanceMonitor
+from amsha.crew_monitor import CrewPerformanceMonitor
 
 class TestCrewPerformanceMonitor(unittest.TestCase):
     def test_monitor_flow(self):

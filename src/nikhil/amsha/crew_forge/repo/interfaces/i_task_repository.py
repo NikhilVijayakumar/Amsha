@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
-from nikhil.amsha.crew_forge.domain.models.task_data import TaskRequest, TaskResponse
+from amsha.crew_forge.domain.models.task_data import TaskRequest, TaskResponse
 
 
 class ITaskRepository(ABC):

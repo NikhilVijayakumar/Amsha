@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel
 
-from nikhil.amsha.llm_factory.domain.state import LLMUseCaseConfig, LLMParameters, LLMModelConfig
+from amsha.llm_factory.domain.state import LLMUseCaseConfig, LLMParameters, LLMModelConfig
 
 
 class LLMSettings(BaseModel):

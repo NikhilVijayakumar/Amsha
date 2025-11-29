@@ -1,6 +1,6 @@
 import yaml
 
-from nikhil.amsha.crew_forge.dependency.crew_forge_container import CrewForgeContainer
+from amsha.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 
 print("--- Running Config Sync Example ---")
 

@@ -1,8 +1,8 @@
 # orchestrator.py (Refactored)
 from typing import Dict, Any, Optional
 
-from nikhil.amsha.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
-from nikhil.amsha.crew_forge.utils.crew_performance_monitor import CrewPerformanceMonitor
+from amsha.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
+from amsha.crew_monitor.service.crew_performance_monitor import CrewPerformanceMonitor
 
 
 class DbCrewOrchestrator:

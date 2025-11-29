@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
-from nikhil.amsha.crew_forge.domain.models.agent_data import AgentRequest, AgentResponse
+from amsha.crew_forge.domain.models.agent_data import AgentRequest, AgentResponse
 
 
 class IAgentRepository(ABC):

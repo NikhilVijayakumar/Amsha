@@ -2,10 +2,10 @@
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
-from nikhil.amsha.crew_forge.domain.models.repo_data import RepoData
-from nikhil.amsha.crew_forge.domain.models.task_data import TaskRequest, TaskResponse
-from nikhil.amsha.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
+from amsha.crew_forge.domain.models.repo_data import RepoData
+from amsha.crew_forge.domain.models.task_data import TaskRequest, TaskResponse
+from amsha.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
+from amsha.crew_forge.repo.interfaces.i_task_repository import ITaskRepository
 
 
 class TaskRepository(MongoRepository, ITaskRepository):

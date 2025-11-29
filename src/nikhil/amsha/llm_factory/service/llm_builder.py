@@ -2,10 +2,10 @@
 
 from crewai import LLM
 
-from nikhil.amsha.llm_factory.domain.llm_type import LLMType
-from nikhil.amsha.llm_factory.domain.state import LLMBuildResult
-from nikhil.amsha.llm_factory.settings.llm_settings import LLMSettings
-from nikhil.amsha.llm_factory.utils.llm_utils import LLMUtils
+from amsha.llm_factory.domain.llm_type import LLMType
+from amsha.llm_factory.domain.state import LLMBuildResult
+from amsha.llm_factory.settings.llm_settings import LLMSettings
+from amsha.llm_factory.utils.llm_utils import LLMUtils
 
 
 class LLMBuilder:

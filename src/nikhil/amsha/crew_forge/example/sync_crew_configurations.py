@@ -1,8 +1,6 @@
 import os
 
-from nikhil.amsha.crew_forge.sync.manager.sync_crew_config_manager import SyncCrewConfigManager
-
-
+from amsha.crew_forge.sync.manager.sync_crew_config_manager import SyncCrewConfigManager
 
 
 def main():

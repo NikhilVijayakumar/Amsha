@@ -5,10 +5,9 @@ from typing import Optional
 
 from crewai import Crew, Agent, Process, Task
 
-from nikhil.amsha.crew_forge.domain.models.agent_data import AgentRequest
-from nikhil.amsha.crew_forge.domain.models.crew_data import CrewData
-from nikhil.amsha.crew_forge.domain.models.task_data import TaskRequest
-
+from amsha.crew_forge.domain.models.agent_data import AgentRequest
+from amsha.crew_forge.domain.models.crew_data import CrewData
+from amsha.crew_forge.domain.models.task_data import TaskRequest
 
 
 class CrewBuilderService:

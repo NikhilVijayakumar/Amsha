@@ -1,9 +1,7 @@
 from typing import Dict, Any
 
-
-
-from nikhil.amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
-from nikhil.amsha.llm_factory.domain.llm_type import LLMType
+from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
+from amsha.llm_factory.domain.llm_type import LLMType
 
 
 class DesignerCrewApplication(AmshaCrewFileApplication):

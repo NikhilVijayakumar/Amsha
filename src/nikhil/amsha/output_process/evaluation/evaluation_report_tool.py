@@ -3,8 +3,9 @@ from typing import List, Dict, Any
 
 import numpy as np
 import pandas as pd
-from nikhil.amsha.utils.json_utils import JsonUtils
-from nikhil.amsha.utils.yaml_utils import YamlUtils
+
+from amsha.utils.json_utils import JsonUtils
+from amsha.utils.yaml_utils import YamlUtils
 
 
 class EvaluationReportTool:

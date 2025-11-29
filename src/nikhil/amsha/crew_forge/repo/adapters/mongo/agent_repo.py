@@ -2,10 +2,10 @@
 from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
-from nikhil.amsha.crew_forge.domain.models.agent_data import AgentRequest, AgentResponse
-from nikhil.amsha.crew_forge.domain.models.repo_data import RepoData
-from nikhil.amsha.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
-from nikhil.amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
+from amsha.crew_forge.domain.models.agent_data import AgentResponse, AgentRequest
+from amsha.crew_forge.domain.models.repo_data import RepoData
+from amsha.crew_forge.repo.adapters.mongo.mongo_repository import MongoRepository
+from amsha.crew_forge.repo.interfaces.i_agent_repository import IAgentRepository
 
 
 class AgentRepository(MongoRepository, IAgentRepository):
