@@ -149,5 +149,25 @@ class AmshaCrewFileApplication:
             return True
         return False
 
+    @staticmethod
+    def clean_json_metrics(output_filename: str) -> (bool,Optional[str]):
+        """
+        Cleans and validates a JSON file, using an LLM for fixes with a retry limit.
+
+        Args:
+            output_filename: The path to the JSON file to be cleaned.
+            max_llm_retries: The maximum number of times to call the LLM to fix the file.
+
+        Returns:
+            The true or false.
+        """
+        print(f"AmshaCrewForgeApplication:{output_filename}")
+        current_file = Path(output_filename)
+        cleaner = JsonCleanerUtils(output_filename)
+        if cleaner.process_file():
+            print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
+            return True,cleaner.output_file_path
+        return False,None
+
 
 
