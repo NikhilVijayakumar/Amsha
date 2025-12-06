@@ -28,6 +28,12 @@ Amsha integrates powerful knowledge source management capabilities.
 ### 🔌 Core Integrations
 *   **MongoDB**: Native adapters for persisting and retrieving agent and task configurations.
 
+### 📊 Crew Monitor
+*   **Performance Tracking**: Monitor CPU, GPU, and memory usage of your agents.
+*   **Contribution Analysis**: Determine which LLMs contributed to specific features.
+*   **Automated Reporting**: Generate detailed Excel reports from execution logs.
+*   [Read the detailed docs](docs/crew_monitor/About.md)
+
 ---
 
 ## 📦 Installation
@@ -127,3 +133,11 @@ Amsha relies on a structured configuration approach:
 ---
 
 
+
+---
+
+## 📚 Documentation
+
+*   [Crew Forge](docs/crew_forge/About.md)
+*   [LLM Factory](docs/llm_factory/About.md)
+*   [Crew Monitor](docs/crew_monitor/About.md)

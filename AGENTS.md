@@ -252,7 +252,7 @@ async def get_agent_by_id(self, agent_id: str) -> AgentResponse:
 
 ## 10. Versioning & Backward Compatibility
 
-**Current Version:** 1.5.3
+**Current Version:** 2.0.9
 
 ### Semantic Versioning (MAJOR.MINOR.PATCH)
 
@@ -664,7 +664,7 @@ Before committing code, verify:
 
 **All Dependencies:** Managed in **`pyproject.toml`**
 - Client applications use `pyproject.toml` for everything
-- Includes Amsha as a dependency: `amsha==1.5.3`
+- Includes Amsha as a dependency: `amsha==2.0.9`
 - Follows modern Python packaging standards
 
 ### Rules
@@ -686,7 +686,7 @@ Before committing code, verify:
    # Use pyproject.toml exclusively
    # Add amsha as dependency
    dependencies = [
-       "amsha==1.5.3",
+       "amsha==2.0.9",
        "other-deps..."
    ]
    ```
@@ -701,10 +701,12 @@ Before committing code, verify:
 ```toml
 [project]
 name = "Amsha"
-version = "1.5.3"
+version = "2.0.9"
 dependencies = [
-    "PyYAML==6.0.2",
+    "PyYAML==6.0.3",
     "crewai==0.201.1",
+    "dependency-injector==4.48.2",
+    "pandas==2.3.2",
     # ... etc
 ]
 ```
@@ -723,16 +725,4 @@ black == 24.2.0
 pytest == 7.4.0
 ```
 
-### Checklist for Dependency Changes
 
-When adding/updating dependencies:
-
-- [ ] Is this a production dependency? → Add to `pyproject.toml` AND `requirements.txt`
-- [ ] Is this a dev-only dependency? → Add ONLY to `requirements.txt`
-- [ ] Did you pin the exact version? (e.g., `==1.5.3` not `>=1.5.0`)
-- [ ] Did you update `DEPENDENCIES.md` if it's a significant framework?
-- [ ] Did you test with a clean virtual environment?
-
----
-
-**Remember:** Every line of code in Amsha affects multiple projects. Code with care, test thoroughly, and maintain backward compatibility.

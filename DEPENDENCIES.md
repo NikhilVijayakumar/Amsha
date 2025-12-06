@@ -1,6 +1,6 @@
 # Framework Dependencies - Status & Migration Roadmap
 
-**Last Updated:** 2025-11-25  
+**Last Updated:** 2025-12-06  
 **Review Schedule:** Quarterly (March, June, September, December)
 
 ---
@@ -92,9 +92,8 @@ This document tracks all external framework dependencies in Amsha, assesses thei
 **Risk Level:** 🟢 **LOW** - Utility dependency
 
 **Usage:**
-- Data processing in MLOps
+- Data processing
 - CSV/Excel handling
-- Topic modeling data manipulation
 
 **Isolation Status:** ⚠️ **Partial**
 - Used in utilities and preprocessing
@@ -130,6 +129,10 @@ These are stable, well-maintained libraries with minimal breaking change risk:
 | docling | 2.53.0 | Document parsing | 🟢 LOW | ✅ Knowledge Source |
 | psutil | 7.1.3 | System monitoring | 🟢 LOW | ✅ Utilities |
 | nvidia-ml-py | 13.580.82 | GPU monitoring | 🟢 LOW | ✅ Utilities |
+| dependency-injector | 4.48.2 | Dependency Injection | 🟢 LOW | ✅ Core Framework |
+| openpyxl | 3.1.5 | Excel I/O | 🟢 LOW | ✅ Reporting Tool |
+| chardet | 5.2.0 | Encoding detection | 🟢 LOW | ✅ Utilities |
+| crewai-tools | 0.75.0 | Agent Tools | 🟡 MEDIUM | ✅ Extensions |
 
 ---
 
@@ -144,7 +147,6 @@ These are stable, well-maintained libraries with minimal breaking change risk:
 
 2. **Review Changelogs:**
    - CrewAI: Check for breaking changes
-   - DVC: Monitor CLI interface changes
    - BERTopic: Review API updates
 
 3. **Update This Document:**
@@ -156,7 +158,6 @@ These are stable, well-maintained libraries with minimal breaking change risk:
    ```bash
    # Count direct framework imports in service layer
    grep -r "from crewai" src/nikhil/amsha/toolkit/*/service/ | wc -l
-   grep -r "import dvc" src/nikhil/amsha/toolkit/*/service/ | wc -l
    ```
 
 ### Annual Review (Every 12 Months)
@@ -181,8 +182,7 @@ These are stable, well-maintained libraries with minimal breaking change risk:
 ## Coupling Reduction Roadmap
 
 ### Q1 2025
-- [ ] Create `IDataVersioner` interface for DVC isolation
-- [ ] Implement `DVCVersioner` adapter
+### Q1 2025
 - [ ] Document framework upgrade process
 
 ### Q2 2025
@@ -191,8 +191,8 @@ These are stable, well-maintained libraries with minimal breaking change risk:
 - [ ] Add LangGraph research spike
 
 ### Q3 2025
+### Q3 2025
 - [ ] Evaluate Polars vs Pandas
-- [ ] Research Git LFS as DVC alternative
 - [ ] Measure coupling metrics (baseline)
 
 ### Q4 2025
