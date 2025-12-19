@@ -12,8 +12,8 @@ class TestCrewPerformanceMonitor(unittest.TestCase):
             monitor = CrewPerformanceMonitor(model_name="test-model-v1")
             
             # Force GPU availability for test
-            with patch('nikhil.amsha.crew_forge.utils.crew_performance_monitor.GPU_AVAILABLE', True):
-                with patch('nikhil.amsha.crew_forge.utils.crew_performance_monitor.pynvml') as mock_pynvml:
+            with patch('amsha.crew_forge.utils.crew_performance_monitor.GPU_AVAILABLE', True):
+                with patch('amsha.crew_forge.utils.crew_performance_monitor.pynvml') as mock_pynvml:
                     # Setup mocks
                     mock_pynvml.nvmlDeviceGetCount.return_value = 1
                     mock_handle = MagicMock()

@@ -1,0 +1,7 @@
+agent:
+  role: "Greeter"
+  goal: "Greet the user warmly."
+  backstory: "You are a friendly AI assistant."
+  allow_delegation: false
+  verbose: true
+

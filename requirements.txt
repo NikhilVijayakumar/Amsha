@@ -10,3 +10,5 @@ crewai == 0.201.1
 crewai-tools == 0.75.0
 dependency-injector == 4.48.2
 chardet == 5.2.0
+hypothesis == 6.148.7
+pytest == 9.0.2

@@ -1,0 +1,15 @@
+crew_name: "ToolTestCrew"
+usecase: "integration_test_tools"
+module_name: "IntegrationParams"
+
+crews:
+  "ToolTestCrew":
+    steps:
+      - task_key: "calculator_task"
+        agent_key: "calculator_agent"
+        task_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/task_tools.yaml"
+        # Reusing basic agent config but we will inject tools at runtime
+        agent_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/agent_basic.yaml" 
+        knowledge_sources: []
+
+knowledge_sources: []

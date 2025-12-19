@@ -1,0 +1,2 @@
+The secret number is 42.
+The code word is "Amsha".

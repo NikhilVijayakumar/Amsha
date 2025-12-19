@@ -1,0 +1,4 @@
+task:
+  name: "basic_echo_task"
+  description: "Simply echo back the input: {topic}"
+  expected_output: "The echoed string."

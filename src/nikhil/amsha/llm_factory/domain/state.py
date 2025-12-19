@@ -28,6 +28,8 @@ class LLMUseCaseConfig(BaseModel):
     models: Dict[str, LLMModelConfig]
 
 
+from typing import Any
 class LLMBuildResult(NamedTuple):
     llm: LLM
     model_name: str
+    provider: Optional[Any] = None

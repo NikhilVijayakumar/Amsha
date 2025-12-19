@@ -6,6 +6,7 @@ from amsha.llm_factory.domain.llm_type import LLMType
 from amsha.llm_factory.domain.state import LLMBuildResult
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.utils.llm_utils import LLMUtils
+from amsha.llm_factory.infrastructure.crewai_provider import CrewAILLMProvider
 
 
 class LLMBuilder:
@@ -41,11 +42,13 @@ class LLMBuilder:
                 max_completion_tokens=params.max_completion_tokens,
                 presence_penalty=params.presence_penalty,
                 frequency_penalty=params.frequency_penalty,
-                stop=params.stop,
-                stream=True
             )
-            # Return both the LLM and its name in a structured way
-        return LLMBuildResult(llm=llm_instance, model_name=clean_model_name)
+        
+        # Create provider
+        provider = CrewAILLMProvider(llm_instance)
+        
+        # Return result with backward compatible llm and new provider
+        return LLMBuildResult(llm=llm_instance, model_name=clean_model_name, provider=provider)
 
     def build_creative(self, model_key: str = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()

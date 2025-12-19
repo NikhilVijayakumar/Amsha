@@ -1,0 +1,24 @@
+llm:
+  creative:
+    default: "lm_studio_model"
+    models:
+      gemini_model:
+        model: "gemini/gemini-pro"
+        # Environment variable should be GOOGLE_API_KEY
+        # If not present in env, user will need to set it.
+        api_key: "${GOOGLE_API_KEY}" 
+
+      lm_studio_model:
+        model: "lm_studio/openai/gpt-oss-20b" # 'openai/' prefix tells CrewAI to use OpenAI client compatibility
+        base_url: "http://localhost:1234/v1"
+        api_key: "lm-studio" # Not used but typically required
+
+      openrouter_model:
+        model: "openrouter/openai/gpt-3.5-turbo" 
+        # Environment variable should be OPENROUTER_API_KEY
+        api_key: "${OPENROUTER_API_KEY}"
+
+llm_parameters:
+  creative:
+    temperature: 0.7
+    max_completion_tokens: 1024

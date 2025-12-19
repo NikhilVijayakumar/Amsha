@@ -3,7 +3,6 @@ from typing import Optional, Dict, Any
 from amsha.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 from amsha.crew_forge.domain.models.crew_config_data import CrewConfigResponse
 from amsha.crew_forge.domain.models.crew_data import CrewData
-from amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
 from amsha.crew_forge.service.atomic_db_builder import AtomicDbBuilderService
 from amsha.utils.yaml_utils import YamlUtils
 
@@ -75,6 +74,7 @@ class AtomicCrewDBManager:
                 print(f"knowledge_sources:{path}")
                 agent_knowledge_paths.add(path)
             if agent_knowledge_paths:
+                from amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
                 agent_text_source = AmshaCrewDoclingSource(
                     file_paths=list(agent_knowledge_paths)
                 )
@@ -106,6 +106,7 @@ class AtomicCrewDBManager:
             print(f"knowledge_sources:{path}")
             crew_knowledge_paths.add(path)
         if crew_knowledge_paths:
+            from amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
             crew_text_source = AmshaCrewDoclingSource(
                 file_paths=list(crew_knowledge_paths)
             )
