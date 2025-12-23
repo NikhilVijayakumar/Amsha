@@ -12,12 +12,7 @@ class ILLMProvider(Protocol):
         """Returns the name of the model being used."""
         ...
         
-    def generate_text(self, prompt: str, **kwargs) -> str:
-        """
-        Generates text based on the prompt.
-        """
-        ...
-        
+
     def get_raw_llm(self) -> Any:
         """
         Returns the underlying LLM object for backward compatibility 

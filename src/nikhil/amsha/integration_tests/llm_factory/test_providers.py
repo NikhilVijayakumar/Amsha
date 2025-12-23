@@ -76,11 +76,11 @@ def main():
 
 
             
-            print(f"   ✅ Built: {build_result.model_name}")
+            print(f"   ✅ Built: {build_result.provider.model_name}")
             
             # Simple Connectivity Test
             print("   📡 Sending request: 'Hello, respond with TEST_OK'")
-            response = build_result.llm.call(messages=[{"role": "user", "content": "Hello, respond with TEST_OK only."}])
+            response = build_result.provider.get_raw_llm().call(messages=[{"role": "user", "content": "Hello, respond with TEST_OK only."}])
             print(f"   Testing: {response}")
             
             if response:

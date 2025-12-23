@@ -1,11 +1,9 @@
 llm:
   creative:
-    default: "lm_studio_model"
+    default: "gemini_model"
     models:
       gemini_model:
-        model: "gemini/gemini-pro"
-        # Environment variable should be GOOGLE_API_KEY
-        # If not present in env, user will need to set it.
+        model: "gemini/gemini-2.0-flash"
         api_key: "${GOOGLE_API_KEY}" 
 
       lm_studio_model:
