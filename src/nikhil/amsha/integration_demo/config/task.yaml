@@ -1,4 +1,0 @@
-task:
-  name: "hello_task"
-  description: "Say hello to the user: {topic}"
-  expected_output: "A warm greeting string."

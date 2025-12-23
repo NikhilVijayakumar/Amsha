@@ -69,9 +69,12 @@ def main():
         }
         
         try:
+
             settings = LLMSettings(**test_settings_dict)
             builder = LLMBuilder(settings)
             build_result = builder.build(LLMType.CREATIVE)
+
+
             
             print(f"   ✅ Built: {build_result.model_name}")
             
@@ -86,7 +89,7 @@ def main():
             else:
                 print("   ❌ Empty response")
                 results[model_key] = "FAILED (Empty Response)"
-                
+
         except Exception as e:
             print(f"   ❌ Error: {e}")
             results[model_key] = f"FAILED ({str(e)})"
@@ -94,6 +97,8 @@ def main():
     print("\n--- Test Summary ---")
     for key, result in results.items():
         print(f"{key}: {result}")
+
+
 
 if __name__ == "__main__":
     main()

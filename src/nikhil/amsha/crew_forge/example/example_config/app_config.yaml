@@ -1,7 +1,0 @@
-backend: "mongo"
-domain_root_path: "E:/Python/Amsha/src/nikhil/amsha/toolkit/crew_forge/example/example_config/crew_configs"
-output_dir_path: "E:/Python/Amsha/.Amsha/output/intermediate"
-
-mongo:
-  uri: "mongodb://user:pass@localhost:27017"
-  db_name: "crew_forge_example_db"

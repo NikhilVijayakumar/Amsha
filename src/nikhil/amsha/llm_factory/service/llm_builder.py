@@ -1,12 +1,12 @@
 # src/nikhil/amsha/llm_factory/service/llm_builder.py
-
+import requests
 from crewai import LLM
 
 from amsha.llm_factory.domain.llm_type import LLMType
 from amsha.llm_factory.domain.state import LLMBuildResult
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.utils.llm_utils import LLMUtils
-from amsha.llm_factory.infrastructure.crewai_provider import CrewAILLMProvider
+
 
 
 class LLMBuilder:
@@ -44,11 +44,8 @@ class LLMBuilder:
                 frequency_penalty=params.frequency_penalty,
             )
         
-        # Create provider
-        provider = CrewAILLMProvider(llm_instance)
-        
         # Return result with backward compatible llm and new provider
-        return LLMBuildResult(llm=llm_instance, model_name=clean_model_name, provider=provider)
+        return LLMBuildResult(llm=llm_instance, model_name=clean_model_name)
 
     def build_creative(self, model_key: str = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()
@@ -57,3 +54,5 @@ class LLMBuilder:
     def build_evaluation(self, model_key: str = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()
         return self.build(LLMType.EVALUATION, model_key)
+
+

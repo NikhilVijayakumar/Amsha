@@ -1,8 +1,0 @@
-generate_feature_crew:
-  agent: senior_python_engineer
-  description: >
-    Write the code for the FEATURE CREW (The Doer).
-    Refer to 'creative_standard.md' in your knowledge base.
-    Use the `AmshaCodeWriterTool` to save the files to the paths defined in the architecture.
-  expected_output: >
-    Confirmation that files were written.

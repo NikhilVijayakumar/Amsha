@@ -64,7 +64,7 @@ def main():
     
     # 3. Inject Custom Tool via MonkeyPatching
     # We patch AtomicYamlBuilderService.add_agent to inject our tool
-    from unittest.mock import patch
+
     from amsha.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
     
     original_add_agent = AtomicYamlBuilderService.add_agent
@@ -110,7 +110,6 @@ def main():
         traceback.print_exc()
     finally:
         runtime.shutdown()
-        # Restore original if needed (good practice, though script ends)
         AtomicYamlBuilderService.add_agent = original_add_agent
 
 if __name__ == "__main__":
