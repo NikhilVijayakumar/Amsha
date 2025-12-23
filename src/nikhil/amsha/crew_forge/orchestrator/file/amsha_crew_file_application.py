@@ -49,8 +49,9 @@ class AmshaCrewFileApplication:
             build_llm = llm_builder.build_creative()
         else:
             build_llm = llm_builder.build_evaluation()
-        self.model_name = build_llm.model_name
-        return build_llm.llm
+        provider = build_llm.provider
+        self.model_name = provider.model_name
+        return provider.get_raw_llm()
 
 
     def _prepare_multiple_inputs_for(self, crew_name: str) -> dict:
