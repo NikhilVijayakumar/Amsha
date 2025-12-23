@@ -6,11 +6,12 @@ depend on. This Protocol enables structural typing and duck typing for
 different application implementations (File-based, DB-based, etc.).
 """
 
-from typing import Protocol, Dict, Any, Optional, Union
+from typing import Protocol, Dict, Any, Optional, Union, runtime_checkable
 from amsha.execution_runtime.domain.execution_handle import ExecutionHandle
 from amsha.execution_runtime.domain.execution_mode import ExecutionMode
 
 
+@runtime_checkable
 class CrewApplication(Protocol):
     """
     High-level interface for crew application management.

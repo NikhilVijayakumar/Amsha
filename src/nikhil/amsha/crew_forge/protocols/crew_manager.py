@@ -6,10 +6,11 @@ This Protocol enables different crew manager implementations to be used
 interchangeably through structural typing.
 """
 
-from typing import Protocol, Optional
+from typing import Protocol, Optional, runtime_checkable
 from crewai import Crew
 
 
+@runtime_checkable
 class CrewManager(Protocol):
     """
     Interface for crew building and configuration.

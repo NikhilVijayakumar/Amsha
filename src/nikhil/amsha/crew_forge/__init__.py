@@ -56,8 +56,10 @@ class MyCustomApplication:
 ```
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from amsha.llm_factory.domain.model.llm_type import LLMType
+from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
+from amsha.execution_state.service.state_manager import StateManager
 
 # Protocol interfaces - primary public API
 from .protocols import (
@@ -85,7 +87,12 @@ from .exceptions import (
 )
 
 # Factory functions for creating Protocol implementations
-def create_file_crew_application(config_paths: Dict[str, str], llm_type: LLMType) -> FileCrewApplication:
+def create_file_crew_application(
+    config_paths: Dict[str, str], 
+    llm_type: LLMType,
+    runtime: Optional[RuntimeEngine] = None,
+    state_manager: Optional[StateManager] = None
+) -> FileCrewApplication:
     """
     Factory function for creating file-based crew applications.
     
@@ -119,10 +126,15 @@ def create_file_crew_application(config_paths: Dict[str, str], llm_type: LLMType
         result = app.run_crew("my_crew", {"input": "data"})
         ```
     """
-    return FileCrewApplication(config_paths, llm_type)
+    return FileCrewApplication(config_paths, llm_type, runtime, state_manager)
 
 
-def create_db_crew_application(config_paths: Dict[str, str], llm_type: LLMType) -> DbCrewApplication:
+def create_db_crew_application(
+    config_paths: Dict[str, str], 
+    llm_type: LLMType,
+    runtime: Optional[RuntimeEngine] = None,
+    state_manager: Optional[StateManager] = None
+) -> DbCrewApplication:
     """
     Factory function for creating database-based crew applications.
     
@@ -156,10 +168,16 @@ def create_db_crew_application(config_paths: Dict[str, str], llm_type: LLMType) 
         result = app.run_crew("my_crew", {"input": "data"})
         ```
     """
-    return DbCrewApplication(config_paths, llm_type)
+    return DbCrewApplication(config_paths, llm_type, runtime, state_manager)
 
 
-def create_crew_application(backend: str, config_paths: Dict[str, str], llm_type: LLMType) -> CrewApplication:
+def create_crew_application(
+    backend: str, 
+    config_paths: Dict[str, str], 
+    llm_type: LLMType,
+    runtime: Optional[RuntimeEngine] = None,
+    state_manager: Optional[StateManager] = None
+) -> CrewApplication:
     """
     Generic factory function for creating crew applications with different backends.
     
@@ -196,9 +214,9 @@ def create_crew_application(backend: str, config_paths: Dict[str, str], llm_type
         ```
     """
     if backend == "file":
-        return create_file_crew_application(config_paths, llm_type)
+        return create_file_crew_application(config_paths, llm_type, runtime, state_manager)
     elif backend == "db":
-        return create_db_crew_application(config_paths, llm_type)
+        return create_db_crew_application(config_paths, llm_type, runtime, state_manager)
     else:
         raise ValueError(f"Unsupported backend type: {backend}. Supported types: 'file', 'db'")
 

@@ -15,7 +15,10 @@ from amsha.crew_forge.exceptions import (
 from amsha.utils.yaml_utils import YamlUtils
 
 
-class AtomicCrewDBManager:
+from amsha.crew_forge.protocols.crew_manager import CrewManager
+
+
+class AtomicCrewDBManager(CrewManager):
     """
     Database-based implementation of CrewManager Protocol.
     

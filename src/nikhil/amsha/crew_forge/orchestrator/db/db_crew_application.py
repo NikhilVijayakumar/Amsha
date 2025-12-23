@@ -15,6 +15,8 @@ from amsha.crew_forge.service.shared_llm_initialization_service import SharedLLM
 from amsha.crew_forge.service.shared_json_file_service import SharedJSONFileService
 from amsha.execution_runtime.domain.execution_handle import ExecutionHandle
 from amsha.execution_runtime.domain.execution_mode import ExecutionMode
+from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
+from amsha.execution_state.service.state_manager import StateManager
 from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.utils.yaml_utils import YamlUtils
 from amsha.crew_forge.exceptions import (
@@ -25,7 +27,7 @@ from amsha.crew_forge.exceptions import (
 )
 
 
-class DbCrewApplication:
+class DbCrewApplication(CrewApplication):
     """
     Database-based implementation of CrewApplication Protocol.
     
@@ -35,7 +37,13 @@ class DbCrewApplication:
     while conforming to the CrewApplication Protocol interface.
     """
     
-    def __init__(self, config_paths: Dict[str, str], llm_type: LLMType):
+    def __init__(
+        self, 
+        config_paths: Dict[str, str], 
+        llm_type: LLMType,
+        runtime: Optional[RuntimeEngine] = None,
+        state_manager: Optional[StateManager] = None
+    ):
         """
         Initialize the database-based crew application.
         
@@ -86,8 +94,12 @@ class DbCrewApplication:
                 job_config=self.job_config
             )
             
-            # Create orchestrator with the manager
-            self.orchestrator = DbCrewOrchestrator(manager)
+            # Create orchestrator with the manager and injected dependencies
+            self.orchestrator = DbCrewOrchestrator(
+                manager=manager,
+                runtime=runtime,
+                state_manager=state_manager
+            )
             
             # Initialize shared services
             self._input_service = SharedInputPreparationService()

@@ -5,7 +5,8 @@ Tests that the new Protocol-based applications can be imported and used
 through the public API.
 """
 import pytest
-from unittest.mock import Mock, patch
+import unittest
+from unittest.mock import Mock, patch, MagicMock
 
 def test_protocol_applications_can_be_imported():
     """Test that Protocol-based applications can be imported from the public API."""
@@ -90,3 +91,83 @@ def test_exception_hierarchy_available():
     assert issubclass(CrewExecutionException, CrewForgeException)
     assert issubclass(CrewManagerException, CrewForgeException)
     assert issubclass(InputPreparationException, CrewForgeException)
+
+def test_explicit_inheritance():
+    """Test that implementations explicitly inherit from Protocols."""
+    from amsha.crew_forge.protocols.crew_application import CrewApplication
+    from amsha.crew_forge.protocols.crew_manager import CrewManager
+    from amsha.crew_forge.orchestrator.file.file_crew_application import FileCrewApplication
+    from amsha.crew_forge.orchestrator.db.db_crew_application import DbCrewApplication
+    from amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
+    from amsha.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
+    
+    # Check Application inheritance
+    assert FileCrewApplication in FileCrewApplication.__mro__
+    assert CrewApplication in FileCrewApplication.__mro__
+    assert DbCrewApplication in DbCrewApplication.__mro__
+    assert CrewApplication in DbCrewApplication.__mro__
+    
+    # Check Manager inheritance
+    assert AtomicCrewFileManager in AtomicCrewFileManager.__mro__
+    assert CrewManager in AtomicCrewFileManager.__mro__
+    assert AtomicCrewDBManager in AtomicCrewDBManager.__mro__
+    assert CrewManager in AtomicCrewDBManager.__mro__
+
+def test_dependency_injection_support():
+    """Test that factory functions and classes support dependency injection."""
+    from amsha.crew_forge import create_file_crew_application, FileCrewApplication
+    from amsha.llm_factory.domain.model.llm_type import LLMType
+    from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
+    from amsha.execution_state.service.state_manager import StateManager
+    from unittest.mock import MagicMock
+    
+    # Mock dependencies
+    mock_runtime = MagicMock(spec=RuntimeEngine)
+    mock_state_manager = MagicMock(spec=StateManager)
+    
+    # Mock config paths
+    config_paths = {
+        "job": "mock_job.yaml",
+        "app": "mock_app.yaml",
+        "llm": "mock_llm.yaml"
+    }
+    
+    # We need to mock the internals to avoid actual file loading during init
+    # Patch where it is USED, not where it is defined
+    with patch('amsha.utils.yaml_utils.YamlUtils.yaml_safe_load'), \
+         patch('amsha.crew_forge.service.shared_llm_initialization_service.SharedLLMInitializationService.initialize_llm') as mock_llm_init, \
+         patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.AtomicCrewFileManager'), \
+         patch('amsha.crew_forge.orchestrator.file.file_crew_application.FileCrewOrchestrator') as mock_orchestrator_cls:
+        
+        mock_llm_init.return_value = (MagicMock(), "test_model")
+        
+        # Test direct instantiation with DI
+        app = FileCrewApplication(
+            config_paths, 
+            LLMType.CREATIVE,
+            runtime=mock_runtime,
+            state_manager=mock_state_manager
+        )
+        
+        # Verify dependencies were passed to orchestrator
+        print(f"DEBUG: Call args: {mock_orchestrator_cls.call_args}")
+        mock_orchestrator_cls.assert_called_with(
+            manager=unittest.mock.ANY,
+            runtime=mock_runtime,
+            state_manager=mock_state_manager
+        )
+        
+        # Test factory function with DI
+        create_file_crew_application(
+            config_paths,
+            LLMType.CREATIVE,
+            runtime=mock_runtime,
+            state_manager=mock_state_manager
+        )
+        
+        # Verify dependencies were passed again
+        mock_orchestrator_cls.assert_called_with(
+            manager=unittest.mock.ANY,
+            runtime=mock_runtime,
+            state_manager=mock_state_manager
+        )
