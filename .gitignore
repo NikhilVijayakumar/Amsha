@@ -61,7 +61,14 @@ Thumbs.db
 /src/nikhil/amsha/crew_forge/example/knowledge/latest_kickoff_task_outputs.db
 /config/llm_config.yaml
 /.ai_audit.env
+/.env
 /.Amsha/
 /config/job_config.yaml
 /src/nikhil/amsha/crew_gen/application/config/app_config.yaml
 /src/nikhil/amsha/crew_gen/application/config/llm_config.yaml
+/.dvc/tmp/btime
+/.dvc/tmp/lock
+/.dvc/tmp/rwlock
+/.dvc/tmp/rwlock.lock
+/.dvc/config.local
+/.vscode/settings.json
