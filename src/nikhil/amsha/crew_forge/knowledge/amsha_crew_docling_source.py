@@ -34,11 +34,11 @@ class AmshaCrewDoclingSource(BaseKnowledgeSource):
 
     _logger: Logger = Logger(verbose=True)
 
-    file_path: Optional[List[Union[Path, str]]]
+    file_path: Optional[List[Union[Path, str]]] = Field(default=None)
     file_paths: List[Union[Path, str]]
-    chunks: List[str]
-    safe_file_paths: List[Union[Path, str]]
-    content: List["DoclingDocument"]
+    chunks: List[str] = Field(default_factory=list)
+    safe_file_paths: List[Union[Path, str]] = Field(default_factory=list)
+    content: List["DoclingDocument"] = Field(default_factory=list)
     document_converter: "DocumentConverter" = Field(
         default_factory=lambda: DocumentConverter(
             allowed_formats=[

@@ -22,12 +22,12 @@ class ExecutionState(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     modified_at: datetime = Field(default_factory=datetime.utcnow)
     
-    inputs: Dict[str, Any]
-    outputs: Dict[str, Any]
-    metadata: Dict[str, Any]
+    inputs: Dict[str, Any] = Field(default_factory=dict)
+    outputs: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
     
     # Audit history of state changes
-    history: List[StateSnapshot]
+    history: List[StateSnapshot] = Field(default_factory=list)
     
     def update_status(self, new_status: ExecutionStatus, metadata: Optional[Dict[str, Any]] = None):
         """

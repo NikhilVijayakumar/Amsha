@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-from amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
-from amsha.crew_forge.orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
-from amsha.llm_factory.dependency.llm_container import LLMContainer
-from amsha.llm_factory.domain.llm_type import LLMType
-from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
-from amsha.utils.yaml_utils import YamlUtils
+from ...orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
+from ...orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
+from ....llm_factory.dependency.llm_container import LLMContainer
+from ....llm_factory.domain.model.llm_type import LLMType
+from ....output_process.optimization.json_cleaner_utils import JsonCleanerUtils
+from ....utils.yaml_utils import YamlUtils
 
 
 class AmshaCrewFileApplication:

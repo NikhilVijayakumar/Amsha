@@ -1,10 +1,10 @@
 llm:
   creative:
-    default: lm_studio_model
+    default: gemini_model
     models:
       gemini_model:
-        api_key: MISSING_GOOGLE_API_KEY
-        model: gemini/gemini-pro
+        api_key: AIzaSyDwuy24Nn7B-vmmO-AVQBofQzXpiogQAc8
+        model: gemini/gemini-2.5-flash
       lm_studio_model:
         api_key: lm-studio
         base_url: http://localhost:1234/v1

@@ -4,7 +4,7 @@ import yaml
 from amsha.utils.yaml_utils import YamlUtils
 from amsha.llm_factory.service.llm_builder import LLMBuilder
 from amsha.llm_factory.settings.llm_settings import LLMSettings
-from amsha.llm_factory.domain.llm_type import LLMType
+from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.execution_runtime.domain.execution_mode import ExecutionMode
 from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
 from amsha.execution_state.service.state_manager import StateManager
@@ -46,7 +46,7 @@ def main():
     
     try:
         build_result = llm_builder.build(LLMType.CREATIVE)
-        llm = build_result.llm
+        llm = build_result.provider.get_raw_llm()
     except Exception as e:
         print(f"   ❌ LLM Build Failed: {e}")
         return

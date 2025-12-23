@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import MagicMock
 from amsha.llm_factory.service.llm_builder import LLMBuilder
 from amsha.llm_factory.settings.llm_settings import LLMSettings
-from amsha.llm_factory.domain.llm_type import LLMType
-from amsha.llm_factory.infrastructure.crewai_provider import CrewAILLMProvider
+from amsha.llm_factory.domain.model.llm_type import LLMType
+from amsha.llm_factory.adapters.crewai_adapter import CrewAIProviderAdapter
 
 class TestLLMRefactoring(unittest.TestCase):
     def setUp(self):
@@ -29,17 +29,15 @@ class TestLLMRefactoring(unittest.TestCase):
     def test_build_returns_provider(self):
         result = self.builder.build(LLMType.CREATIVE)
         
-        # Check backward compatibility
-        self.assertIsNotNone(result.llm)
-        self.assertEqual(result.model_name, "gpt-4")
-        
         # Check new provider presence
         self.assertIsNotNone(result.provider)
-        self.assertIsInstance(result.provider, CrewAILLMProvider)
+        self.assertIsInstance(result.provider, CrewAIProviderAdapter)
         
         # Check provider wraps correct LLM
-        self.assertEqual(result.provider.get_raw_llm(), result.llm)
         self.assertEqual(result.provider.model_name, "gpt-4")
+        
+        # Check backward compatibility through provider
+        self.assertIsNotNone(result.provider.get_raw_llm())
 
 if __name__ == '__main__':
     unittest.main()

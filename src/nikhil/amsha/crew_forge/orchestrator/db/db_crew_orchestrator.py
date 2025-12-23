@@ -1,103 +1,92 @@
-# orchestrator.py (Refactored)
+"""
+Database-based crew orchestrator implementation using BaseCrewOrchestrator.
+
+This module provides a Protocol-compliant orchestrator for database-based
+crew execution that leverages shared orchestration logic.
+"""
 from typing import Dict, Any, Optional, Union
 
-from amsha.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
+from amsha.crew_forge.service.base_crew_orchestrator import BaseCrewOrchestrator
+from amsha.crew_forge.protocols.crew_manager import CrewManager
 from amsha.crew_monitor.service.crew_performance_monitor import CrewPerformanceMonitor
 from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
 from amsha.execution_runtime.domain.execution_mode import ExecutionMode
 from amsha.execution_runtime.domain.execution_handle import ExecutionHandle
 from amsha.execution_state.service.state_manager import StateManager
-from amsha.execution_state.domain.enums import ExecutionStatus
 
 
-class DbCrewOrchestrator:
+class DbCrewOrchestrator(BaseCrewOrchestrator):
     """
-    Orchestrates the execution of a SINGLE atomic crew. It receives a pre-built
-    manager and is completely decoupled from configuration files.
+    Database-based crew orchestrator implementation.
+    
+    This class implements the CrewOrchestrator Protocol using the shared
+    BaseCrewOrchestrator logic. It provides database-based crew execution
+    with consistent execution state management and performance monitoring.
     """
-    def __init__(self, manager: AtomicCrewDBManager, runtime: Optional[RuntimeEngine] = None, state_manager: Optional[StateManager] = None):
-        """Initializes the orchestrator with an injected manager, runtime, and state manager."""
-        print("--- [Orchestrator] Initializing pure runner ---")
-        self.manager = manager
-        self.last_monitor: Optional[CrewPerformanceMonitor] = None
-        self.runtime = runtime or RuntimeEngine()
-        self.state_manager = state_manager or StateManager()
-
-    def run_crew(self, crew_name: str, inputs: Dict[str, Any], filename_suffix:Optional[str]=None, mode: ExecutionMode = ExecutionMode.INTERACTIVE) -> Union[Any, ExecutionHandle]:
+    
+    def __init__(
+        self, 
+        manager: CrewManager, 
+        runtime: Optional[RuntimeEngine] = None,
+        state_manager: Optional[StateManager] = None
+    ):
         """
-        Builds and runs the specified atomic crew using its manager.
-        Supports both valid Interactive and Background execution modes.
+        Initialize the database-based orchestrator.
+        
+        Args:
+            manager: CrewManager Protocol implementation for building crews
+            runtime: Optional RuntimeEngine for execution management
+            state_manager: Optional StateManager for execution state tracking
         """
-        print(f"\n[Orchestrator] Request received to run crew: '{crew_name}'")
+        super().__init__(manager, runtime, state_manager)
+    
+    def run_crew(
+        self,
+        crew_name: str,
+        inputs: Dict[str, Any],
+        filename_suffix: Optional[str] = None,
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE
+    ) -> Union[Any, ExecutionHandle]:
+        """
+        Execute a crew with the specified parameters.
         
-        # 1. Create Execution State
-        state = self.state_manager.create_execution(inputs=inputs)
-        print(f"[Orchestrator] Created Execution State ID: {state.execution_id}")
-        self.state_manager.update_status(state.execution_id, ExecutionStatus.RUNNING, metadata={"crew_name": crew_name, "mode": mode.value})
+        Uses the shared BaseCrewOrchestrator logic for consistent execution
+        across all orchestrator implementations.
         
-        try:
-            crew_to_run = self.manager.build_atomic_crew(crew_name,filename_suffix)
-        except Exception as e:
-            self.state_manager.update_status(state.execution_id, ExecutionStatus.FAILED, metadata={"error": str(e)})
-            raise e
-
-        def _execute_kickoff():
-            print(f"[Orchestrator] Kicking off crew with inputs: {inputs}")
+        Args:
+            crew_name: Name of the crew to execute
+            inputs: Dictionary of input parameters for the crew
+            filename_suffix: Optional suffix for output filenames
+            mode: Execution mode (INTERACTIVE or BACKGROUND)
             
-            # Initialize monitor with model name from manager
-            self.last_monitor = CrewPerformanceMonitor(model_name=self.manager.model_name)
-            self.last_monitor.start_monitoring()
+        Returns:
+            For INTERACTIVE mode: The crew execution result
+            For BACKGROUND mode: ExecutionHandle for monitoring
             
-            try:
-                result = crew_to_run.kickoff(inputs=inputs)
-                
-                self.last_monitor.stop_monitoring()
-                self.last_monitor.log_usage(result)
-                summary = self.last_monitor.get_summary()
-                metrics = self.last_monitor.get_metrics()
-                print(summary)
-                print(f"[Orchestrator] Crew '{crew_name}' finished.")
-                
-                # Update State on Success
-                self.state_manager.update_status(state.execution_id, ExecutionStatus.COMPLETED, metadata={"metrics": metrics})
-                
-                # Try to serialize result if possible, usually result is string or dict
-                # Note: If result is complex object, this might fail serialization in real DB, 
-                # but in-memory is fine. Pydantic might complain.
-                # safely setting output if simple
-                if isinstance(result, (str, dict, list, int, float, bool)):
-                     # We need to re-fetch state to use method or use manager
-                     # State object 'state' is a snapshot.
-                     # We use manager to update.
-                     # StateManager doesn't expose set_output directly on manager?
-                     # We need to fetch, update, save.
-                     current_state = self.state_manager.get_execution(state.execution_id)
-                     if current_state:
-                         current_state.set_output("result", result)
-                         self.state_manager.repository.save(current_state)
-                
-                return result
-            except Exception as e:
-                print(f"[Orchestrator] Execution Failed: {e}")
-                self.state_manager.update_status(state.execution_id, ExecutionStatus.FAILED, metadata={"error": str(e)})
-                raise e
-
-        handle = self.runtime.submit(_execute_kickoff, mode=mode)
+        Raises:
+            CrewExecutionException: If crew execution fails
+            CrewManagerException: If crew building fails
+        """
+        return super().run_crew(crew_name, inputs, filename_suffix, mode)
+    
+    def get_last_output_file(self) -> Optional[str]:
+        """
+        Get the last output file path.
         
-        # Attach execution_id to handle if possible (monkey patch for now just for correlation)
-        handle.execution_state_id = state.execution_id
-        
-        if mode == ExecutionMode.INTERACTIVE:
-            return handle.result()
-        return handle
-
-
-    def get_last_output_file(self)->Optional[str]:
-        return self.manager.output_file
-
+        Returns:
+            Path to the last generated output file, or None if no file exists
+        """
+        return super().get_last_output_file()
+    
     def get_last_performance_stats(self) -> Optional[CrewPerformanceMonitor]:
-        """Returns the performance monitor from the last run."""
-        return self.last_monitor
+        """
+        Get performance statistics from the last execution.
+        
+        Returns:
+            CrewPerformanceMonitor instance with metrics from the last run,
+            or None if no execution has occurred
+        """
+        return super().get_last_performance_stats()
 
 
 

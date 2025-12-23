@@ -3,7 +3,7 @@ llm:
     default: "gemini_model"
     models:
       gemini_model:
-        model: "gemini/gemini-2.0-flash"
+        model: "gemini/gemini-2.5-flash"
         api_key: "${GOOGLE_API_KEY}" 
 
       lm_studio_model:

@@ -1,9 +1,9 @@
 import os
-import sys
-import yaml
 import re
 
-from amsha.llm_factory.domain.llm_type import LLMType
+import yaml
+
+from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.llm_factory.service.llm_builder import LLMBuilder
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 

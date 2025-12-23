@@ -7,9 +7,9 @@ crews:
     steps:
       - task_key: "calculator_task"
         agent_key: "calculator_agent"
-        task_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/task_tools.yaml"
+        task_file: "/home/dell/PycharmProjects/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/task_tools.yaml"
         # Reusing basic agent config but we will inject tools at runtime
-        agent_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/agent_basic.yaml" 
+        agent_file: "/home/dell/PycharmProjects/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/agent_basic.yaml" 
         knowledge_sources: []
 
 knowledge_sources: []

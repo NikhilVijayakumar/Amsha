@@ -1,5 +1,5 @@
 # src/nikhil/amsha/llm_factory/service/llm_builder.py
-from amsha.llm_factory.domain.llm_type import LLMType
+from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.llm_factory.domain.model.llm_build_result import LLMBuildResult
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.utils.llm_utils import LLMUtils
