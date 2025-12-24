@@ -45,10 +45,12 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
         crew_name: str,
         inputs: Dict[str, Any],
         filename_suffix: Optional[str] = None,
-        mode: ExecutionMode = ExecutionMode.INTERACTIVE
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE,
+        max_retries: int = 0,
+        output_validator: Optional[Union[callable, Any]] = None
     ) -> Union[Any, ExecutionHandle]:
         """
-        Execute a crew with the specified parameters.
+        Execute a crew with the specified parameters, optionally retrying on validation failure.
         
         Uses the shared BaseCrewOrchestrator logic for consistent execution
         across all orchestrator implementations.
@@ -58,6 +60,8 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
             inputs: Dictionary of input parameters for the crew
             filename_suffix: Optional suffix for output filenames
             mode: Execution mode (INTERACTIVE or BACKGROUND)
+            max_retries: Maximum number of retries if validation fails (default: 0)
+            output_validator: Callable that takes a file path and returns bool (True=Success)
             
         Returns:
             For INTERACTIVE mode: The crew execution result
@@ -67,7 +71,54 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
             CrewExecutionException: If crew execution fails
             CrewManagerException: If crew building fails
         """
-        return super().run_crew(crew_name, inputs, filename_suffix, mode)
+        if mode == ExecutionMode.BACKGROUND and (max_retries > 0 or output_validator):
+             # For now, we only support retries in INTERACTIVE mode because BACKGROUND 
+             # requires more complex state management/callbacks.
+             pass 
+
+        attempt = 0
+        success = False
+        last_result = None
+        
+        # Determine effective loop count: 1 initial attempt + max_retries
+        total_attempts = 1 + max_retries
+        
+        while attempt < total_attempts and not success:
+            current_suffix = filename_suffix
+            if attempt > 0:
+                # Append retry count to suffix so output files dont overwrite effectively
+                # or just for clarity. 
+                base_suffix = filename_suffix or crew_name
+                current_suffix = f"{base_suffix}_retry_{attempt}"
+            
+            # Execute via base class
+            last_result = super().run_crew(crew_name, inputs, current_suffix, mode)
+            
+            # If no validator, success is automatic (unless exception raised, which super handles)
+            if not output_validator:
+                success = True
+                continue
+
+            # Perform Validation
+            # Only strictly applicable in INTERACTIVE mode where we wait for result
+            if mode == ExecutionMode.INTERACTIVE:
+                last_file = self.get_last_output_file()
+                if last_file:
+                    print(f"[FileCrewOrchestrator] Validating output: {last_file}")
+                    if output_validator(last_file):
+                        print("[FileCrewOrchestrator] Validation PASSED.")
+                        success = True
+                    else:
+                        print(f"[FileCrewOrchestrator] Validation FAILED (Attempt {attempt+1}/{total_attempts})")
+                        attempt += 1
+                else:
+                    print(f"[FileCrewOrchestrator] No output file found to validate. (Attempt {attempt+1}/{total_attempts})")
+                    attempt += 1
+            else:
+                 # Background mode validation logic would go here
+                 success = True
+
+        return last_result
     
     def get_last_output_file(self) -> Optional[str]:
         """
