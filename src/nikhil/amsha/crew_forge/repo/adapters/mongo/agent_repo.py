@@ -67,4 +67,6 @@ class AgentRepository(MongoRepository, IAgentRepository):
     def get_agents_by_usecase(self, usecase: str) -> list[AgentResponse]:
         """Retrieves all agents for a given usecase."""
         agent_data_list = self.find_many({"usecase": usecase})
+        for agent_data in agent_data_list:
+            agent_data["_id"] = str(agent_data["_id"])
         return [AgentResponse(**agent_data) for agent_data in agent_data_list]

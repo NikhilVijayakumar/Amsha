@@ -1,0 +1,3 @@
+output_dir_path: "e:/Python/Amsha/output/example"
+log_level: "INFO"
+openai_model_name: "gpt-4" # Placeholder
