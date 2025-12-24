@@ -1,0 +1,11 @@
+crew_name: "KnowledgeStoryCrew"
+crews:
+  "Step2_Write":
+    steps:
+      - task_key: "write_story"
+        agent_key: "StoryTeller"
+        task_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/pipeline/task_write.yaml"
+        agent_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/pipeline/agent_writer.yaml"
+    input:
+      - key_name: "characters"
+        type: "file"

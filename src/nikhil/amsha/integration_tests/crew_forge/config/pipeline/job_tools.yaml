@@ -1,0 +1,10 @@
+crew_name: "ToolsPolishCrew"
+crews:
+  "Step3_Polish":
+    steps:
+      - task_key: "polish_story"
+        agent_key: "Editor"
+        task_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/pipeline/task_polish.yaml"
+        agent_file: "e:/Python/Amsha/src/nikhil/amsha/integration_tests/crew_forge/config/pipeline/agent_editor.yaml"
+        knowledge_sources: []
+    input: []

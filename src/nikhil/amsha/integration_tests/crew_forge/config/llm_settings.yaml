@@ -1,6 +1,6 @@
 llm:
   creative:
-    default: gemini_model
+    default: lm_studio_model
     models:
       gemini_model:
         api_key: AIzaSyDwuy24Nn7B-vmmO-AVQBofQzXpiogQAc8

@@ -1,0 +1,4 @@
+task:
+  name: "polish_story"
+  description: "Review the following story and improve its flow. Ensure it has a clear beginning, middle, and end. Add a 'Moral of the Story' section at the end. Story: '{rough_draft}'"
+  expected_output: "The polished story with a moral."

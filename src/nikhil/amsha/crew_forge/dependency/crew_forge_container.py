@@ -18,11 +18,6 @@ class CrewForgeContainer(containers.DeclarativeContainer):
 
     mongo_container = providers.Container(MongoRepoContainer, config=config)
 
-    # selected_container = providers.Selector(
-    #     config.backend,
-    #     mongo=mongo_container
-    # )
-
     agent_repo = mongo_container.provided.agent_repo
     task_repo = mongo_container.provided.task_repo
     crew_config_repo = mongo_container.provided.crew_config_repo
@@ -40,8 +35,6 @@ class CrewForgeContainer(containers.DeclarativeContainer):
         domain_root_path=config.domain_root_path,
     )
 
-
-
     crew_parser = providers.Singleton(CrewParser)
 
     config_sync_service = providers.Factory(
@@ -50,7 +43,7 @@ class CrewForgeContainer(containers.DeclarativeContainer):
     )
 
     crew_data = providers.Dependency(instance_of=CrewData)
-    crew_builder_service =providers.Factory(
+    crew_builder_service = providers.Factory(
         CrewBuilderService,
         data=crew_data,
     )
@@ -65,13 +58,10 @@ class CrewForgeContainer(containers.DeclarativeContainer):
     atomic_yaml_builder = providers.Factory(
         AtomicYamlBuilderService,
         parser=crew_parser,
-    data=providers.Factory(CrewData),  # Runtime args for CrewData
-        # agent_yaml_file and task_yaml_file are passed when you call the provider
+        data=providers.Factory(CrewData)
     )
 
     crew_blueprint_service = providers.Callable(
         lambda crew_repo: CrewBluePrintService(crew_repo=crew_repo()),
-        crew_repo=crew_config_repo,
+        crew_repo=crew_config_repo
     )
-
-

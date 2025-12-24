@@ -1,0 +1,4 @@
+task:
+  name: "write_story"
+  description: "Write a short bedtime story (approx 200 words) based on the concept: '{concept_title}'. Incorporate characters from the knowledge base: {characters}. Ensure the tone is calming."
+  expected_output: "A complete short story text."
