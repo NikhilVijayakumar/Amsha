@@ -39,7 +39,9 @@ class BaseCrewOrchestrator:
         self.manager = manager
         self.runtime = runtime or RuntimeEngine()
         self.state_manager = state_manager or StateManager()
+        self.state_manager = state_manager or StateManager()
         self.last_monitor: Optional[CrewPerformanceMonitor] = None
+        self.last_execution_id: Optional[str] = None
     
     def run_crew(
         self,
@@ -72,6 +74,7 @@ class BaseCrewOrchestrator:
         
         # Create execution state
         state = self.state_manager.create_execution(inputs=inputs)
+        self.last_execution_id = state.execution_id
         print(f"[BaseOrchestrator] Created Execution State ID: {state.execution_id}")
         context.add_context("execution_id", state.execution_id)
         
@@ -174,3 +177,7 @@ class BaseCrewOrchestrator:
     def get_last_performance_stats(self) -> Optional[CrewPerformanceMonitor]:
         """Get performance statistics from the last execution."""
         return self.last_monitor
+
+    def get_last_execution_id(self) -> Optional[str]:
+        """Get the execution ID of the last run."""
+        return self.last_execution_id

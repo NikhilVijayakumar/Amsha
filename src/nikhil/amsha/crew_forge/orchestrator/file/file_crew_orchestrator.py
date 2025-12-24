@@ -139,5 +139,14 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
         """
         return super().get_last_performance_stats()
 
+    def get_last_execution_id(self) -> Optional[str]:
+        """
+        Get the execution ID of the last run.
+        
+        Returns:
+            Execution ID string or None
+        """
+        return super().get_last_execution_id()
+
 
 

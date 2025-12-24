@@ -28,13 +28,21 @@ class AmshaCrewFileApplication:
         self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
         self.model_name:Optional[str] = None
         llm = self._initialize_llm()
+        
+        # Initialize StateManager (defaulting to InMemory for now)
+        from ....execution_state.service.state_manager import StateManager
+        self.state_manager = StateManager()
+        
         manager = AtomicCrewFileManager(
             llm=llm,
             model_name = self.model_name,
             app_config_path=config_paths["app"],
             job_config=self.job_config
         )
-        self.orchestrator = FileCrewOrchestrator(manager)
+        self.orchestrator = FileCrewOrchestrator(
+            manager=manager,
+            state_manager=self.state_manager
+        )
 
 
     def _initialize_llm(self) -> Any:
@@ -129,6 +137,92 @@ class AmshaCrewFileApplication:
 
         return final_inputs
 
+
+
+
+    def execute_crew_with_retry(
+        self, 
+        crew_name: str, 
+        inputs: Dict[str, Any], 
+        max_retries: int = 0,
+        filename_suffix: Optional[str] = None
+    ) -> Any:
+        """
+        Executes a crew with retry logic managed by the application.
+        
+        Args:
+            crew_name: Name of the crew to run.
+            inputs: Input dictionary for the crew.
+            max_retries: Maximum number of retries allowed.
+            filename_suffix: Optional suffix for output files.
+            
+        Returns:
+            The result of the successful execution, or the last result if all retries fail.
+        """
+        from ....execution_runtime.domain.execution_mode import ExecutionMode
+        from ....execution_state.domain.enums import ExecutionStatus
+
+        attempt = 0
+        success = False
+        last_result = None
+        
+        # Total attempts = initial run (1) + retries
+        while attempt <= max_retries:
+            attempt += 1
+            print(f"🔄 [App] Execution Attempt {attempt}/{max_retries + 1} for crew '{crew_name}'")
+            
+            current_suffix = filename_suffix
+            if attempt > 1:
+                base_suffix = filename_suffix or crew_name
+                current_suffix = f"{base_suffix}_retry_{attempt}"
+            
+            # Run the crew
+            last_result = self.orchestrator.run_crew(
+                crew_name=crew_name,
+                inputs=inputs,
+                filename_suffix=current_suffix,
+                mode=ExecutionMode.INTERACTIVE
+            )
+            
+            # Get output file for validation
+            output_file = self.orchestrator.get_last_output_file()
+            
+            # Validate
+            if self.validate_execution(last_result, output_file):
+                print(f"✅ [App] Validation Success for '{crew_name}'!")
+                success = True
+                break
+            
+            print(f"❌ [App] Validation Failed for '{crew_name}'.")
+            
+            # Update State on failure
+            execution_id = self.orchestrator.get_last_execution_id()
+            if execution_id:
+                print(f"   -> Updating state for execution {execution_id} to FAILED")
+                self.state_manager.update_status(
+                    execution_id, 
+                    ExecutionStatus.FAILED, 
+                    metadata={"reason": "Validation failed", "attempt": attempt}
+                )
+            
+            if attempt > max_retries:
+                print(f"🛑 [App] Max retries reached for '{crew_name}'. Giving up.")
+        
+        return last_result
+
+    def validate_execution(self, result: Any, output_file: Optional[str]) -> bool:
+        """
+        Hook for subclasses to implement custom validation logic.
+        
+        Args:
+            result: The result object returned by the crew execution.
+            output_file: The path to the output file generated, if any.
+            
+        Returns:
+            True if execution is considered successful, False otherwise.
+        """
+        # Default implementation assumes success if no exception was raised during execution
+        return True
 
 
     def clean_json(self, output_filename: str, max_llm_retries: int = 2) -> bool:
