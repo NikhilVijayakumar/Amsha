@@ -47,7 +47,8 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
         filename_suffix: Optional[str] = None,
         mode: ExecutionMode = ExecutionMode.INTERACTIVE,
         max_retries: int = 0,
-        output_validator: Optional[Union[callable, Any]] = None
+        output_validator: Optional[Union[callable, Any]] = None,
+            output_json: Any = None
     ) -> Union[Any, ExecutionHandle]:
         """
         Execute a crew with the specified parameters, optionally retrying on validation failure.
@@ -62,7 +63,7 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
             mode: Execution mode (INTERACTIVE or BACKGROUND)
             max_retries: Maximum number of retries if validation fails (default: 0)
             output_validator: Callable that takes a file path and returns bool (True=Success)
-            
+            output_json: Any
         Returns:
             For INTERACTIVE mode: The crew execution result
             For BACKGROUND mode: ExecutionHandle for monitoring
@@ -92,7 +93,7 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
                 current_suffix = f"{base_suffix}_retry_{attempt}"
             
             # Execute via base class
-            last_result = super().run_crew(crew_name, inputs, current_suffix, mode)
+            last_result = super().run_crew(crew_name, inputs, current_suffix, mode,output_json)
             
             # If no validator, success is automatic (unless exception raised, which super handles)
             if not output_validator:
@@ -138,6 +139,15 @@ class FileCrewOrchestrator(BaseCrewOrchestrator):
             or None if no execution has occurred
         """
         return super().get_last_performance_stats()
+
+    def get_last_execution_id(self) -> Optional[str]:
+        """
+        Get the execution ID of the last run.
+        
+        Returns:
+            Execution ID string or None
+        """
+        return super().get_last_execution_id()
 
 
 

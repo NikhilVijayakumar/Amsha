@@ -66,4 +66,6 @@ class TaskRepository(MongoRepository, ITaskRepository):
     def get_tasks_by_usecase(self, usecase: str) -> list[TaskResponse]:
         """Retrieves all tasks for a given usecase."""
         task_data_list = self.find_many({"usecase": usecase})
+        for task_data in task_data_list:
+            task_data["_id"] = str(task_data["_id"])
         return [TaskResponse(**task_data) for task_data in task_data_list]

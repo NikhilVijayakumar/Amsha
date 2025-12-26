@@ -99,7 +99,9 @@ class ContributionAnalyzer:
                 }
                 for f in features_list
             ]
-            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+            dirname = os.path.dirname(output_filename)
+            if dirname:
+                os.makedirs(dirname, exist_ok=True)
             df = pd.DataFrame(rows_for_excel)
             df.to_excel(output_filename, index=False, engine='openpyxl')
             print(f"  -> ✅ Successfully saved Excel summary to: {output_filename}")

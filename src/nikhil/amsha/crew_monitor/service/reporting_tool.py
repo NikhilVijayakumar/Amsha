@@ -81,7 +81,9 @@ class ReportingTool:
         mean_df.index = ['Mean']
 
         try:
-            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+            dirname = os.path.dirname(output_filename)
+            if dirname:
+                os.makedirs(dirname, exist_ok=True)
             with pd.ExcelWriter(output_filename, engine='openpyxl') as writer:
                 df.to_excel(writer, sheet_name='Evaluation Summary', index=False)
                 mean_df.to_excel(writer, sheet_name='Evaluation Summary', startrow=len(df) + 2, header=False)
@@ -101,42 +103,59 @@ class ReportingTool:
             print(f"  -> ⚠️ No files specified for combination in job '{job_name}'.")
             return
 
+        valid_files = []
+        for file_path_str, columns in files_and_columns.items():
+            file_path = Path(file_path_str)
+            if file_path.is_file() and file_path.suffix.lower() == '.xlsx':
+                valid_files.append((file_path, columns))
+            else:
+                print(f"  -> ⚠️ Skipping invalid file: '{file_path_str}'")
+
+        if not valid_files:
+            print(f"  -> ⚠️ No valid files found to combine for job '{job_name}'.")
+            return
+
         summary_data_list = []
-        os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+        sheets_to_write = {}
+        
+        for file_path, columns in valid_files:
+            try:
+                sheet_name = file_path.stem[:31]
+                df = pd.read_excel(file_path)
+                sheets_to_write[sheet_name] = df
+
+                required_cols = ['Feature Name'] + columns
+                if all(col in df.columns for col in required_cols):
+                    chunk = df[df['Feature Name'].notna() & (df['Feature Name'] != 'Mean')][required_cols].copy()
+                    chunk['Source Report'] = sheet_name
+                    summary_data_list.append(chunk)
+            except Exception as e:
+                print(f"  -> ❌ Error processing '{file_path}': {e}")
+
+        if not sheets_to_write:
+            print(f"  -> ⚠️ No data could be read from the specified files for job '{job_name}'.")
+            return
+
+        dirname = os.path.dirname(output_filename)
+        if dirname:
+            os.makedirs(dirname, exist_ok=True)
+            
         with pd.ExcelWriter(output_filename, engine='openpyxl') as writer:
-            for file_path_str, columns in files_and_columns.items():
-                file_path = Path(file_path_str)
-                if not (file_path.is_file() and file_path.suffix.lower() == '.xlsx'):
-                    print(f"  -> ⚠️ Skipping invalid file: '{file_path_str}'")
-                    continue
-
-                try:
-                    sheet_name = file_path.stem[:31]
-                    df = pd.read_excel(file_path)
-                    df.to_excel(writer, sheet_name=sheet_name, index=False)
-
-                    required_cols = ['Feature Name'] + columns
-                    if all(col in df.columns for col in required_cols):
-                        chunk = df[df['Feature Name'].notna() & (df['Feature Name'] != 'Mean')][required_cols].copy()
-                        chunk['Source Report'] = sheet_name
-                        summary_data_list.append(chunk)
-                except Exception as e:
-                    print(f"  -> ❌ Error processing '{file_path_str}': {e}")
+            for sheet_name, df in sheets_to_write.items():
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
 
             if summary_data_list:
                 full_summary_df = pd.concat(summary_data_list, ignore_index=True)
-
-                # This is the corrected block
                 melted = full_summary_df.melt(
                     id_vars=['Feature Name', 'Source Report'],
                     var_name='Metric',
-                    value_name='Value'  # ✅ CORRECTED LINE
+                    value_name='Value'
                 ).dropna(subset=['Value'])
 
                 pivot = melted.pivot_table(
                     index='Feature Name',
                     columns=['Source Report', 'Metric'],
-                    values='Value',  # This will now find the column
+                    values='Value',
                     aggfunc='first'
                 )
                 pivot.to_excel(writer, sheet_name='Summary')

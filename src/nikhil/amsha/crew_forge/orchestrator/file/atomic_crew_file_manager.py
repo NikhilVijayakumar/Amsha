@@ -67,7 +67,8 @@ class AtomicCrewFileManager(CrewManager):
 
 
 
-    def build_atomic_crew(self, crew_name: str, filename_suffix: Optional[str] = None) -> Crew:
+    def build_atomic_crew(self, crew_name: str, filename_suffix: Optional[str] = None,
+                          output_json: Any = None) -> Crew:
         """
         Build a configured crew ready for execution.
         
@@ -78,6 +79,7 @@ class AtomicCrewFileManager(CrewManager):
         Args:
             crew_name: Name of the crew configuration to build
             filename_suffix: Optional suffix for output filenames
+            output_json: Any
             
         Returns:
             Configured CrewAI Crew instance ready for execution
@@ -173,7 +175,8 @@ class AtomicCrewFileManager(CrewManager):
                 # Add task to crew
                 crew_builder.add_task(
                     agent=crew_builder.get_last_agent(),
-                    output_filename=output_filename
+                    output_filename=output_filename,
+                    output_json=output_json
                 )
 
             # Store output file reference

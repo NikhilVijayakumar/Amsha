@@ -1,6 +1,7 @@
 # src/nikhil/amsha/toolkit/crew_forge/service/crew_builder_service.py
 import os
 import time
+import typing
 from typing import Optional
 
 from crewai import Crew, Agent, Process, Task
@@ -50,7 +51,8 @@ class CrewBuilderService:
         self._agents.append(agent)
         return self
 
-    def add_task(self, task_details: TaskRequest, agent: Agent, output_filename: str = None,validation:bool=False) -> 'CrewBuilderService':
+    def add_task(self, task_details: TaskRequest, agent: Agent, output_filename: str = None,
+                 validation:bool=False, output_json: typing.Any = None) -> 'CrewBuilderService':
         print(f"CrewBuilderService:{output_filename}")
 
         if not task_details:
@@ -69,6 +71,10 @@ class CrewBuilderService:
                 output_file = os.path.join(self.output_dir, f"{output_filename}.json")
             self.output_files.append(output_file)
             task.output_file = output_file
+
+        if output_json:
+            task.output_json = output_json
+
 
         self._tasks.append(task)
         return self

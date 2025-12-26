@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator, List, Optional, Union
+from typing import Annotated, Any, Iterator, List, Optional, Union
 from urllib.parse import urlparse
 
 try:
@@ -13,7 +13,7 @@ try:
 except ImportError:
     DOCLING_AVAILABLE = False
 
-from pydantic import Field
+from pydantic import Field, SkipValidation
 
 from crewai.knowledge.source.base_knowledge_source import BaseKnowledgeSource
 from crewai.utilities.logger import Logger
@@ -38,8 +38,8 @@ class AmshaCrewDoclingSource(BaseKnowledgeSource):
     file_paths: List[Union[Path, str]]
     chunks: List[str] = Field(default_factory=list)
     safe_file_paths: List[Union[Path, str]] = Field(default_factory=list)
-    content: List["DoclingDocument"] = Field(default_factory=list)
-    document_converter: "DocumentConverter" = Field(
+    content: List[Any] = Field(default_factory=list)
+    document_converter: Any = Field(
         default_factory=lambda: DocumentConverter(
             allowed_formats=[
                 InputFormat.MD,

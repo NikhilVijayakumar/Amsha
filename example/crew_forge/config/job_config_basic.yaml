@@ -1,0 +1,15 @@
+crew_name: "BasicTestCrew"
+usecase: "integration_test_basic"
+module_name: "IntegrationParams"
+
+crews:
+  "BasicTestCrew":
+    steps:
+      - task_key: "basic_echo_task"
+        agent_key: "basic_agent"
+        # Relative paths handled by runner or absolute paths
+        task_file: "/home/dell/PycharmProjects/Amsha/src/nikhil/amsha/example/crew_forge/config/task_basic.yaml"
+        agent_file: "/home/dell/PycharmProjects/Amsha/src/nikhil/amsha/example/crew_forge/config/agent_basic.yaml"
+        knowledge_sources: []
+
+knowledge_sources: []

@@ -132,7 +132,31 @@ Amsha relies on a structured configuration approach:
 
 ---
 
+## 🧪 Testing
 
+Amsha uses `pytest` and `pytest-cov` for unit testing and coverage analysis.
+
+### Running Tests
+To run all unit tests:
+```bash
+python -m pytest tests/unit/
+```
+
+To run tests for a specific module:
+```bash
+python -m pytest tests/unit/crew_forge/test_amsha_crew_docling_source.py
+```
+
+### Running Coverage
+To run coverage for the entire project:
+```bash
+python -m pytest tests/unit/ --cov=amsha --cov-report=term-missing
+```
+
+To run coverage for a specific module:
+```bash
+python -m pytest tests/unit/crew_forge/test_amsha_crew_docling_source.py --cov=amsha.crew_forge.knowledge --cov-report=term-missing
+```
 
 ---
 

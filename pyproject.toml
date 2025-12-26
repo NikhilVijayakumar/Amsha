@@ -1,6 +1,6 @@
 [project]
 name = "Amsha"
-version = "2.0.9"
+version = "2.1.1"
 description = "Amsha is a lightweight library designed to provide common configuration and helper utilities for CrewAI orchestration. It serves as a foundational component for building scalable and maintainable AI agent systems"
 dependencies = [
      "PyYAML ==6.0.3",
@@ -16,7 +16,8 @@ dependencies = [
     "chardet == 5.2.0",
     "nvidia-ml-py == 13.580.82",
     "hypothesis == 6.148.7",
-    "pytest == 9.0.2"
+    "pytest == 9.0.2",
+    "pytest-cov == 5.0.0"
 ]
 
 [tool.setuptools]

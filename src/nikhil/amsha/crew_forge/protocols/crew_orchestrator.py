@@ -26,7 +26,8 @@ class CrewOrchestrator(Protocol):
         crew_name: str,
         inputs: Dict[str, Any],
         filename_suffix: Optional[str] = None,
-        mode: ExecutionMode = ExecutionMode.INTERACTIVE
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE,
+            output_json: Any = None
     ) -> Union[Any, ExecutionHandle]:
         """
         Execute a crew with the specified parameters.
@@ -40,7 +41,7 @@ class CrewOrchestrator(Protocol):
             inputs: Dictionary of input parameters for the crew
             filename_suffix: Optional suffix for output filenames
             mode: Execution mode (INTERACTIVE or BACKGROUND)
-            
+             output_json: Any
         Returns:
             For INTERACTIVE mode: The crew execution result
             For BACKGROUND mode: ExecutionHandle for monitoring
