@@ -1,5 +1,5 @@
 # src/nikhil/amsha/toolkit/crew_forge/service/atomic_db_builder.py
-from typing import Optional
+from typing import Optional, Any
 
 from crewai import Crew, Agent, Process
 
@@ -28,12 +28,13 @@ class AtomicDbBuilderService:
         details:AgentRequest = AgentRequest(role=agent_details.role,goal=agent_details.goal,backstory=agent_details.backstory)
         self.builder.add_agent(details,knowledge_sources,tools)
 
-    def add_task(self, task_id: str, agent: Agent, output_filename: str = None,validation:bool=False) :
+    def add_task(self, task_id: str, agent: Agent, output_filename: str = None,
+                 validation:bool=False,output_json: Any = None) :
         task_details = self.task_repo.get_task_by_id(task_id)
         if not task_details:
             raise ValueError(f"Task with ID '{task_id}' not found.")
         details:TaskRequest = TaskRequest(name=task_details.name,description=task_details.description,expected_output=task_details.expected_output)
-        self.builder.add_task(details, agent, output_filename,validation)
+        self.builder.add_task(details, agent, output_filename,validation,output_json)
 
     def build(self, process: Process = Process.sequential,knowledge_sources=None) -> Crew:
         return self.builder.build(process,knowledge_sources)
