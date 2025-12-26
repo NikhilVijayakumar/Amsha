@@ -30,7 +30,8 @@ class LLMBuilder:
                 presence_penalty=params.presence_penalty,
                 frequency_penalty=params.frequency_penalty,
                 stop=params.stop,
-                stream=True
+                stream=True,
+                drop_params=True
             )
         else:
             llm_instance = LLM(
@@ -43,6 +44,7 @@ class LLMBuilder:
                 max_completion_tokens=params.max_completion_tokens,
                 presence_penalty=params.presence_penalty,
                 frequency_penalty=params.frequency_penalty,
+                drop_params=True
             )
 
 
