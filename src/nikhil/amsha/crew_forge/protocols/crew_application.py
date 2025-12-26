@@ -28,7 +28,8 @@ class CrewApplication(Protocol):
         self, 
         crew_name: str, 
         inputs: Dict[str, Any], 
-        mode: ExecutionMode = ExecutionMode.INTERACTIVE
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE,
+            output_json: Any = None
     ) -> Union[Any, ExecutionHandle]:
         """
         Execute a crew with given inputs.
@@ -37,7 +38,7 @@ class CrewApplication(Protocol):
             crew_name: Name of the crew to execute
             inputs: Dictionary of input parameters for the crew
             mode: Execution mode (INTERACTIVE or BACKGROUND)
-            
+            output_json: Any
         Returns:
             For INTERACTIVE mode: The crew execution result
             For BACKGROUND mode: ExecutionHandle for monitoring

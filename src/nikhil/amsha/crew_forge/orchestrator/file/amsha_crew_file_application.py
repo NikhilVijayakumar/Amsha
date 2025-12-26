@@ -4,6 +4,9 @@ from typing import Dict, Any, Optional
 
 from ...orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from ...orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
+from ....execution_runtime.domain import ExecutionMode
+from ....execution_state.domain import ExecutionStatus
+from ....execution_state.service import StateManager
 from ....llm_factory.dependency.llm_container import LLMContainer
 from ....llm_factory.domain.model.llm_type import LLMType
 from ....output_process.optimization.json_cleaner_utils import JsonCleanerUtils
@@ -29,8 +32,7 @@ class AmshaCrewFileApplication:
         self.model_name:Optional[str] = None
         llm = self._initialize_llm()
         
-        # Initialize StateManager (defaulting to InMemory for now)
-        from ....execution_state.service.state_manager import StateManager
+
         self.state_manager = StateManager()
         
         manager = AtomicCrewFileManager(
@@ -159,8 +161,7 @@ class AmshaCrewFileApplication:
         Returns:
             The result of the successful execution, or the last result if all retries fail.
         """
-        from ....execution_runtime.domain.execution_mode import ExecutionMode
-        from ....execution_state.domain.enums import ExecutionStatus
+
 
         attempt = 0
         success = False
@@ -251,7 +252,6 @@ class AmshaCrewFileApplication:
 
         Args:
             output_filename: The path to the JSON file to be cleaned.
-            max_llm_retries: The maximum number of times to call the LLM to fix the file.
 
         Returns:
             The true or false.

@@ -118,7 +118,8 @@ class FileCrewApplication(CrewApplication):
         self, 
         crew_name: str, 
         inputs: Dict[str, Any], 
-        mode: ExecutionMode = ExecutionMode.INTERACTIVE
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE,
+            output_json: Any = None
     ) -> Union[Any, ExecutionHandle]:
         """
         Execute a crew with given inputs.
@@ -137,7 +138,7 @@ class FileCrewApplication(CrewApplication):
             CrewExecutionException: If crew execution fails
         """
         print(f"🎯 [FileCrewApp] Running crew '{crew_name}' in {mode.value} mode...")
-        return self.orchestrator.run_crew(crew_name, inputs, mode=mode)
+        return self.orchestrator.run_crew(crew_name, inputs, mode=mode,output_json=output_json)
     
     def prepare_inputs_for(self, crew_name: str) -> Dict[str, Any]:
         """

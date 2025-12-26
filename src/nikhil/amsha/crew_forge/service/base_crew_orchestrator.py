@@ -48,7 +48,8 @@ class BaseCrewOrchestrator:
         crew_name: str,
         inputs: Dict[str, Any],
         filename_suffix: Optional[str] = None,
-        mode: ExecutionMode = ExecutionMode.INTERACTIVE
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE,
+            output_json: Any = None
     ) -> Union[Any, ExecutionHandle]:
         """
         Shared crew execution logic that works with any CrewManager implementation.
@@ -58,6 +59,7 @@ class BaseCrewOrchestrator:
             inputs: Input parameters for the crew
             filename_suffix: Optional suffix for output files
             mode: Execution mode (INTERACTIVE or BACKGROUND)
+              output_json: Any
             
         Returns:
             Execution result (direct result for INTERACTIVE, ExecutionHandle for BACKGROUND)
@@ -85,7 +87,7 @@ class BaseCrewOrchestrator:
         )
         
         try:
-            crew_to_run = self.manager.build_atomic_crew(crew_name, filename_suffix)
+            crew_to_run = self.manager.build_atomic_crew(crew_name, filename_suffix,output_json)
         except Exception as e:
             error_message = ErrorMessageBuilder.manager_error(
                 "CrewManager", 

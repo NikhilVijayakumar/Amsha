@@ -3,14 +3,14 @@ llm:
     default: lm_studio_model
     models:
       gemini_model:
-        api_key: AIzaSyDwuy24Nn7B-vmmO-AVQBofQzXpiogQAc8
+        api_key: {GOOGLE_API_KEY}
         model: gemini/gemini-2.5-flash
       lm_studio_model:
         api_key: lm-studio
         base_url: http://localhost:1234/v1
         model: lm_studio/openai/gpt-oss-20b
       openrouter_model:
-        api_key: MISSING_OPENROUTER_API_KEY
+        api_key: {OPENROUTER_API_KEY}
         model: openrouter/openai/gpt-3.5-turbo
 llm_parameters:
   creative:

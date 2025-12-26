@@ -6,7 +6,7 @@ This Protocol enables different crew manager implementations to be used
 interchangeably through structural typing.
 """
 
-from typing import Protocol, Optional, runtime_checkable
+from typing import Protocol, Optional, runtime_checkable, Any
 from crewai import Crew
 
 
@@ -24,7 +24,8 @@ class CrewManager(Protocol):
     def build_atomic_crew(
         self, 
         crew_name: str, 
-        filename_suffix: Optional[str] = None
+        filename_suffix: Optional[str] = None,
+            output_json: Any = None
     ) -> Crew:
         """
         Build a configured crew ready for execution.
@@ -36,6 +37,7 @@ class CrewManager(Protocol):
         Args:
             crew_name: Name of the crew configuration to build
             filename_suffix: Optional suffix for output filenames
+            output_json: Any
             
         Returns:
             Configured CrewAI Crew instance ready for execution
