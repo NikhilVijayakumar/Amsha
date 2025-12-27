@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from ...orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from ...orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
@@ -19,7 +19,7 @@ class AmshaCrewFileApplication:
 
     """
 
-    def __init__(self, config_paths: Dict[str, str],llm_type:LLMType):
+    def __init__(self, config_paths: Dict[str, str],llm_type:LLMType,inputs: Optional[List[Dict[str, Any]]] = None):
         """
         Initializes the application with necessary configuration paths.
 
@@ -31,6 +31,7 @@ class AmshaCrewFileApplication:
         self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
         self.model_name:Optional[str] = None
         llm = self._initialize_llm()
+        self.external_inputs = inputs
         
 
         self.state_manager = StateManager()
@@ -63,6 +64,47 @@ class AmshaCrewFileApplication:
         self.model_name = provider.model_name
         return provider.get_raw_llm()
 
+    def _process_input_item(self, input_item: Dict[str, Any]) -> Any:
+        """Standalone logic to transform an input definition into actual data."""
+        key_name = input_item.get("key_name")
+        source = input_item.get("source")
+
+        if source == "file":
+            file_path = Path(input_item["path"])
+            file_format = input_item.get("format", "text")
+
+            if file_format == "json":
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            else:  # Plain text
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    return f.read()
+
+        elif source == "direct":
+            return input_item.get("value")
+
+        return None
+
+    def _handle_external_overrides(self, key_name: str) -> Optional[Any]:
+        """
+        Checks if the client provided an override for a specific key.
+        Returns the processed data if found, otherwise None.
+        """
+        if not self.external_inputs:
+            return None
+
+        # Find the specific override in the list provided by the client
+        override_item = next(
+            (item for item in self.external_inputs if item.get("key_name") == key_name),
+            None
+        )
+
+        if override_item:
+            print(f"  -> 🚀 Handling External Override for: {key_name}")
+            return self._process_input_item(override_item)
+
+        return None
+
 
     def _prepare_multiple_inputs_for(self, crew_name: str) -> dict:
         """
@@ -78,27 +120,17 @@ class AmshaCrewFileApplication:
 
         # Loop through each input definition in the list
         for input_item in inputs_def:
-            key_name = input_item["key_name"]  # The key for the final dictionary
+            key_name = input_item["key_name"]
 
-            # Case 1: The value is from a file source
-            if input_item.get("source") == "file":
-                file_path = Path(input_item["path"])
-                file_format = input_item.get("format", "text")
-                print(f"  -> Loading '{key_name}' from file: {file_path}")
+            # STEP 1: Try External Handler (The new separate method)
+            external_data = self._handle_external_overrides(key_name)
 
-                if file_format == "json":
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        # Correctly assign the loaded data to its key
-                        final_inputs[key_name] = json.load(f)
-                else:  # Plain text
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        # Correctly assign the loaded data to its key
-                        final_inputs[key_name] = f.read()
-
-            # Case 2: The value is provided directly in the config
-            elif input_item.get("source") == "direct":
-                print(f"  -> Loading '{key_name}' directly from config.")
-                final_inputs[key_name] = input_item["value"]
+            if external_data is not None:
+                final_inputs[key_name] = external_data
+            else:
+                # STEP 2: Fallback to existing YAML logic via the common processor
+                print(f"  -> Loading '{key_name}' from YAML config.")
+                final_inputs[key_name] = self._process_input_item(input_item)
 
         print(f"  -> Final prepared inputs: {list(final_inputs.keys())}")
         return final_inputs
