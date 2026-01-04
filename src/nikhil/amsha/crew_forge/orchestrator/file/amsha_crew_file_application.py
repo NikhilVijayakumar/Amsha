@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
+from ... import CrewApplication
 from ...orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from ...orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
 from ....execution_runtime.domain import ExecutionMode
@@ -13,7 +14,7 @@ from ....output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from ....utils.yaml_utils import YamlUtils
 
 
-class AmshaCrewFileApplication:
+class AmshaCrewFileApplication(CrewApplication):
     """
     A reusable base class that handles all the boilerplate setup for running a crew.
 
@@ -258,20 +259,21 @@ class AmshaCrewFileApplication:
         return True
 
 
-    def clean_json(self, output_filename: str, max_llm_retries: int = 2) -> bool:
+    def clean_json(self, output_filename: str, max_llm_retries: int = 2,output_folder: Optional[str] = None) -> bool:
         """
         Cleans and validates a JSON file, using an LLM for fixes with a retry limit.
 
         Args:
             output_filename: The path to the JSON file to be cleaned.
             max_llm_retries: The maximum number of times to call the LLM to fix the file.
+            output_folder: optional output folder to group different generated output
 
         Returns:
             The true or false.
         """
         print(f"AmshaCrewForgeApplication:{output_filename}")
         current_file = Path(output_filename)
-        cleaner = JsonCleanerUtils(output_filename)
+        cleaner = JsonCleanerUtils(input_file_path=output_filename,output_folder=output_folder)
         if cleaner.process_file():
             print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
             return True
