@@ -180,7 +180,8 @@ class AmshaCrewFileApplication(CrewApplication):
         crew_name: str, 
         inputs: Dict[str, Any], 
         max_retries: int = 0,
-        filename_suffix: Optional[str] = None
+        filename_suffix: Optional[str] = None,
+            output_folder: Optional[str] = None
     ) -> Any:
         """
         Executes a crew with retry logic managed by the application.
@@ -190,6 +191,7 @@ class AmshaCrewFileApplication(CrewApplication):
             inputs: Input dictionary for the crew.
             max_retries: Maximum number of retries allowed.
             filename_suffix: Optional suffix for output files.
+            output_folder: optional output folder to group different generated output
             
         Returns:
             The result of the successful execution, or the last result if all retries fail.
@@ -222,7 +224,7 @@ class AmshaCrewFileApplication(CrewApplication):
             output_file = self.orchestrator.get_last_output_file()
             
             # Validate
-            if self.validate_execution(last_result, output_file):
+            if self.validate_execution(last_result, output_file,output_folder):
                 print(f"✅ [App] Validation Success for '{crew_name}'!")
                 success = True
                 break
@@ -244,19 +246,24 @@ class AmshaCrewFileApplication(CrewApplication):
         
         return last_result
 
-    def validate_execution(self, result: Any, output_file: Optional[str]) -> bool:
+    def validate_execution(self, result: Any, output_file: Optional[str],output_folder: Optional[str] = None) -> bool:
         """
         Hook for subclasses to implement custom validation logic.
         
         Args:
             result: The result object returned by the crew execution.
             output_file: The path to the output file generated, if any.
+            output_folder: optional output folder to group different generated output
             
         Returns:
             True if execution is considered successful, False otherwise.
         """
-        # Default implementation assumes success if no exception was raised during execution
-        return True
+        class_name = self.__class__.__name__
+        valid = False
+        if output_file:
+            print(f"{class_name}:{output_file}")
+            valid=self.clean_json(output_filename=output_file, output_folder=output_folder)
+        return valid
 
 
     def clean_json(self, output_filename: str, max_llm_retries: int = 2,output_folder: Optional[str] = None) -> bool:
@@ -279,24 +286,7 @@ class AmshaCrewFileApplication(CrewApplication):
             return True
         return False
 
-    @staticmethod
-    def clean_json_metrics(output_filename: str) -> (bool,Optional[str]):
-        """
-        Cleans and validates a JSON file, using an LLM for fixes with a retry limit.
 
-        Args:
-            output_filename: The path to the JSON file to be cleaned.
-
-        Returns:
-            The true or false.
-        """
-        print(f"AmshaCrewForgeApplication:{output_filename}")
-        current_file = Path(output_filename)
-        cleaner = JsonCleanerUtils(output_filename)
-        if cleaner.process_file():
-            print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
-            return True,cleaner.output_file_path
-        return False,None
 
 
 
