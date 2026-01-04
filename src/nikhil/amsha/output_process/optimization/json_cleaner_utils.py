@@ -40,9 +40,13 @@ class JsonCleanerUtils:
 
         # 2. Reconstruct the path, removing the dynamic folder
         p = Path(path_str)
-        # Regex to match the dynamic folder pattern 'output_YYYYMMDDHHMMSS'
-        # We build a new list of path parts, excluding the dynamic one
-        filtered_parts = [part for part in p.parts if not re.match(r"output_\d+", part)]
+        # 2. Filter out ALL 'output' folders and dynamic timestamp folders
+        filtered_parts = []
+        for part in p.parts:
+            # Skip if the folder is exactly 'output' OR matches 'output_12345...'
+            if part == "output" or re.match(r"output_\d+", part):
+                continue
+            filtered_parts.append(part)
 
         if self.output_folder:
             try:
@@ -51,7 +55,7 @@ class JsonCleanerUtils:
 
                 # Insert the category after a node final/output/category
                 new_parts = (
-                        filtered_parts[:output_idx + 2] +
+                        filtered_parts[:output_idx + 1] +
                         [self.output_folder] +
                         filtered_parts[output_idx + 1:]
                 )
