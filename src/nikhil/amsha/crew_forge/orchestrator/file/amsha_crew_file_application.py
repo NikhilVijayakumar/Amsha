@@ -2,9 +2,10 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
-from amsha.crew_forge import CrewApplication
+
 from amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from amsha.crew_forge.orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
+from amsha.crew_forge.protocols.crew_application import CrewApplication
 from amsha.execution_runtime.domain import ExecutionMode
 from amsha.execution_state.domain import ExecutionStatus
 from amsha.execution_state.service import StateManager

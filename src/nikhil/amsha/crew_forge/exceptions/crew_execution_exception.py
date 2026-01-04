@@ -4,8 +4,7 @@ Exception for crew execution errors.
 This module defines the exception raised when crew execution fails
 during runtime.
 """
-
-from .crew_forge_exception import CrewForgeException
+from amsha.crew_forge.exceptions import CrewForgeException
 
 
 class CrewExecutionException(CrewForgeException):

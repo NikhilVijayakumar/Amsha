@@ -4,8 +4,7 @@ Exception for crew configuration errors.
 This module defines the exception raised when crew configuration
 is invalid or cannot be processed.
 """
-
-from .crew_forge_exception import CrewForgeException
+from amsha.crew_forge.exceptions import CrewForgeException
 
 
 class CrewConfigurationException(CrewForgeException):

@@ -3,8 +3,7 @@ Exception for input preparation errors.
 
 This module defines the exception raised when input preparation fails.
 """
-
-from .crew_forge_exception import CrewForgeException
+from amsha.crew_forge.exceptions import CrewForgeException
 
 
 class InputPreparationException(CrewForgeException):
