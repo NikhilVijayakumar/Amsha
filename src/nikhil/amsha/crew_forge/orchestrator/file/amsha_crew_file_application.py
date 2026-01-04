@@ -181,7 +181,8 @@ class AmshaCrewFileApplication(CrewApplication):
         inputs: Dict[str, Any], 
         max_retries: int = 0,
         filename_suffix: Optional[str] = None,
-            output_folder: Optional[str] = None
+            output_folder: Optional[str] = None,
+            output_json: Any = None
     ) -> Any:
         """
         Executes a crew with retry logic managed by the application.
@@ -192,6 +193,7 @@ class AmshaCrewFileApplication(CrewApplication):
             max_retries: Maximum number of retries allowed.
             filename_suffix: Optional suffix for output files.
             output_folder: optional output folder to group different generated output
+            output_json: Pydantic Json
             
         Returns:
             The result of the successful execution, or the last result if all retries fail.
@@ -217,6 +219,7 @@ class AmshaCrewFileApplication(CrewApplication):
                 crew_name=crew_name,
                 inputs=inputs,
                 filename_suffix=current_suffix,
+                output_json=output_json,
                 mode=ExecutionMode.INTERACTIVE
             )
             
