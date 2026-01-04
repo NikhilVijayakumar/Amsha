@@ -11,15 +11,17 @@ class JsonCleanerUtils:
     and save it to a derived, unique file path.
     """
 
-    def __init__(self, input_file_path: str):
+    def __init__(self, input_file_path: str,output_folder: Optional[str] = None):
         """
         Initializes the cleaner with a single source file path.
         The output path is derived automatically.
 
         Args:
             input_file_path (str): The full path to the input file.
+            output_folder: output folder inside final directory. if not provided will be ignored
         """
         self.input_file_path = Path(input_file_path)
+        self.output_folder = output_folder
 
         # Derive the base output path and then find a unique version of it
         base_output_path = self._derive_output_path()
@@ -42,6 +44,12 @@ class JsonCleanerUtils:
         # Regex to match the dynamic folder pattern 'output_YYYYMMDDHHMMSS'
         # We build a new list of path parts, excluding the dynamic one
         filtered_parts = [part for part in p.parts if not re.match(r"output_\d+", part)]
+
+        if self.output_folder:
+            # We insert the folder right before the filename (the last part)
+            # This ensures it is nested inside the 'final' structure
+            new_parts = filtered_parts[:-1] + [self.output_folder] + [filtered_parts[-1]]
+            return Path(*new_parts)
 
         return Path(*filtered_parts)
 

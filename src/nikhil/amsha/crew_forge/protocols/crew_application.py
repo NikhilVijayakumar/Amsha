@@ -69,7 +69,7 @@ class CrewApplication(Protocol):
         """
         ...
     
-    def clean_json(self, output_filename: str, max_retries: int = 2) -> bool:
+    def clean_json(self, output_filename: str, max_retries: int = 2,output_folder: Optional[str] = None) -> bool:
         """
         Clean and validate JSON output files.
         
@@ -79,6 +79,7 @@ class CrewApplication(Protocol):
         Args:
             output_filename: Path to the JSON file to clean
             max_retries: Maximum number of LLM correction attempts
+            output_folder: The output folder to group output if not provided ignored
             
         Returns:
             True if cleaning was successful, False otherwise

@@ -167,7 +167,7 @@ class FileCrewApplication(CrewApplication):
             # Fall back to single input format for backward compatibility
             return self._input_service.prepare_inputs_for(crew_name, self.job_config)
     
-    def clean_json(self, output_filename: str, max_retries: int = 2) -> bool:
+    def clean_json(self, output_filename: str, max_retries: int = 2,output_folder: Optional[str] = None) -> bool:
         """
         Clean and validate JSON output files.
         
@@ -177,6 +177,7 @@ class FileCrewApplication(CrewApplication):
         Args:
             output_filename: Path to the JSON file to clean
             max_retries: Maximum number of LLM correction attempts
+            output_folder: Final output folder if not provided not considered
             
         Returns:
             True if cleaning was successful, False otherwise
@@ -185,7 +186,7 @@ class FileCrewApplication(CrewApplication):
             FileNotFoundError: If the output file doesn't exist
         """
         print(f"🧹 [FileCrewApp] Cleaning JSON file: {output_filename}")
-        return self._json_service.clean_json(output_filename, max_retries)
+        return self._json_service.clean_json(output_filename, max_retries,output_folder)
     
     def get_last_output_file(self) -> Optional[str]:
         """
