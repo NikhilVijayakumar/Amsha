@@ -47,11 +47,11 @@ class JsonCleanerUtils:
         if self.output_folder:
             try:
                 # Find the index of the 'output' folder to use as a anchor
-                output_idx = filtered_parts.index("output")
+                output_idx = filtered_parts.index("final")
 
-                # Insert the category (Photosynthesis) immediately after 'output'
+                # Insert the category after a node final/output/category
                 new_parts = (
-                        filtered_parts[:output_idx + 1] +
+                        filtered_parts[:output_idx + 2] +
                         [self.output_folder] +
                         filtered_parts[output_idx + 1:]
                 )
