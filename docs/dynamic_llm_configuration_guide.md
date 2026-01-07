@@ -5,7 +5,7 @@ Dynamic LLM Configuration allows applications to override the default file-based
 
 ## Usage
 
-The `DbCrewApplication` and `FileCrewApplication` classes now accept an optional `llm_config_override` argument in their constructors.
+The `AmshaCrewDbApplication` and `AmshaCrewFileApplication` classes now accept an optional `llm_config_override` argument in their constructors.
 
 ### Dictionary Structure
 The `llm_config_override` dictionary supports two top-level keys:
@@ -34,12 +34,12 @@ llm_config_override = {
 ### Example Usage
 
 ```python
-from amsha.crew_forge.orchestrator.file.file_crew_application import FileCrewApplication
+from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
 from amsha.llm_factory.domain.model.llm_type import LLMType
 
 # ... define config_paths ...
 
-app = FileCrewApplication(
+app = AmshaCrewFileApplication(
     config_paths=config_paths,
     llm_type=LLMType.CREATIVE,
     llm_config_override={
@@ -51,11 +51,11 @@ app = FileCrewApplication(
 
 ## Migration Guide for Downstream Libraries
 
-If you have created a custom application class that extends `DbCrewApplication` or `FileCrewApplication`, you need to update your class to propagate the `llm_config_override` argument.
+If you have created a custom application class that extends `AmshaCrewDbApplication` or `AmshaCrewFileApplication` (formerly `DbCrewApplication` / `FileCrewApplication`), you need to update your class to propagate the `llm_config_override` argument.
 
 ### Before
 ```python
-class MyCustomApp(DbCrewApplication):
+class MyCustomApp(AmshaCrewDbApplication):
     def __init__(self, config_paths, llm_type, inputs=None):
         # ... custom logic ...
         super().__init__(config_paths, llm_type)
@@ -67,7 +67,7 @@ Update your `__init__` method to accept `llm_config_override` (and potentially o
 ```python
 from typing import Optional, Dict
 
-class MyCustomApp(DbCrewApplication):
+class MyCustomApp(AmshaCrewDbApplication):
     def __init__(self, config_paths, llm_type, inputs=None, 
                  llm_config_override: Optional[Dict] = None):
         

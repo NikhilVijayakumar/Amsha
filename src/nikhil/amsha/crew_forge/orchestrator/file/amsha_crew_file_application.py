@@ -6,11 +6,13 @@ from typing import Dict, Any, Optional, List
 from amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from amsha.crew_forge.orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
 from amsha.crew_forge.protocols.crew_application import CrewApplication
+from amsha.crew_forge.service.shared_llm_initialization_service import SharedLLMInitializationService
 from amsha.execution_runtime.domain import ExecutionMode
 from amsha.execution_state.domain import ExecutionStatus
 from amsha.execution_state.service import StateManager
-from amsha.llm_factory.dependency.llm_container import LLMContainer
 from amsha.llm_factory.domain.model.llm_type import LLMType
+from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
+from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from amsha.utils.yaml_utils import YamlUtils
 
@@ -21,18 +23,40 @@ class AmshaCrewFileApplication(CrewApplication):
 
     """
 
-    def __init__(self, config_paths: Dict[str, str],llm_type:LLMType,inputs: Optional[List[Dict[str, Any]]] = None):
+    def __init__(self, config_paths: Dict[str, str], llm_type: LLMType, inputs: Optional[List[Dict[str, Any]]] = None, llm_config_override: Optional[Dict] = None):
         """
         Initializes the application with necessary configuration paths.
 
         Args:
             config_paths: A dictionary containing paths to config files.
+            llm_type: Type of LLM to initialize (CREATIVE or EVALUATION)
+            inputs: Optional external inputs
+            llm_config_override: Optional dictionary containing LLM configuration overrides
         """
         self.llm_type = llm_type
         self.config_paths = config_paths
         self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
-        self.model_name:Optional[str] = None
-        llm = self._initialize_llm()
+        
+        # Prepare overrides if provided
+        model_config = None
+        llm_params = None
+        
+        if llm_config_override:
+            print("  -> Using LLM configuration overrides")
+            if 'model_config' in llm_config_override:
+                model_config = LLMModelConfig(**llm_config_override['model_config'])
+            if 'llm_parameters' in llm_config_override:
+                llm_params = LLMParameters(**llm_config_override['llm_parameters'])
+
+        # Initialize LLM using shared service
+        llm, model_name = SharedLLMInitializationService.initialize_llm(
+            config_paths["llm"], 
+            llm_type,
+            model_config=model_config,
+            llm_params=llm_params
+        )
+        self.model_name = model_name
+        
         self.external_inputs = inputs
         
 
@@ -48,23 +72,6 @@ class AmshaCrewFileApplication(CrewApplication):
             manager=manager,
             state_manager=self.state_manager
         )
-
-
-    def _initialize_llm(self) -> Any:
-        """Sets up the DI container for the LLM and builds the instance."""
-        print("⚙️  Setting up LLM...")
-        llm_container = LLMContainer()
-        llm_container.config.llm.yaml_path.from_value(
-            str(Path(self.config_paths["llm"]))
-        )
-        llm_builder = llm_container.llm_builder()
-        if self.llm_type == LLMType.CREATIVE:
-            build_llm = llm_builder.build_creative()
-        else:
-            build_llm = llm_builder.build_evaluation()
-        provider = build_llm.provider
-        self.model_name = provider.model_name
-        return provider.get_raw_llm()
 
     def _process_input_item(self, input_item: Dict[str, Any]) -> Any:
         """Standalone logic to transform an input definition into actual data."""
