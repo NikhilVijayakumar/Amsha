@@ -72,3 +72,6 @@ Thumbs.db
 /.dvc/tmp/rwlock.lock
 /.dvc/config.local
 /.vscode/settings.json
+/.kiro/specs/crew-forge-refactoring/design.md
+/.kiro/specs/crew-forge-refactoring/requirements.md
+/.kiro/specs/crew-forge-refactoring/tasks.md

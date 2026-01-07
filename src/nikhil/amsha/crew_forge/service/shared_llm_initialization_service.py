@@ -2,9 +2,14 @@
 Shared LLM initialization utilities for all application implementations.
 """
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any, Tuple, Optional, TYPE_CHECKING
 from amsha.llm_factory.dependency.llm_container import LLMContainer
 from amsha.llm_factory.domain.model.llm_type import LLMType
+
+if TYPE_CHECKING:
+    from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
+    from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
+
 from amsha.crew_forge.exceptions import (
     CrewConfigurationException,
     ErrorContext,
@@ -17,13 +22,17 @@ class SharedLLMInitializationService:
     """Shared LLM initialization logic for all application implementations."""
     
     @staticmethod
-    def initialize_llm(llm_config_path: str, llm_type: LLMType) -> Tuple[Any, str]:
+    def initialize_llm(llm_config_path: str, llm_type: LLMType,
+                       model_config: Optional["LLMModelConfig"] = None,
+                       llm_params: Optional["LLMParameters"] = None) -> Tuple[Any, str]:
         """
         Initialize LLM instance using the LLM factory with consistent patterns.
         
         Args:
-            llm_config_path: Path to the LLM configuration file
+            llm_config_path: Path to the LLM configuration file (used as fallback or for container init)
             llm_type: Type of LLM to build (CREATIVE or EVALUATION)
+            model_config: Optional specific model configuration to use
+            llm_params: Optional specific LLM parameters to use
             
         Returns:
             Tuple of (llm_instance, model_name)
@@ -38,7 +47,9 @@ class SharedLLMInitializationService:
         context.add_context("llm_type", llm_type.value)
         
         try:
-            # Validate config file exists
+            # Validate config file exists - still required for container initialization 
+            # (unless we want to refactor container to not need a path if overrides are provided, 
+            # but let's keep it simple for now and rely on the file existence check from before)
             config_path = Path(llm_config_path)
             if not config_path.exists():
                 raise CrewConfigurationException(
@@ -59,10 +70,16 @@ class SharedLLMInitializationService:
             
             if llm_type == LLMType.CREATIVE:
                 print("  -> Building CREATIVE LLM...")
-                build_llm = llm_builder.build_creative()
+                build_llm = llm_builder.build_creative(
+                    model_config_override=model_config,
+                    params_override=llm_params
+                )
             elif llm_type == LLMType.EVALUATION:
                 print("  -> Building EVALUATION LLM...")
-                build_llm = llm_builder.build_evaluation()
+                build_llm = llm_builder.build_evaluation(
+                    model_config_override=model_config,
+                    params_override=llm_params
+                )
             else:
                 raise CrewConfigurationException(
                     message=ErrorMessageBuilder.configuration_error(

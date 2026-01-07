@@ -18,6 +18,8 @@ from amsha.execution_runtime.domain.execution_mode import ExecutionMode
 from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
 from amsha.execution_state.service.state_manager import StateManager
 from amsha.llm_factory.domain.model.llm_type import LLMType
+from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
+from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
 from amsha.utils.yaml_utils import YamlUtils
 from amsha.crew_forge.exceptions import (
     CrewConfigurationException,
@@ -42,7 +44,8 @@ class FileCrewApplication(CrewApplication):
         config_paths: Dict[str, str], 
         llm_type: LLMType,
         runtime: Optional[RuntimeEngine] = None,
-        state_manager: Optional[StateManager] = None
+        state_manager: Optional[StateManager] = None,
+        llm_config_override: Optional[Dict] = None
     ):
         """
         Initialize the file-based crew application.
@@ -51,6 +54,10 @@ class FileCrewApplication(CrewApplication):
             config_paths: Dictionary containing paths to configuration files
                          Expected keys: "job", "app", "llm"
             llm_type: Type of LLM to initialize (CREATIVE or EVALUATION)
+            runtime: Optional RuntimeEngine instance
+            state_manager: Optional StateManager instance
+            llm_config_override: Optional dictionary containing LLM configuration overrides
+                                Expected keys: "model_config", "llm_parameters"
             
         Raises:
             CrewConfigurationException: If configuration loading or LLM initialization fails
@@ -80,10 +87,23 @@ class FileCrewApplication(CrewApplication):
             # Load job configuration
             self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
             
+            # Prepare overrides if provided
+            model_config = None
+            llm_params = None
+            
+            if llm_config_override:
+                print("  -> Using LLM configuration overrides")
+                if 'model_config' in llm_config_override:
+                    model_config = LLMModelConfig(**llm_config_override['model_config'])
+                if 'llm_parameters' in llm_config_override:
+                    llm_params = LLMParameters(**llm_config_override['llm_parameters'])
+            
             # Initialize LLM using shared service
             llm, model_name = SharedLLMInitializationService.initialize_llm(
                 config_paths["llm"], 
-                llm_type
+                llm_type,
+                model_config=model_config,
+                llm_params=llm_params
             )
             
             # Create manager using the initialized LLM

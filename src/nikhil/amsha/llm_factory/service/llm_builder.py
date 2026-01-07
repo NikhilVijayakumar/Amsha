@@ -1,11 +1,15 @@
 # src/nikhil/amsha/llm_factory/service/llm_builder.py
+from typing import Optional, TYPE_CHECKING
+
 from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.llm_factory.domain.model.llm_build_result import LLMBuildResult
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.utils.llm_utils import LLMUtils
 from crewai import LLM
 
-
+if TYPE_CHECKING:
+    from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
+    from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
 
 from amsha.llm_factory.adapters.crewai_adapter import CrewAIProviderAdapter
 
@@ -14,9 +18,16 @@ class LLMBuilder:
     def __init__(self, settings: LLMSettings):
         self.settings: LLMSettings = settings
 
-    def build(self, llm_type: LLMType, model_key: str = None) -> LLMBuildResult:
-        model_config = self.settings.get_model_config(llm_type.value, model_key)
-        params = self.settings.get_parameters(llm_type.value)
+    def build(self, llm_type: LLMType, model_key: str = None, 
+              model_config_override: "LLMModelConfig" = None, 
+              params_override: "LLMParameters" = None) -> LLMBuildResult:
+        
+        if model_config_override and params_override:
+            model_config = model_config_override
+            params = params_override
+        else:
+            model_config = self.settings.get_model_config(llm_type.value, model_key)
+            params = self.settings.get_parameters(llm_type.value)
 
         clean_model_name = LLMUtils.extract_model_name(model_config.model)
         if model_config.base_url is None:
@@ -53,12 +64,16 @@ class LLMBuilder:
         # Return result with backward compatible llm and new provider
         return LLMBuildResult(provider=provider)
 
-    def build_creative(self, model_key: str = None) -> LLMBuildResult:
+    def build_creative(self, model_key: str = None, 
+                       model_config_override: "LLMModelConfig" = None, 
+                       params_override: "LLMParameters" = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()
-        return self.build(LLMType.CREATIVE, model_key)
+        return self.build(LLMType.CREATIVE, model_key, model_config_override, params_override)
 
-    def build_evaluation(self, model_key: str = None) -> LLMBuildResult:
+    def build_evaluation(self, model_key: str = None, 
+                         model_config_override: "LLMModelConfig" = None, 
+                         params_override: "LLMParameters" = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()
-        return self.build(LLMType.EVALUATION, model_key)
+        return self.build(LLMType.EVALUATION, model_key, model_config_override, params_override)
 
 

@@ -8,8 +8,8 @@ crews:
       - task_key: "basic_echo_task"
         agent_key: "basic_agent"
         # Relative paths handled by runner or absolute paths
-        task_file: "/home/dell/PycharmProjects/Amsha/src/nikhil/amsha/example/crew_forge/config/task_basic.yaml"
-        agent_file: "/home/dell/PycharmProjects/Amsha/src/nikhil/amsha/example/crew_forge/config/agent_basic.yaml"
+        task_file: "example/crew_forge/config/task_basic.yaml"
+        agent_file: "example/crew_forge/config/agent_basic.yaml"
         knowledge_sources: []
 
 knowledge_sources: []
