@@ -90,3 +90,6 @@ Thumbs.db
 /output/integration_tests/output/StoryParams/output_20251224084653/openai/gpt-oss-20b_Step3_Polish_retry_2.json
 /output/integration_tests/output/StoryParams/output_20251224084657/openai/gpt-oss-20b_Step3_Polish_retry_3.json
 /src/nikhil/amsha/integration_tests/crew_forge/test_json_retry_workflow.py
+/.kiro/specs/crew-forge-refactoring/design.md
+/.kiro/specs/crew-forge-refactoring/requirements.md
+/.kiro/specs/crew-forge-refactoring/tasks.md
