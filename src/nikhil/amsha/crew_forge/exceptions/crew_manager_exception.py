@@ -3,8 +3,7 @@ Exception for crew manager errors.
 
 This module defines the exception raised when crew manager operations fail.
 """
-
-from .crew_forge_exception import CrewForgeException
+from amsha.crew_forge.exceptions import CrewForgeException
 
 
 class CrewManagerException(CrewForgeException):

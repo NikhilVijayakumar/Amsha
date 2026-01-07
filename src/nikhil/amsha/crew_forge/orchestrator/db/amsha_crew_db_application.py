@@ -2,15 +2,16 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-from ...orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
-from ...orchestrator.db.db_crew_orchestrator import DbCrewOrchestrator
-from ....llm_factory.dependency.llm_container import LLMContainer
-from ....llm_factory.domain.model.llm_type import LLMType
-from ....output_process.optimization.json_cleaner_utils import JsonCleanerUtils
-from ....utils.yaml_utils import YamlUtils
+from amsha.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
+from amsha.crew_forge.orchestrator.db.db_crew_orchestrator import DbCrewOrchestrator
+from amsha.crew_forge.protocols.crew_application import CrewApplication
+from amsha.llm_factory.dependency.llm_container import LLMContainer
+from amsha.llm_factory.domain.model.llm_type import LLMType
+from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
+from amsha.utils.yaml_utils import YamlUtils
 
 
-class AmshaCrewDBApplication:
+class AmshaCrewDBApplication(CrewApplication):
     """
     A reusable base class that handles all the boilerplate setup for running a crew.
 
@@ -131,7 +132,7 @@ class AmshaCrewDBApplication:
 
 
 
-    def clean_json(self, output_filename: str, max_llm_retries: int = 2) -> bool:
+    def clean_json(self, output_filename: str, max_llm_retries: int = 2,output_folder: Optional[str] = None) -> bool:
         """
         Cleans and validates a JSON file, using an LLM for fixes with a retry limit.
 
@@ -144,7 +145,7 @@ class AmshaCrewDBApplication:
         """
         print(f"AmshaCrewForgeApplication:{output_filename}")
         current_file = Path(output_filename)
-        cleaner = JsonCleanerUtils(output_filename)
+        cleaner = JsonCleanerUtils(output_filename,output_folder)
         if cleaner.process_file():
             print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
             return True

@@ -16,7 +16,7 @@ class SharedJSONFileService:
     """Shared JSON processing and file management utilities."""
     
     @staticmethod
-    def clean_json(output_filename: str, max_retries: int = 2) -> bool:
+    def clean_json(output_filename: str, max_retries: int = 2,output_folder=None) -> bool:
         """
         Clean and validate a JSON file using consistent patterns across implementations.
         
@@ -42,7 +42,7 @@ class SharedJSONFileService:
                 raise FileNotFoundError(f"Output file not found: {output_filename}")
             
             # Use the existing JsonCleanerUtils for consistent behavior
-            cleaner = JsonCleanerUtils(output_filename)
+            cleaner = JsonCleanerUtils(output_filename,output_folder)
             
             if cleaner.process_file():
                 print(f"✅ [SharedJSONFile] JSON validated successfully. Clean file at: {cleaner.output_file_path}")
