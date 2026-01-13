@@ -3,6 +3,7 @@ import re
 import os
 from pathlib import Path  # Import the Path object
 from typing import Any, Optional
+from amsha.common.logger import get_logger
 
 
 class JsonCleanerUtils:
@@ -21,6 +22,7 @@ class JsonCleanerUtils:
             output_folder: output folder inside final directory. if not provided will be ignored
         """
         self.input_file_path = Path(input_file_path)
+        self.logger = get_logger("output_process.json_cleaner")
         self.output_folder = output_folder
 
         # Derive the base output path and then find a unique version of it
@@ -136,7 +138,9 @@ class JsonCleanerUtils:
         try:
             return json.loads(fixed)
         except json.JSONDecodeError:
-            print("❌ JSON cleaning failed. Could not parse content.")
+            self.logger.error("JSON cleaning failed - could not parse content", extra={
+                "input_file": str(self.input_file_path)
+            })
             return None
 
     def process_file(self) -> bool:
@@ -146,7 +150,9 @@ class JsonCleanerUtils:
         try:
             content = self.input_file_path.read_text(encoding='utf-8')
         except FileNotFoundError:
-            print(f"❌ Error: Input file not found at {self.input_file_path}")
+            self.logger.error("Input file not found", extra={
+                "input_file": str(self.input_file_path)
+            })
             return False
 
         return self.process_content(content)
@@ -157,14 +163,18 @@ class JsonCleanerUtils:
         """
 
         parsed_data = self._clean_and_parse_string(content)
-        print(f"process_content:parsed_data\n{parsed_data}")
 
         if parsed_data:
             self.output_file_path.write_text(json.dumps(parsed_data, indent=4), encoding='utf-8')
-            print(f"✅ Successfully processed and saved to {self.output_file_path}")
+            self.logger.info("JSON file processed and saved", extra={
+                "output_file": str(self.output_file_path),
+                "input_file": str(self.input_file_path)
+            })
             return True
         else:
-            print(f"❌ Failed to parse JSON from {self.input_file_path}. No file written.")
+            self.logger.warning("Failed to parse JSON, no file written", extra={
+                "input_file": str(self.input_file_path)
+            })
             return False
 
 

@@ -15,6 +15,7 @@ from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
 from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from amsha.utils.yaml_utils import YamlUtils
+from amsha.common.logger import get_logger
 
 
 class AmshaCrewFileApplication(CrewApplication):
@@ -33,6 +34,7 @@ class AmshaCrewFileApplication(CrewApplication):
             inputs: Optional external inputs
             llm_config_override: Optional dictionary containing LLM configuration overrides
         """
+        self.logger = get_logger("crew_forge.application")
         self.llm_type = llm_type
         self.config_paths = config_paths
         self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
@@ -42,7 +44,10 @@ class AmshaCrewFileApplication(CrewApplication):
         llm_params = None
         
         if llm_config_override:
-            print("  -> Using LLM configuration overrides")
+            self.logger.info("Using LLM configuration overrides", extra={
+                "has_model_config": 'model_config' in llm_config_override,
+                "has_llm_parameters": 'llm_parameters' in llm_config_override
+            })
             if 'model_config' in llm_config_override:
                 model_config = LLMModelConfig(**llm_config_override['model_config'])
             if 'llm_parameters' in llm_config_override:
@@ -111,7 +116,9 @@ class AmshaCrewFileApplication(CrewApplication):
         )
 
         if override_item:
-            print(f"  -> 🚀 Handling External Override for: {key_name}")
+            self.logger.debug("Handling external input override", extra={
+                "key_name": key_name
+            })
             return self._process_input_item(override_item)
 
         return None
@@ -127,7 +134,10 @@ class AmshaCrewFileApplication(CrewApplication):
         inputs_def = crew_def.get("input", [])
         final_inputs = {}
 
-        print(f"📦 [App] Preparing inputs for '{crew_name}'...")
+        self.logger.info("Preparing crew inputs", extra={
+            "crew_name": crew_name,
+            "num_inputs": len(inputs_def)
+        })
 
         # Loop through each input definition in the list
         for input_item in inputs_def:
@@ -140,10 +150,15 @@ class AmshaCrewFileApplication(CrewApplication):
                 final_inputs[key_name] = external_data
             else:
                 # STEP 2: Fallback to existing YAML logic via the common processor
-                print(f"  -> Loading '{key_name}' from YAML config.")
+                self.logger.debug("Loading input from YAML config", extra={
+                    "key_name": key_name
+                })
                 final_inputs[key_name] = self._process_input_item(input_item)
 
-        print(f"  -> Final prepared inputs: {list(final_inputs.keys())}")
+        self.logger.debug("Inputs prepared", extra={
+            "crew_name": crew_name,
+            "input_keys": list(final_inputs.keys())
+        })
         return final_inputs
 
 
@@ -156,7 +171,10 @@ class AmshaCrewFileApplication(CrewApplication):
         inputs_def = crew_def.get("input", {})  # Get the inputs dictionary
         final_inputs = {}
 
-        print(f"📦 [App] Preparing inputs for '{crew_name}'...")
+        self.logger.info("Preparing crew inputs", extra={
+            "crew_name": crew_name,
+            "num_placeholders": len(inputs_def)
+        })
 
         # Loop through each placeholder and its defined value
         for placeholder, value_def in inputs_def.items():
@@ -165,7 +183,10 @@ class AmshaCrewFileApplication(CrewApplication):
             if isinstance(value_def, dict) and value_def.get("source") == "file":
                 file_path = Path(value_def["path"])
                 file_format = value_def.get("format", "text")
-                print(f"  -> Loading '{placeholder}' from file: {file_path}")
+                self.logger.debug("Loading input from file", extra={
+                    "placeholder": placeholder,
+                    "file_path": str(file_path)
+                })
 
                 if file_format == "json":
                     with open(file_path, 'r', encoding='utf-8') as f:
@@ -176,7 +197,9 @@ class AmshaCrewFileApplication(CrewApplication):
 
             # Case 2: The value is provided directly (e.g., a string)
             else:
-                print(f"  -> Loading '{placeholder}' directly from config.")
+                self.logger.debug("Loading input from config", extra={
+                    "placeholder": placeholder
+                })
                 final_inputs = value_def
 
 
@@ -217,7 +240,11 @@ class AmshaCrewFileApplication(CrewApplication):
         # Total attempts = initial run (1) + retries
         while attempt <= max_retries:
             attempt += 1
-            print(f"🔄 [App] Execution Attempt {attempt}/{max_retries + 1} for crew '{crew_name}'")
+            self.logger.info("Crew execution attempt", extra={
+                "crew_name": crew_name,
+                "attempt": attempt,
+                "max_attempts": max_retries + 1
+            })
             
             current_suffix = filename_suffix
             if attempt > 1:
@@ -238,16 +265,26 @@ class AmshaCrewFileApplication(CrewApplication):
             
             # Validate
             if self.validate_execution(last_result, output_file,output_folder):
-                print(f"✅ [App] Validation Success for '{crew_name}'!")
+                self.logger.info("Crew validation successful", extra={
+                    "crew_name": crew_name,
+                    "attempt": attempt,
+                    "output_file": output_file
+                })
                 success = True
                 break
             
-            print(f"❌ [App] Validation Failed for '{crew_name}'.")
+            self.logger.warning("Crew validation failed", extra={
+                "crew_name": crew_name,
+                "attempt": attempt
+            })
             
             # Update State on failure
             execution_id = self.orchestrator.get_last_execution_id()
             if execution_id:
-                print(f"   -> Updating state for execution {execution_id} to FAILED")
+                self.logger.debug("Updating execution state to FAILED", extra={
+                    "execution_id": execution_id,
+                    "attempt": attempt
+                })
                 self.state_manager.update_status(
                     execution_id, 
                     ExecutionStatus.FAILED, 
@@ -255,7 +292,10 @@ class AmshaCrewFileApplication(CrewApplication):
                 )
             
             if attempt > max_retries:
-                print(f"🛑 [App] Max retries reached for '{crew_name}'. Giving up.")
+                self.logger.error("Max retries reached, execution failed", extra={
+                    "crew_name": crew_name,
+                    "attempts": attempt
+                })
         
         return last_result
 
@@ -274,7 +314,10 @@ class AmshaCrewFileApplication(CrewApplication):
         class_name = self.__class__.__name__
         valid = False
         if output_file:
-            print(f"{class_name}:{output_file}")
+            self.logger.info("Output file generated", extra={
+                "class_name": class_name,
+                "output_file": output_file
+            })
             valid=self.clean_json(output_filename=output_file, output_folder=output_folder)
         return valid
 

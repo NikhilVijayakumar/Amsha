@@ -12,6 +12,7 @@ from amsha.crew_forge.exceptions import (
     wrap_external_exception
 )
 from amsha.utils.yaml_utils import YamlUtils
+from amsha.common.logger import get_logger
 
 
 from amsha.crew_forge.protocols.crew_manager import CrewManager
@@ -41,7 +42,11 @@ class AtomicCrewFileManager(CrewManager):
         Raises:
             CrewConfigurationException: If configuration loading fails
         """
-        print("🏗️  [FileManager] Initializing file-based crew manager...")
+        self.logger = get_logger("crew_forge.file_manager")
+        self.logger.info("Initializing file-based crew manager", extra={
+            "model_name": model_name,
+            "has_output_config": output_config is not None
+        })
         
         context = ErrorContext("AtomicCrewFileManager", "__init__")
         context.add_context("app_config_path", app_config_path)
@@ -60,7 +65,10 @@ class AtomicCrewFileManager(CrewManager):
             self.app_config = app_config
             self.crew_container.config.from_dict(app_config)
             
-            print(f"✅ [FileManager] Initialized successfully with model: {model_name}")
+            self.logger.info("File manager initialized successfully", extra={
+                "model_name": model_name,
+                "num_crew_blueprints": len(self.app_config.get("crews", {}))
+            })
             
         except Exception as e:
             if isinstance(e, (CrewManagerException, CrewConfigurationException)):
@@ -91,7 +99,10 @@ class AtomicCrewFileManager(CrewManager):
             CrewManagerException: If crew building fails
             CrewConfigurationException: If crew configuration is invalid
         """
-        print(f"🔨 [FileManager] Building atomic crew: '{crew_name}'...")
+        self.logger.info("Building atomic crew", extra={
+            "crew_name": crew_name,
+            "model_name": self.model_name
+        })
         
         context = ErrorContext("AtomicCrewFileManager", "build_atomic_crew")
         context.add_context("crew_name", crew_name)
@@ -156,7 +167,10 @@ class AtomicCrewFileManager(CrewManager):
                 # Handle agent knowledge sources
                 agent_knowledge_paths = set()
                 for path in step.get('knowledge_sources', []):
-                    print(f"  -> Adding agent knowledge source: {path}")
+                    self.logger.debug("Adding agent knowledge source", extra={
+                        "agent_name": agent_def["name"],
+                        "knowledge_path": path
+                    })
                     agent_knowledge_paths.add(path)
                 
                 agent_text_source = None
@@ -193,7 +207,10 @@ class AtomicCrewFileManager(CrewManager):
             # Handle crew-level knowledge sources
             crew_knowledge_paths = set()
             for path in crew_def.get('knowledge_sources', []):
-                print(f"  -> Adding crew knowledge source: {path}")
+                self.logger.debug("Adding crew knowledge source", extra={
+                    "crew_name": crew_name,
+                    "knowledge_path": path
+                })
                 crew_knowledge_paths.add(path)
             
             crew_text_source = None
@@ -203,7 +220,10 @@ class AtomicCrewFileManager(CrewManager):
                     file_paths=list(crew_knowledge_paths)
                 )
 
-            print(f"✅ [FileManager] Finished building '{crew_name}'.")
+            self.logger.info("Crew building completed", extra={
+                "crew_name": crew_name,
+                "has_knowledge_sources": bool(crew_knowledge_paths)
+            })
             
             if not crew_builder:
                 raise CrewManagerException(

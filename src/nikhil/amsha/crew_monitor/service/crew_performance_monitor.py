@@ -1,6 +1,7 @@
 import time
 import psutil
 from typing import Any, Dict, Optional
+from amsha.common.logger import get_logger
 
 try:
     import pynvml
@@ -10,6 +11,7 @@ except ImportError:
 
 class CrewPerformanceMonitor:
     def __init__(self, model_name: Optional[str] = None):
+        self.logger = get_logger("crew_monitor.performance")
         self.model_name = model_name
         self.total_tokens = 0
         self.prompt_tokens = 0
@@ -40,7 +42,9 @@ class CrewPerformanceMonitor:
                     mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
                     self.gpu_stats[f"gpu_{i}_start_mem"] = mem_info.used
             except Exception as e:
-                print(f"[CrewPerformanceMonitor] GPU monitoring failed to start: {e}")
+                self.logger.warning("GPU monitoring failed to start", extra={
+                    "error": str(e)
+                })
 
     def stop_monitoring(self):
         """Stops the monitoring of time and resources."""
@@ -59,7 +63,9 @@ class CrewPerformanceMonitor:
                     self.gpu_stats[f"gpu_{i}_utilization"] = utilization.gpu
                 pynvml.nvmlShutdown()
             except Exception as e:
-                print(f"[CrewPerformanceMonitor] GPU monitoring failed to stop: {e}")
+                self.logger.warning("GPU monitoring failed to stop", extra={
+                    "error": str(e)
+                })
 
     def log_usage(self, result: Any):
         """
@@ -71,7 +77,7 @@ class CrewPerformanceMonitor:
             
             # CrewAI 1.8.0: token_usage might be None
             if usage is None:
-                print("[CrewPerformanceMonitor] Info: token_usage is None in result (CrewAI 1.8.0).")
+                self.logger.debug("Token usage is None in CrewAI 1.8.0 result")
                 return
             
             # Handle if usage is a dict or object
@@ -85,7 +91,7 @@ class CrewPerformanceMonitor:
                 self.prompt_tokens = getattr(usage, 'prompt_tokens', 0)
                 self.completion_tokens = getattr(usage, 'completion_tokens', 0)
         else:
-            print("[CrewPerformanceMonitor] Warning: 'token_usage' not found in result.")
+            self.logger.warning("Token usage not found in result")
 
     def get_metrics(self) -> Dict[str, Any]:
         """

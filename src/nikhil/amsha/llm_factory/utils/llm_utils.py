@@ -1,15 +1,18 @@
 # src/nikhil/amsha/llm_factory/utils/llm_utils.py
 
 import os
+from amsha.common.logger import get_logger
 
 from crewai.telemetry import Telemetry
+
+_logger = get_logger("llm_factory.utils")
 
 
 class LLMUtils:
 
     @staticmethod
     def noop(*args, **kwargs):
-        print("Telemetry method called and noop'd\n")
+        _logger.debug("Telemetry noop method called")
         pass
 
     @staticmethod
@@ -19,9 +22,9 @@ class LLMUtils:
             for attr in dir(Telemetry):
                 if callable(getattr(Telemetry, attr)) and not attr.startswith("__"):
                     setattr(Telemetry, attr, LLMUtils.noop)
-            print("CrewAI telemetry disabled successfully.")
+            _logger.info("CrewAI telemetry disabled successfully")
         except ImportError:
-            print("Telemetry module not found. Skipping telemetry disabling.")
+            _logger.debug("Telemetry module not found, skipping")
 
     @staticmethod
     def extract_model_name(model_string):

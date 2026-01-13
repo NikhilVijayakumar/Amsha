@@ -4,12 +4,16 @@ Shared JSON processing and file management utilities for all application impleme
 from pathlib import Path
 from typing import Optional, Tuple
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
+from amsha.common.logger import get_logger, MetricsLogger
 from amsha.crew_forge.exceptions import (
     CrewForgeException,
     ErrorContext,
     ErrorMessageBuilder,
     wrap_external_exception
 )
+
+# Module-level logger for static methods
+_logger = get_logger("crew_forge.json_service")
 
 
 class SharedJSONFileService:
@@ -30,7 +34,9 @@ class SharedJSONFileService:
         Raises:
             CrewForgeException: If file operations fail
         """
-        print(f"🧹 [SharedJSONFile] Cleaning JSON file: {output_filename}")
+        _logger.info("Cleaning JSON file", extra={
+            "output_filename": output_filename
+        })
         
         context = ErrorContext("SharedJSONFileService", "clean_json")
         context.add_context("output_filename", output_filename)
@@ -45,10 +51,15 @@ class SharedJSONFileService:
             cleaner = JsonCleanerUtils(output_filename,output_folder)
             
             if cleaner.process_file():
-                print(f"✅ [SharedJSONFile] JSON validated successfully. Clean file at: {cleaner.output_file_path}")
+                _logger.info("JSON validation successful", extra={
+                    "validated_file": cleaner.output_file_path,
+                    "original_file": output_filename
+                })
                 return True
             else:
-                print(f"❌ [SharedJSONFile] JSON cleaning failed for: {output_filename}")
+                _logger.warning("JSON cleaning failed", extra={
+                    "output_filename": output_filename
+                })
                 return False
                 
         except Exception as e:
@@ -73,7 +84,9 @@ class SharedJSONFileService:
         Raises:
             CrewForgeException: If file operations fail
         """
-        print(f"🧹 [SharedJSONFile] Cleaning JSON file with metrics: {output_filename}")
+        _logger.info("Cleaning JSON file with metrics", extra={
+            "output_filename": output_filename
+        })
         
         context = ErrorContext("SharedJSONFileService", "clean_json_with_metrics")
         context.add_context("output_filename", output_filename)
@@ -88,10 +101,15 @@ class SharedJSONFileService:
             cleaner = JsonCleanerUtils(output_filename)
             
             if cleaner.process_file():
-                print(f"✅ [SharedJSONFile] JSON validated successfully. Clean file at: {cleaner.output_file_path}")
+                _logger.info("JSON validation successful", extra={
+                    "validated_file": cleaner.output_file_path,
+                    "original_file": output_filename
+                })
                 return True, cleaner.output_file_path
             else:
-                print(f"❌ [SharedJSONFile] JSON cleaning failed for: {output_filename}")
+                _logger.warning("JSON cleaning failed", extra={
+                    "output_filename": output_filename
+                })
                 return False, None
                 
         except Exception as e:
@@ -128,7 +146,9 @@ class SharedJSONFileService:
             
             # Create directory if it doesn't exist
             directory.mkdir(parents=True, exist_ok=True)
-            print(f"📁 [SharedJSONFile] Ensured directory exists: {directory}")
+            _logger.debug("Directory ensured", extra={
+                "directory": str(directory)
+            })
             
             return directory
             

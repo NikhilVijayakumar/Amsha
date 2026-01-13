@@ -1,4 +1,5 @@
 import sys
+import time
 from typing import Dict, Any, Optional, Union
 from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
 from amsha.execution_runtime.domain.execution_mode import ExecutionMode
@@ -15,6 +16,7 @@ from amsha.crew_forge.exceptions import (
     ErrorMessageBuilder,
     wrap_external_exception
 )
+from amsha.common.logger import get_logger, MetricsLogger
 
 
 class BaseCrewOrchestrator:
@@ -34,10 +36,15 @@ class BaseCrewOrchestrator:
             runtime: Optional RuntimeEngine for execution management
             state_manager: Optional StateManager for execution state tracking
         """
-        print("--- [BaseOrchestrator] Initializing shared orchestrator logic ---")
+        self.logger = get_logger("crew_forge.orchestrator")
+        self.metrics_logger = MetricsLogger(self.logger)
+        
+        self.logger.info("Orchestrator initialized", extra={
+            "manager_type": type(manager).__name__
+        })
+        
         self.manager = manager
         self.runtime = runtime or RuntimeEngine()
-        self.state_manager = state_manager or StateManager()
         self.state_manager = state_manager or StateManager()
         self.last_monitor: Optional[CrewPerformanceMonitor] = None
         self.last_execution_id: Optional[str] = None
@@ -67,7 +74,14 @@ class BaseCrewOrchestrator:
             CrewManagerException: If crew building fails
             CrewExecutionException: If crew execution fails
         """
-        print(f"\n[BaseOrchestrator] Request received to run crew: '{crew_name}'")
+        execution_start_time = time.time()
+        
+        self.logger.info("Crew execution request received", extra={
+            "crew_name": crew_name,
+            "mode": mode.value,
+            "has_inputs": bool(inputs),
+            "filename_suffix": filename_suffix
+        })
         
         context = ErrorContext("BaseCrewOrchestrator", "run_crew")
         context.add_context("crew_name", crew_name)
@@ -76,7 +90,11 @@ class BaseCrewOrchestrator:
         # Create execution state
         state = self.state_manager.create_execution(inputs=inputs)
         self.last_execution_id = state.execution_id
-        print(f"[BaseOrchestrator] Created Execution State ID: {state.execution_id}")
+        
+        self.logger.info("Execution state created", extra={
+            "execution_id": state.execution_id,
+            "crew_name": crew_name
+        })
         context.add_context("execution_id", state.execution_id)
         
         self.state_manager.update_status(
@@ -108,7 +126,11 @@ class BaseCrewOrchestrator:
 
         def _execute_kickoff():
             """Internal function to execute crew kickoff with monitoring."""
-            print(f"[BaseOrchestrator] Kicking off crew with inputs: {inputs}")
+            self.logger.info("Initiating crew kickoff", extra={
+                "crew_name": crew_name,
+                "execution_id": state.execution_id,
+                "model_name": self.manager.model_name
+            })
             
             # Initialize monitor with model name from manager
             self.last_monitor = CrewPerformanceMonitor(model_name=self.manager.model_name)
@@ -119,7 +141,9 @@ class BaseCrewOrchestrator:
 
                 # Handle streaming response (CrewAI 1.8.0+)
                 if hasattr(result, '__iter__') and not isinstance(result, (str, dict, list, CrewOutput)):
-                    print(f"[BaseOrchestrator] Streaming output detected:")
+                    self.logger.info("Streaming output detected, consuming chunks", extra={
+                        "execution_id": state.execution_id
+                    })
                     final_string = ""
                     for chunk in result:
                         sys.__stdout__.write(str(chunk))
@@ -144,8 +168,26 @@ class BaseCrewOrchestrator:
                 self.last_monitor.log_usage(result)
                 summary = self.last_monitor.get_summary()
                 metrics = self.last_monitor.get_metrics()
-                print(summary)
-                print(f"[BaseOrchestrator] Crew '{crew_name}' finished.")
+                # Log performance summary
+                self.logger.info("Performance summary", extra={
+                    "execution_id": state.execution_id,
+                    "summary": summary
+                })
+                
+                # Log execution completion with metrics
+                execution_duration = time.time() - execution_start_time
+                self.metrics_logger.log_execution_metrics(
+                    crew_name=crew_name,
+                    execution_id=state.execution_id,
+                    metrics=metrics,
+                    duration=execution_duration
+                )
+                
+                self.logger.info("Crew execution completed successfully", extra={
+                    "crew_name": crew_name,
+                    "execution_id": state.execution_id,
+                    "duration_seconds": round(execution_duration, 4)
+                })
                 
                 # Update state on success
                 self.state_manager.update_status(
@@ -174,7 +216,12 @@ class BaseCrewOrchestrator:
                     "crew_kickoff", 
                     str(e)
                 )
-                print(f"[BaseOrchestrator] Execution Failed: {error_message}")
+                self.logger.error("Crew execution failed", extra={
+                    "crew_name": crew_name,
+                    "execution_id": state.execution_id,
+                    "error_message": error_message,
+                    "error_type": type(e).__name__
+                }, exc_info=True)
                 
                 self.state_manager.update_status(
                     state.execution_id, 

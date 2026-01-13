@@ -3,6 +3,7 @@ import os
 import time
 import typing
 from typing import Optional
+from amsha.common.logger import get_logger
 
 from crewai import Crew, Agent, Process, Task
 
@@ -14,6 +15,7 @@ from amsha.crew_forge.domain.models.task_data import TaskRequest
 class CrewBuilderService:
 
     def __init__(self, data: CrewData):
+        self.logger = get_logger("crew_forge.builder")
         self.llm = data.llm
         self.module_name = data.module_name
         if data.output_dir_path:
@@ -53,7 +55,9 @@ class CrewBuilderService:
 
     def add_task(self, task_details: TaskRequest, agent: Agent, output_filename: str = None,
                  validation:bool=False, output_json: typing.Any = None) -> 'CrewBuilderService':
-        print(f"CrewBuilderService:{output_filename}")
+        self.logger.debug("Building crew task", extra={
+            "output_filename": output_filename
+        })
 
         if not task_details:
             raise ValueError(f"Task with name '{task_details.name}' not found.")

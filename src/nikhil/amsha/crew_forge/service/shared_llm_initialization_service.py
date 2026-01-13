@@ -17,6 +17,7 @@ from amsha.crew_forge.exceptions import (
     ErrorMessageBuilder,
     wrap_external_exception
 )
+from amsha.common.logger import get_logger, MetricsLogger
 
 
 class SharedLLMInitializationService:
@@ -41,7 +42,14 @@ class SharedLLMInitializationService:
         Raises:
             CrewConfigurationException: If LLM configuration is invalid or file not found
         """
-        print("⚙️  [SharedLLMInit] Setting up LLM...")
+        logger = get_logger("llm_factory.initialization")
+        metrics_logger = MetricsLogger(logger)
+        
+        logger.info("LLM initialization requested", extra={
+            "llm_type": llm_type.value,
+            "has_model_override": model_config is not None,
+            "has_params_override": llm_params is not None
+        })
         
         context = ErrorContext("SharedLLMInitializationService", "initialize_llm")
         context.add_context("llm_config_path", llm_config_path)
@@ -70,13 +78,17 @@ class SharedLLMInitializationService:
             llm_builder = llm_container.llm_builder()
             
             if llm_type == LLMType.CREATIVE:
-                print("  -> Building CREATIVE LLM...")
+                logger.debug("Building CREATIVE LLM instance", extra={
+                    "llm_type": "CREATIVE"
+                })
                 build_llm = llm_builder.build_creative(
                     model_config_override=model_config,
                     params_override=llm_params
                 )
             elif llm_type == LLMType.EVALUATION:
-                print("  -> Building EVALUATION LLM...")
+                logger.debug("Building EVALUATION LLM instance", extra={
+                    "llm_type": "EVALUATION"
+                })
                 build_llm = llm_builder.build_evaluation(
                     model_config_override=model_config,
                     params_override=llm_params
@@ -98,7 +110,21 @@ class SharedLLMInitializationService:
             # Get output_config from model_config for custom aliases/folder organization
             output_config = model_config.output_config if model_config else None
             
-            print(f"  -> LLM initialized successfully: {model_name}")
+            # Log successful initialization with configuration details
+            llm_config_dict = {
+                "model": model_config.model if model_config else "from_config",
+                "temperature": llm_params.temperature if llm_params else "from_config",
+                "max_tokens": llm_params.max_completion_tokens if llm_params else "from_config",
+            }
+            
+            metrics_logger.log_llm_config(model_name, llm_config_dict)
+            
+            logger.info("LLM initialized successfully", extra={
+                "model_name": model_name,
+                "llm_type": llm_type.value,
+                "has_output_config": output_config is not None
+            })
+            
             return llm_instance, model_name, output_config
             
         except CrewConfigurationException:
