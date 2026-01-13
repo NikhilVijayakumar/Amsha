@@ -27,15 +27,7 @@ builtins.print = safe_print
 
 from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
 from amsha.llm_factory.domain.model.llm_type import LLMType
-from amsha.execution_runtime.domain.execution_mode import ExecutionMode
-from amsha.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
 
-# --- Config Paths ---
-CONFIG_DIR = os.path.join(os.path.dirname(__file__), "config")
-APP_CONFIG_PATH = os.path.join(CONFIG_DIR, "app_config.yaml")
-JOB_CONFIG_PATH = os.path.join(CONFIG_DIR, "job_config_retry_test.yaml") # Use corrected config
-LLM_PROVIDERS_CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "llm_factory", "config", "llm_providers.yaml")
-LLM_SETTINGS_PATH = os.path.join(CONFIG_DIR, "llm_settings.yaml")
 
 class GeneratePlotApplication(AmshaCrewFileApplication):
     """
@@ -107,15 +99,7 @@ class GeneratePlotApplication(AmshaCrewFileApplication):
         print("✅ [Validator] JSON is clean!")
         return True
 
-# --- Main Execution Setup ---
-def setup_llm_settings():
-    """Derived settings from the central provider config."""
-    if not os.path.exists(LLM_SETTINGS_PATH):
-        if os.path.exists(LLM_PROVIDERS_CONFIG_PATH):
-            import shutil
-            shutil.copy(LLM_PROVIDERS_CONFIG_PATH, LLM_SETTINGS_PATH)
-        else:
-             raise FileNotFoundError("LLM Providers config not found!")
+
 
 def main():
     log_file_path = "test_retry_output.log"
@@ -123,12 +107,10 @@ def main():
     with open(log_file_path, "w", encoding="utf-8") as f:
         sys.stdout = f
         sys.stderr = f
-        print("Running GeneratePlotApplication Retry Test\n")
+        print("Running GeneratePlotApplication Retry Test/n")
         
         try:
-            setup_llm_settings()
-            
-            setup_llm_settings()
+           
             
             # --- Mocking crewai.Crew.kickoff to avoid LLM dependency ---
             from unittest.mock import MagicMock, patch
@@ -137,15 +119,15 @@ def main():
             # We patch Crew.kickoff to return a dummy result
             with patch.object(Crew, 'kickoff', return_value={"result": "Mocked Story Content"}):
                 configs = {
-                    "llm": LLM_SETTINGS_PATH,
-                    "app": APP_CONFIG_PATH,
-                    "job": JOB_CONFIG_PATH
+                    "llm": "config/llm_config.yaml",
+                    "app": "config/app_config.yaml",
+                    "job": "config/job_config_basic.yaml"
                 }
                 
                 app = GeneratePlotApplication(config_paths=configs, llm_type=LLMType.CREATIVE)
                 app.run()
             
-            print("\nTest Finished!")
+            print("/nTest Finished!")
             
             # Verify attempts
             if app.validation_attempts == 3:
