@@ -93,3 +93,4 @@ Thumbs.db
 /.kiro/specs/crew-forge-refactoring/design.md
 /.kiro/specs/crew-forge-refactoring/requirements.md
 /.kiro/specs/crew-forge-refactoring/tasks.md
+/example/crew_forge/config/llm_config.yaml

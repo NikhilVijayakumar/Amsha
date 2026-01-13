@@ -1,0 +1,105 @@
+task:
+  name: "Generate Scientific Knowledge Base"
+  description: |
+                Acts as a science educator and curriculum designer for children. It takes a single, high-level scientific concept and expands it into a detailed, purely factual, and structured JSON object. This document is designed to serve as the foundational "ground truth" for all future creative tasks.
+            
+                Input:
+                - scientific_concept : {scientific_concept}
+            
+                Steps:
+                1.  Receive the scientific_concept as input.
+                2.  Define a simple, age-appropriate summary of the concept.
+                3.  Identify the Key Components and "Actors" (e.g., "Sun," "Water," "CO2," "Chlorophyll") and write a brief description for each.
+                4.  Outline the "How it Works" as a logical, step-by-step process.
+                5.  Explain the "Why it Matters" (its importance to the ecosystem or daily life).
+                6.  List the Core Scientific Principles this process demonstrates (e.g., "Energy Transformation," "Chemical Reaction").
+                7.  List relevant, age-appropriate vocabulary.
+                8.  Assemble all information into a single, structured JSON object as defined in the expected_output.
+
+  expected_output: |
+                      A single, structured, and valid JSON object.
+                      ```json
+                      {
+                        "scientificConcept": "Photosynthesis",
+                        "coreConcept": "Photosynthesis is the special and secret way that plants make their own food. They are like little green chefs! They use three main ingredients: sunlight (from the sun), water (from the ground), and a gas you can't see (called carbon dioxide, which is what we breathe out). They mix these ingredients inside their leaves to make a type of sugar (their food) and, as a wonderful gift, they release the air that we need to breathe (called oxygen).",
+                        "keyActorsAndComponents": [
+                          {
+                            "name": "The Sun",
+                            "description": "The source of all light and energy."
+                          },
+                          {
+                            "name": "Water",
+                            "description": "The liquid absorbed by the plant's roots."
+                          },
+                          {
+                            "name": "Carbon Dioxide (CO2)",
+                            "description": "An invisible gas in the air."
+                          },
+                          {
+                            "name": "Chlorophyll",
+                            "description": "The green substance inside the leaf that is the key to mixing the ingredients."
+                          },
+                          {
+                            "name": "Glucose (Sugar)",
+                            "description": "The food the plant makes for itself."
+                          },
+                          {
+                            "name": "Oxygen (O2)",
+                            "description": "The 'gift' gas that the plant releases."
+                          }
+                        ],
+                        "storyOfProcess": [
+                          {
+                            "step": 1,
+                            "name": "The Drink",
+                            "description": "The plant's roots soak up Water from the soil."
+                          },
+                          {
+                            "step": 2,
+                            "name": "The Breath",
+                            "description": "The plant's leaves have tiny holes that 'breathe in' the Carbon Dioxide gas from the air."
+                          },
+                          {
+                            "step": 3,
+                            "name": "The Spark",
+                            "description": "The Sun shines its light onto the leaves."
+                          },
+                          {
+                            "step": 4,
+                            "name": "The Magic",
+                            "description": "The Chlorophyll (the green stuff) uses the Sun's energy to 'cook' the Water and Carbon Dioxide, transforming them."
+                          },
+                          {
+                            "step": 5,
+                            "name": "The Food",
+                            "description": "This 'cooking' process creates Glucose (sugar), which the plant immediately uses as food to grow."
+                          },
+                          {
+                            "step": 6,
+                            "name": "The Gift",
+                            "description": "As a leftover from the 'cooking,' the plant 'breathes out' Oxygen, the air we need to live."
+                          }
+                        ],
+                        "corePrinciples": [
+                          {
+                            "name": "Energy Transformation",
+                            "description": "Light energy from the sun is turned into chemical energy (food)."
+                          },
+                          {
+                            "name": "Symbiosis / Interconnection",
+                            "description": "Plants and animals need each other. We breathe out their 'ingredient' (CO2), and they breathe out our 'ingredient' (Oxygen)."
+                          },
+                          {
+                            "name": "Producers",
+                            "description": "Plants are 'producers'; they make their own food, while animals are 'consumers.'"
+                          }
+                        ],
+                        "relevantVocabulary": [
+                          "Absorb",
+                          "Release",
+                          "Energy",
+                          "Transform",
+                          "Nutrient"
+                        ]
+                      }
+                      ```

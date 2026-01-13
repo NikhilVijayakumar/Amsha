@@ -1,4 +1,0 @@
-task:
-  name: "knowledge_task"
-  description: "Answer the question using the provided knowledge source: {question}"
-  expected_output: "The answer from the text."

@@ -1,0 +1,22 @@
+crew_name: "Generate Scientific Knowledge Crew"
+usecase: "Generate Scientific Knowledge"
+module_name: "generate_scientific_knowledge"
+
+crews:
+  generate_scientific_knowledge_crew:
+
+    input:
+      - key_name: "scientific_concept"
+        source: "direct"
+        value: "Photosynthesis"
+      - key_name: "podcast_name"
+        source: "direct"
+        value: "Photosynthesis"
+       
+    steps:
+      - task_file: "example/data/crew/tasks/generate_scientific_knowledge_task.yaml"
+        agent_file: "example/data/crew/agents/science_bard_agent.yaml"
+
+
+pipeline:
+  - "generate_scientific_knowledge_crew"

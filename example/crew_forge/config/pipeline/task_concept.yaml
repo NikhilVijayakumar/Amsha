@@ -1,4 +1,0 @@
-task:
-  name: "generate_concept"
-  description: "Generate a story concept for a '{theme}' theme. Keep it simple and suitable for young children. Return just the core idea title and a 2-sentence summary."
-  expected_output: "A Title and a Summary of the story concept."

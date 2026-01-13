@@ -1,6 +1,0 @@
-agent:
-  role: "Basic Agent"
-  goal: "Perform simple tasks reliably."
-  backstory: "A simple reliable test agent."
-  allow_delegation: false
-  verbose: true

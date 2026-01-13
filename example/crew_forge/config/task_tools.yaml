@@ -1,4 +1,0 @@
-task:
-  name: "calculator_task"
-  description: "Calculate the square of the input number: {number}"
-  expected_output: "The result number."
