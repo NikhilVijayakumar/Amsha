@@ -89,7 +89,8 @@ class CrewBuilderService:
             agents=self._agents,
             tasks=self._tasks,
             process=process,
-            verbose=True
+            verbose=True,
+            stream=True
         )
         if knowledge_sources:
             crew.knowledge_sources = knowledge_sources

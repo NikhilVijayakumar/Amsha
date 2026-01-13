@@ -1,6 +1,4 @@
-"""
-Base orchestrator providing shared execution logic for all crew orchestrator implementations.
-"""
+import sys
 from typing import Dict, Any, Optional, Union
 from amsha.execution_runtime.service.runtime_engine import RuntimeEngine
 from amsha.execution_runtime.domain.execution_mode import ExecutionMode
@@ -9,6 +7,7 @@ from amsha.execution_state.service.state_manager import StateManager
 from amsha.execution_state.domain.enums import ExecutionStatus
 from amsha.crew_monitor.service.crew_performance_monitor import CrewPerformanceMonitor
 from amsha.crew_forge.protocols.crew_manager import CrewManager
+from crewai.crews.crew_output import CrewOutput
 from amsha.crew_forge.exceptions import (
     CrewExecutionException,
     CrewManagerException,
@@ -117,6 +116,29 @@ class BaseCrewOrchestrator:
             
             try:
                 result = crew_to_run.kickoff(inputs=inputs)
+
+                # Handle streaming response (CrewAI 1.8.0+)
+                if hasattr(result, '__iter__') and not isinstance(result, (str, dict, list, CrewOutput)):
+                    print(f"[BaseOrchestrator] Streaming output detected:")
+                    final_string = ""
+                    for chunk in result:
+                        sys.__stdout__.write(str(chunk))
+                        sys.__stdout__.flush()
+                        final_string += str(chunk)
+                    sys.__stdout__.write("\n")
+                    sys.__stdout__.flush()
+
+                    # Reconstruct CrewOutput with metrics from the crew object
+                    # usage_metrics is populated after execution completes
+                    usage = getattr(crew_to_run, 'usage_metrics', {})
+                    
+                    # Create CrewOutput with the gathered data
+                    # This ensures downstream logic (monitor, validation) works as expected
+                    result = CrewOutput(
+                        raw=final_string,
+                        token_usage=usage,
+                        tasks_output=[] # Task outputs might be lost in stream iteration if not manually collected
+                    )
                 
                 self.last_monitor.stop_monitoring()
                 self.last_monitor.log_usage(result)
@@ -138,6 +160,12 @@ class BaseCrewOrchestrator:
                     if current_state:
                         current_state.set_output("result", result)
                         self.state_manager.repository.save(current_state)
+                # Handle CrewOutput serialization
+                elif isinstance(result, CrewOutput):
+                     current_state = self.state_manager.get_execution(state.execution_id)
+                     if current_state:
+                         current_state.set_output("result", result.raw)
+                         self.state_manager.repository.save(current_state)
                 
                 return result
             except Exception as e:

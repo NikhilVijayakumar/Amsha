@@ -5,6 +5,7 @@ from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.llm_factory.domain.model.llm_build_result import LLMBuildResult
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.utils.llm_utils import LLMUtils
+from amsha.llm_factory.utils.deprecated_compat import apply_drop_params_workaround
 from crewai import LLM
 
 if TYPE_CHECKING:
@@ -31,18 +32,23 @@ class LLMBuilder:
 
         clean_model_name = LLMUtils.extract_model_name(model_config.model)
         if model_config.base_url is None:
-            llm_instance = LLM(
-                api_key=model_config.api_key,
-                api_version=model_config.api_version,
-                model=model_config.model,
-                temperature=params.temperature,
-                top_p=params.top_p,
-                max_completion_tokens=params.max_completion_tokens,
-                presence_penalty=params.presence_penalty,
-                frequency_penalty=params.frequency_penalty,
-                stream=True,
-                drop_params=True
-            )
+            # Build base kwargs for LLM
+            llm_kwargs = {
+                'api_key': model_config.api_key,
+                'api_version': model_config.api_version,
+                'model': model_config.model,
+                'temperature': params.temperature,
+                'top_p': params.top_p,
+                'max_completion_tokens': params.max_completion_tokens,
+                'presence_penalty': params.presence_penalty,
+                'frequency_penalty': params.frequency_penalty,
+                'stream': True
+            }
+            
+            # Apply deprecated compatibility workaround
+            llm_kwargs = apply_drop_params_workaround(llm_kwargs)
+            
+            llm_instance = LLM(**llm_kwargs)
         else:
             # CrewAI 1.8.0: Azure models require 'endpoint' parameter instead of 'base_url'
             # Detect Azure models and map base_url to endpoint
@@ -56,7 +62,7 @@ class LLMBuilder:
                 'max_completion_tokens': params.max_completion_tokens,
                 'presence_penalty': params.presence_penalty,
                 'frequency_penalty': params.frequency_penalty,
-                'drop_params': True
+                'stream': True
             }
             
             # Use 'endpoint' for Azure, 'base_url' for others
@@ -64,6 +70,9 @@ class LLMBuilder:
                 llm_kwargs['endpoint'] = model_config.base_url
             else:
                 llm_kwargs['base_url'] = model_config.base_url
+            
+            # Apply deprecated compatibility workaround
+            llm_kwargs = apply_drop_params_workaround(llm_kwargs)
             
             llm_instance = LLM(**llm_kwargs)
 
