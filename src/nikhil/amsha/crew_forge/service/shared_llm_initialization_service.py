@@ -9,6 +9,7 @@ from amsha.llm_factory.domain.model.llm_type import LLMType
 if TYPE_CHECKING:
     from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
     from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
+    from amsha.llm_factory.domain.model.llm_output_config import LLMOutputConfig
 
 from amsha.crew_forge.exceptions import (
     CrewConfigurationException,
@@ -24,7 +25,7 @@ class SharedLLMInitializationService:
     @staticmethod
     def initialize_llm(llm_config_path: str, llm_type: LLMType,
                        model_config: Optional["LLMModelConfig"] = None,
-                       llm_params: Optional["LLMParameters"] = None) -> Tuple[Any, str]:
+                       llm_params: Optional["LLMParameters"] = None) -> Tuple[Any, str, Optional["LLMOutputConfig"]]:
         """
         Initialize LLM instance using the LLM factory with consistent patterns.
         
@@ -35,7 +36,7 @@ class SharedLLMInitializationService:
             llm_params: Optional specific LLM parameters to use
             
         Returns:
-            Tuple of (llm_instance, model_name)
+            Tuple of (llm_instance, model_name, output_config)
             
         Raises:
             CrewConfigurationException: If LLM configuration is invalid or file not found
@@ -91,10 +92,14 @@ class SharedLLMInitializationService:
             
             provider = build_llm.provider
             model_name = provider.model_name
+            # CrewAI 1.8.0 expects LLM wrapper instances, not the raw provider
             llm_instance = provider.get_raw_llm()
             
+            # Get output_config from model_config for custom aliases/folder organization
+            output_config = model_config.output_config if model_config else None
+            
             print(f"  -> LLM initialized successfully: {model_name}")
-            return llm_instance, model_name
+            return llm_instance, model_name, output_config
             
         except CrewConfigurationException:
             # Re-raise crew_forge exceptions as-is

@@ -25,7 +25,7 @@ class LLMUtils:
 
     @staticmethod
     def extract_model_name(model_string):
-        prefixes = ["lm_studio/", "gemini/", "open_ai/","azure"]  # Add any other prefixes here
+        prefixes = ["lm_studio/", "gemini/", "open_ai/", "azure/"]  # Add any other prefixes here
         for prefix in prefixes:
             if model_string.startswith(prefix):
                 return model_string[len(prefix):]  # Remove the prefix

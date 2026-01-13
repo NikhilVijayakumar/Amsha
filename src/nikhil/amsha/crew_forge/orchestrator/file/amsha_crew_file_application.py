@@ -49,13 +49,14 @@ class AmshaCrewFileApplication(CrewApplication):
                 llm_params = LLMParameters(**llm_config_override['llm_parameters'])
 
         # Initialize LLM using shared service
-        llm, model_name = SharedLLMInitializationService.initialize_llm(
+        llm, model_name, output_config = SharedLLMInitializationService.initialize_llm(
             config_paths["llm"], 
             llm_type,
             model_config=model_config,
             llm_params=llm_params
         )
         self.model_name = model_name
+        self.output_config = output_config
         
         self.external_inputs = inputs
         
@@ -64,7 +65,8 @@ class AmshaCrewFileApplication(CrewApplication):
         
         manager = AtomicCrewFileManager(
             llm=llm,
-            model_name = self.model_name,
+            model_name=self.model_name,
+            output_config=output_config,
             app_config_path=config_paths["app"],
             job_config=self.job_config
         )

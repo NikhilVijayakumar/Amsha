@@ -83,12 +83,13 @@ class CrewBuilderService:
         if not self._agents or not self._tasks:
             raise ValueError("A crew must have at least one agent and one task.")
 
+        # CrewAI 1.8.0: stream=True causes immediate return with streaming output object
+        # Remove it to allow normal execution
         crew= Crew(
             agents=self._agents,
             tasks=self._tasks,
             process=process,
-            verbose=True,
-            stream=True
+            verbose=True
         )
         if knowledge_sources:
             crew.knowledge_sources = knowledge_sources

@@ -68,6 +68,12 @@ class CrewPerformanceMonitor:
         """
         if hasattr(result, 'token_usage'):
             usage = result.token_usage
+            
+            # CrewAI 1.8.0: token_usage might be None
+            if usage is None:
+                print("[CrewPerformanceMonitor] Info: token_usage is None in result (CrewAI 1.8.0).")
+                return
+            
             # Handle if usage is a dict or object
             if isinstance(usage, dict):
                 self.total_tokens = usage.get('total_tokens', 0)

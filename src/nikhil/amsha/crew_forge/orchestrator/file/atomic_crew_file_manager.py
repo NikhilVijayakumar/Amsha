@@ -26,7 +26,8 @@ class AtomicCrewFileManager(CrewManager):
     interface for structural typing compatibility.
     """
 
-    def __init__(self, llm, app_config_path: str, job_config: Dict[str, Any], model_name: str):
+    def __init__(self, llm, app_config_path: str, job_config: Dict[str, Any], model_name: str,
+                 output_config: Optional[Any] = None):
         """
         Initialize the file-based crew manager.
         
@@ -35,6 +36,7 @@ class AtomicCrewFileManager(CrewManager):
             app_config_path: Path to application configuration file
             job_config: Job configuration dictionary
             model_name: Name of the LLM model being used
+            output_config: Optional output configuration for custom aliasing and folder organization
             
         Raises:
             CrewConfigurationException: If configuration loading fails
@@ -50,6 +52,7 @@ class AtomicCrewFileManager(CrewManager):
             self.job_config = job_config
             self.crew_container = CrewForgeContainer()
             self._model_name = model_name
+            self._output_config = output_config
             self._output_file: Optional[str] = None
 
             # Load app config for DI with error handling
@@ -166,11 +169,15 @@ class AtomicCrewFileManager(CrewManager):
                 # Add agent to crew
                 crew_builder.add_agent(knowledge_sources=agent_text_source)
                 
-                # Determine output filename
+                # Determine output filename - use alias from output_config if available
+                base_name = self._model_name
+                if self._output_config and hasattr(self._output_config, 'alias') and self._output_config.alias:
+                    base_name = self._output_config.alias
+                
                 if filename_suffix:
-                    output_filename = f"{self._model_name}_{filename_suffix}"
+                    output_filename = f"{base_name}_{filename_suffix}"
                 else:
-                    output_filename = f"{self._model_name}"
+                    output_filename = base_name
                 
                 # Add task to crew
                 crew_builder.add_task(

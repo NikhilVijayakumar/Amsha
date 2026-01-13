@@ -47,32 +47,19 @@ if __name__ == "__main__":
     }
     inputs_list = [
         {
-            "scientific_concept": {
-                "key_name": "topic",
-                "source": "direct",
-                "value": "Quantum Entanglement"
-            }
+            "key_name": "scientific_concept",
+            "source": "direct",
+            "value": "Quantum Entanglement"
         },
         {
-            "podcast_name": {
-                "key_name": "title",
-                "source": "direct",
-                "value": "The Science Minute"
-            }
+            "key_name": "podcast_name",
+            "source": "direct",
+            "value": "The Science Minute"
         }
     ]
     llm_config_override = {
-        "model_config": {
-            "base_url": "http://localhost:1234/v1",
-            "model": "lm_studio/gemma-3-12b-it",
-            "api_key": "lm_studio"
-        },
-        "llm_parameters": {
-            "temperature": 0.8,
-            "top_p": 0.9,
-            "max_completion_tokens": 8192
-        }
-    }
+
+}
     # The main script is now incredibly simple and clean.
     app = GenerateScientificKnowledgeApplication(config_paths=configs, llm_type=LLMType.CREATIVE, inputs=inputs_list, llm_config_override=llm_config_override)
     app.run()
