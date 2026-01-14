@@ -1,0 +1,51 @@
+# Nibandha Log Rotation Configuration Template
+#
+# Place this file at: .Nibandha/config/rotation_config.yaml
+#
+# This configuration controls automatic log rotation for Amsha.
+# Clients must create this file before initializing the logger.
+
+# Enable or disable log rotation
+enabled: true
+
+# Maximum log file size in MB before rotation
+# Rotation is triggered when the log file exceeds this size OR rotation_interval_hours
+max_size_mb: 50
+
+# Rotation interval in hours
+# Rotation is triggered when this time has elapsed OR max_size_mb is exceeded
+rotation_interval_hours: 24
+
+# Number of days to keep archived logs
+# Archives older than this will be deleted when cleanup_old_archives() is called
+archive_retention_days: 30
+
+# Directory for active log files (relative to .Nibandha/Amsha/)
+log_data_dir: logs/data
+
+# Directory for archived log files (relative to .Nibandha/Amsha/)
+archive_dir: logs/archive
+
+# Timestamp format for log filenames (Python strftime format)
+timestamp_format: "%Y-%m-%d_%H-%M-%S"
+
+# ============================================================================
+# Environment-Specific Recommendations
+# ============================================================================
+#
+# Development:
+#   max_size_mb: 10
+#   rotation_interval_hours: 6
+#   archive_retention_days: 7
+#
+# Staging:
+#   max_size_mb: 50
+#   rotation_interval_hours: 12
+#   archive_retention_days: 30
+#
+# Production:
+#   max_size_mb: 200
+#   rotation_interval_hours: 24
+#   archive_retention_days: 90
+#
+# ============================================================================

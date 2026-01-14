@@ -4,7 +4,7 @@ Comprehensive logging for Amsha using Nibandha.
 This module provides structured logging with metrics tracking, execution tracing,
 and performance monitoring - going beyond simple print replacement.
 
-Usage:
+Basic Usage:
     from amsha.common.logger import get_logger, log_execution, MetricsLogger
     
     logger = get_logger("crew_forge")
@@ -14,8 +14,27 @@ Usage:
     def build_crew(name):
         # Automatically logs start, duration, and completion
         pass
+
+Log Rotation (New in Nibandha v1.0.1):
+    Rotation requires a config file at .Nibandha/config/rotation_config.yaml
+    Client applications must create this file before initializing the logger.
+    
+    from amsha.common.logger import should_rotate, rotate_logs, cleanup_old_archives
+    
+    # Check if rotation is needed (size or time triggers)
+    if should_rotate():
+        rotate_logs()
+    
+    # Client applications should call cleanup when appropriate
+    # (e.g., on startup, scheduled maintenance, or manual trigger)
+    deleted_count = cleanup_old_archives()
+    
+    # Inspect current rotation configuration
+    config = get_rotation_config()
+    if config and config.enabled:
+        print(f"Rotation enabled: max {config.max_size_mb}MB, {config.rotation_interval_hours}h")
 """
-from nibandha.core import Nibandha, AppConfig
+from nibandha.core import Nibandha, AppConfig, LogRotationConfig
 from typing import Optional, Dict, Any, Callable
 import logging
 import os
@@ -33,6 +52,9 @@ def get_logger(module_name: Optional[str] = None, log_level: Optional[str] = Non
     This function initializes Nibandha on first call and returns loggers for specific
     modules. All logs are written to .Nibandha/Amsha/logs/Amsha.log and console.
     
+    **Automatic Default Config**: If no rotation config exists, a sensible default
+    is created automatically. Clients can override this using rotation_setup utilities.
+    
     Args:
         module_name: Optional module name for hierarchical logging (e.g., "crew_forge")
         log_level: Optional log level override (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -42,7 +64,7 @@ def get_logger(module_name: Optional[str] = None, log_level: Optional[str] = Non
         Configured logger instance
         
     Examples:
-        >>> logger = get_logger()  # Root Amsha logger
+        >>> logger = get_logger()  # Root Amsha logger (auto-creates default config)
         >>> logger.info("Application started")
         
         >>> crew_logger = get_logger("crew_forge")
@@ -52,6 +74,10 @@ def get_logger(module_name: Optional[str] = None, log_level: Optional[str] = Non
     
     # Initialize Nibandha on first call
     if _amsha_nibandha is None:
+        # Create default rotation config if none exists
+        # This prevents interactive prompts from Nibandha
+        _ensure_default_rotation_config()
+        
         # Get log level from environment or parameter or default
         level = log_level or os.getenv("AMSHA_LOG_LEVEL", "INFO")
         
@@ -196,6 +222,129 @@ class MetricsLogger:
             "status": status,
             **extra_data
         })
+
+
+# ============================================================================
+# Internal Helpers
+# ============================================================================
+
+def _ensure_default_rotation_config() -> None:
+    """
+    Internal helper to create a default rotation config if none exists.
+    
+    This prevents interactive prompts from Nibandha while providing
+    sensible defaults. Clients can override by using rotation_setup utilities.
+    """
+    from pathlib import Path
+    import yaml
+    
+    config_dir = Path(".Nibandha/config")
+    config_file = config_dir / "rotation_config.yaml"
+    
+    # Only create if doesn't exist
+    if not config_file.exists():
+        config_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Sensible defaults for development/testing
+        default_config = {
+            'enabled': True,
+            'max_size_mb': 50,
+            'rotation_interval_hours': 24,
+            'archive_retention_days': 30,
+            'log_data_dir': 'logs/data',
+            'archive_dir': 'logs/archive',
+            'timestamp_format': '%Y-%m-%d_%H-%M-%S'
+        }
+        
+        with open(config_file, 'w') as f:
+            yaml.dump(default_config, f, default_flow_style=False)
+
+
+# ============================================================================
+# Log Rotation Utilities (Nibandha v1.0.1)
+# ============================================================================
+
+def should_rotate() -> bool:
+    """
+    Check if log rotation is needed based on size or time triggers.
+    
+    Returns:
+        True if rotation is needed, False otherwise
+        
+    Note:
+        Returns False if rotation is not enabled or Nibandha is not initialized.
+    """
+    global _amsha_nibandha
+    
+    if _amsha_nibandha is None:
+        return False
+    
+    return _amsha_nibandha.should_rotate()
+
+
+def rotate_logs() -> None:
+    """
+    Manually trigger log rotation and archive the current log file.
+    
+    This creates a new timestamped log file and moves the current one to the archive directory.
+    Rotation must be enabled in the configuration.
+    
+    Raises:
+        Warning if rotation is not enabled or Nibandha is not initialized.
+    """
+    global _amsha_nibandha
+    
+    if _amsha_nibandha is None:
+        logging.warning("Cannot rotate logs: Nibandha not initialized")
+        return
+    
+    _amsha_nibandha.rotate_logs()
+
+
+def cleanup_old_archives() -> int:
+    """
+    Delete archived log files older than the configured retention period.
+    
+    Returns:
+        Number of archive files deleted
+        
+    Note:
+        This is a utility function for client applications. Clients should call this
+        at appropriate times:
+        - On application startup (cleanup old logs from previous runs)
+        - Scheduled maintenance (e.g., daily/weekly cron job)
+        - Manual trigger (e.g., admin command or button)
+        
+        Amsha is a library and does not automatically call cleanup.
+    """
+    global _amsha_nibandha
+    
+    if _amsha_nibandha is None:
+        return 0
+    
+    return _amsha_nibandha.cleanup_old_archives()
+
+
+def get_rotation_config() -> Optional[LogRotationConfig]:
+    """
+    Get the current log rotation configuration for inspection.
+    
+    Returns:
+        LogRotationConfig object if rotation is configured, None otherwise
+        
+    Usage:
+        config = get_rotation_config()
+        if config and config.enabled:
+            print(f"Max size: {config.max_size_mb}MB")
+            print(f"Interval: {config.rotation_interval_hours}h")
+            print(f"Retention: {config.archive_retention_days} days")
+    """
+    global _amsha_nibandha
+    
+    if _amsha_nibandha is None:
+        return None
+    
+    return _amsha_nibandha.rotation_config
 
 
 def reset_logger():

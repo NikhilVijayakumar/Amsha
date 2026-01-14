@@ -96,3 +96,6 @@ Thumbs.db
 /example/crew_forge/config/llm_config.yaml
 
 /example/crew_forge/app.py
+/example/crew_forge/example_app.py
+/uv.lock
+/.Nibandha/config/rotation_config.yaml
