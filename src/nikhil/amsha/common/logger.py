@@ -45,6 +45,63 @@ _amsha_nibandha: Optional[Nibandha] = None
 _module_loggers: dict = {}
 
 
+# ============================================================================
+# Structured Logging Formatter
+# ============================================================================
+
+class StructuredFormatter(logging.Formatter):
+    """
+    Custom formatter that includes extra fields in log output.
+    
+    Formats log records to show structured metadata in a readable way:
+    timestamp | logger_name | level | message | key1=value1 key2=value2
+    """
+    
+    # Standard logging record attributes to exclude from extra fields
+    EXCLUDED_ATTRS = {
+        'name', 'msg', 'args', 'created', 'filename', 'funcName', 'levelname',
+        'levelno', 'lineno', 'module', 'msecs', 'message', 'pathname', 'process',
+        'processName', 'relativeCreated', 'thread', 'threadName', 'exc_info',
+        'exc_text', 'stack_info', 'asctime', 'taskName'
+    }
+    
+    def format(self, record: logging.LogRecord) -> str:
+        # Format base message with standard format
+        base_message = super().format(record)
+        
+        # Extract extra fields
+        extra_fields = {}
+        for key, value in record.__dict__.items():
+            if key not in self.EXCLUDED_ATTRS:
+                extra_fields[key] = value
+        
+        # If there are extra fields, append them to the message
+        if extra_fields:
+            # Format extra fields as key=value pairs
+            extra_str = " | ".join(f"{k}={v}" for k, v in sorted(extra_fields.items()))
+            return f"{base_message} | {extra_str}"
+        
+        return base_message
+
+
+def _configure_structured_logging(logger: logging.Logger) -> None:
+    """
+    Configure the logger to use structured formatter for all handlers.
+    
+    Args:
+        logger: Logger instance to configure
+    """
+    structured_formatter = StructuredFormatter(
+        fmt='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Apply to all handlers
+    for handler in logger.handlers:
+        handler.setFormatter(structured_formatter)
+
+
+
 def get_logger(module_name: Optional[str] = None, log_level: Optional[str] = None) -> logging.Logger:
     """
     Get or create a logger instance for Amsha.
@@ -81,6 +138,9 @@ def get_logger(module_name: Optional[str] = None, log_level: Optional[str] = Non
         # Get log level from environment or parameter or default
         level = log_level or os.getenv("AMSHA_LOG_LEVEL", "INFO")
         
+        # Check if structured logging is enabled
+        use_structured = os.getenv("AMSHA_STRUCTURED_LOGS", "false").lower() == "true"
+        
         config = AppConfig(
             name="Amsha",
             custom_folders=[
@@ -92,6 +152,11 @@ def get_logger(module_name: Optional[str] = None, log_level: Optional[str] = Non
         )
         
         _amsha_nibandha = Nibandha(config).bind()
+        
+        # Apply structured formatter if enabled
+        if use_structured:
+            _configure_structured_logging(_amsha_nibandha.logger)
+        
         _amsha_nibandha.logger.info("Amsha logger initialized via Nibandha")
     
     # Return module-specific logger or root logger
@@ -253,7 +318,7 @@ def _ensure_default_rotation_config() -> None:
             'archive_retention_days': 30,
             'log_data_dir': 'logs/data',
             'archive_dir': 'logs/archive',
-            'timestamp_format': '%Y-%m-%d_%H-%M-%S'
+            'timestamp_format': '%Y-%m-%d'  # Daily rotation - logs append to same file throughout the day
         }
         
         with open(config_file, 'w') as f:

@@ -167,10 +167,6 @@ class AtomicCrewFileManager(CrewManager):
                 # Handle agent knowledge sources
                 agent_knowledge_paths = set()
                 for path in step.get('knowledge_sources', []):
-                    self.logger.debug("Adding agent knowledge source", extra={
-                        "agent_name": agent_def["name"],
-                        "knowledge_path": path
-                    })
                     agent_knowledge_paths.add(path)
                 
                 agent_text_source = None
@@ -182,6 +178,17 @@ class AtomicCrewFileManager(CrewManager):
                 
                 # Add agent to crew
                 crew_builder.add_agent(knowledge_sources=agent_text_source)
+                
+                # Log agent details
+                agent_def = YamlUtils.yaml_safe_load(agent_file)
+                self.logger.info("Agent added to crew", extra={
+                    "crew_name": crew_name,
+                    "step_index": step_index,
+                    "agent_file": agent_file,
+                    "agent_role": agent_def.get("role", "unknown"),
+                    "has_knowledge": bool(agent_knowledge_paths),
+                    "knowledge_count": len(agent_knowledge_paths)
+                })
                 
                 # Determine output filename - use alias from output_config if available
                 base_name = self._model_name
@@ -199,6 +206,17 @@ class AtomicCrewFileManager(CrewManager):
                     output_filename=output_filename,
                     output_json=output_json
                 )
+                
+                # Log task details
+                task_def = YamlUtils.yaml_safe_load(task_file)
+                self.logger.info("Task added to crew", extra={
+                    "crew_name": crew_name,
+                    "step_index": step_index,
+                    "task_file": task_file,
+                    "task_description": task_def.get("description", "")[:100],  # First 100 chars
+                    "output_filename": output_filename,
+                    "output_json_configured": output_json is not None
+                })
 
             # Store output file reference
             if crew_builder:
@@ -222,7 +240,10 @@ class AtomicCrewFileManager(CrewManager):
 
             self.logger.info("Crew building completed", extra={
                 "crew_name": crew_name,
-                "has_knowledge_sources": bool(crew_knowledge_paths)
+                "num_steps": len(crew_def['steps']),
+                "has_crew_knowledge": bool(crew_knowledge_paths),
+                "crew_knowledge_count": len(crew_knowledge_paths),
+                "output_file": self._output_file
             })
             
             if not crew_builder:

@@ -47,6 +47,123 @@ def cleanup_logger():
     reset_logger()
 
 
+class TestLoggerPropagation:
+    """Test that logger propagation is disabled to prevent log leakage."""
+    
+    def test_root_logger_propagation_disabled(self, temp_nibandha_root, monkeypatch):
+        """Test that Amsha root logger has propagate=False after initialization."""
+        import logging
+        
+        monkeypatch.chdir(temp_nibandha_root.parent)
+        
+        # Initialize logger
+        logger = get_logger()
+        
+        # Check root Amsha logger propagation
+        root_logger = logging.getLogger("Amsha")
+        assert root_logger.propagate is False, "Amsha logger should have propagate=False"
+    
+    def test_module_logger_propagation(self, temp_nibandha_root, monkeypatch):
+        """Test that module-specific loggers use correct propagation settings."""
+        import logging
+        
+        monkeypatch.chdir(temp_nibandha_root.parent)
+        
+        # Initialize root logger first
+        root_logger = get_logger()
+        
+        # Get module-specific logger
+        module_logger = get_logger("crew_forge")
+        
+        # Module logger should propagate to Amsha (its parent)
+        # but Amsha should NOT propagate to root
+        amsha_root = logging.getLogger("Amsha")
+        assert amsha_root.propagate is False, "Amsha root should not propagate"
+    
+    def test_no_log_leakage_to_root(self, temp_nibandha_root, monkeypatch):
+        """Test that Amsha logs do not leak to Python's root logger."""
+        import logging
+        from io import StringIO
+        
+        monkeypatch.chdir(temp_nibandha_root.parent)
+        
+        # Set up a handler on Python's root logger to catch any leaked logs
+        root_handler = logging.StreamHandler(StringIO())
+        root_handler.setLevel(logging.DEBUG)
+        root_logger = logging.getLogger()  # Python's root logger
+        original_level = root_logger.level
+        root_logger.setLevel(logging.DEBUG)
+        root_logger.addHandler(root_handler)
+        
+        try:
+            # Initialize Amsha logger and log something
+            amsha_logger = get_logger("test_module")
+            amsha_logger.info("Test message that should NOT leak to root")
+            
+            # Check that root handler did NOT capture this message
+            output = root_handler.stream.getvalue()
+            # The message might contain initialization logs from Nibandha but should not
+            # contain our test message if propagation is properly disabled
+            assert "Test message that should NOT leak to root" not in output, \
+                "Amsha logs leaked to root logger!"
+        finally:
+            root_logger.removeHandler(root_handler)
+            root_logger.setLevel(original_level)
+
+
+class TestTimestampFormat:
+    """Test that timestamp format uses daily granularity for log consolidation."""
+    
+    def test_default_timestamp_format_is_daily(self, temp_nibandha_root, monkeypatch):
+        """Test that default rotation config uses daily timestamp format."""
+        monkeypatch.chdir(temp_nibandha_root.parent)
+        
+        # Initialize logger (creates default config)
+        logger = get_logger("test")
+        config = get_rotation_config()
+        
+        assert config is not None
+        assert config.timestamp_format == '%Y-%m-%d', \
+            f"Expected daily format '%Y-%m-%d', got '{config.timestamp_format}'"
+    
+    def test_same_day_restarts_use_same_log_file(self, temp_nibandha_root, monkeypatch):
+        """Test that multiple initializations on same day append to same log file."""
+        monkeypatch.chdir(temp_nibandha_root.parent)
+        
+        # First initialization
+        logger1 = get_logger("restart_test_1")
+        logger1.info("First initialization")
+        
+        # Get log file name
+        log_dir = temp_nibandha_root / "Amsha" / "logs" / "data"
+        log_files_1 = list(log_dir.glob("*.log"))
+        assert len(log_files_1) == 1, "Should have exactly one log file"
+        first_log_name = log_files_1[0].name
+        
+        # Simulate application restart (reset logger)
+        reset_logger()
+        time.sleep(0.1)  # Small delay
+        
+        # Second initialization (same day)
+        logger2 = get_logger("restart_test_2")
+        logger2.info("Second initialization")
+        
+        # Check log files - should still be same file
+        log_files_2 = list(log_dir.glob("*.log"))
+        assert len(log_files_2) == 1, \
+            f"Expected 1 log file for daily rotation, found {len(log_files_2)}"
+        
+        # File name should match (daily format means same name for same day)
+        second_log_name = log_files_2[0].name
+        assert first_log_name == second_log_name, \
+            f"Log file names differ: {first_log_name} vs {second_log_name}"
+        
+        # Verify both messages are in the same file
+        log_content = log_files_2[0].read_text()
+        assert "First initialization" in log_content
+        assert "Second initialization" in log_content
+
+
 class TestConfigurationLoading:
     """Test configuration loading from YAML/JSON files."""
     

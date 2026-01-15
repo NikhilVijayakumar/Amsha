@@ -20,6 +20,10 @@ rotation_interval_hours: 24
 # Archives older than this will be deleted when cleanup_old_archives() is called
 archive_retention_days: 30
 
+# Maximum number of backup files to keep in archive
+# Keeps only the N most recent backup files, deleting older ones
+backup_count: 5
+
 # Directory for active log files (relative to .Nibandha/Amsha/)
 log_data_dir: logs/data
 
@@ -27,7 +31,8 @@ log_data_dir: logs/data
 archive_dir: logs/archive
 
 # Timestamp format for log filenames (Python strftime format)
-timestamp_format: "%Y-%m-%d_%H-%M-%S"
+# Default %Y-%m-%d ensures daily log consolidation (same-day logs append to one file)
+timestamp_format: "%Y-%m-%d"
 
 # ============================================================================
 # Environment-Specific Recommendations

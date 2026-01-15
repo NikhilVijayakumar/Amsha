@@ -1,0 +1,61 @@
+{
+  "scientific_concept": "Quantum Entanglement",
+  "core_concept": "Quantum entanglement is a special way that tiny particles can connect with each other, even if they are really far apart. It's like they have a secret language that lets them talk to each other instantly, no matter what.",
+  "key_actors_and_components": [
+    {
+      "name": "Photons",
+      "description": "Tiny particles of light that help show how entanglement works."
+    },
+    {
+      "name": "Entangled Particles",
+      "description": "Tiny particles that are connected in a special way, even when they're far apart."
+    },
+    {
+      "name": "Superposition",
+      "description": "A state where something can be two things at the same time, like being both 'up' and 'down'."
+    },
+    {
+      "name": "Quantum States",
+      "description": "The different ways that particles can behave in a quantum world."
+    }
+  ],
+  "story_of_process": [
+    {
+      "step": 1,
+      "name": "Connection",
+      "description": "Two or more tiny particles become connected, or 'entangled', so they can talk to each other instantly."
+    },
+    {
+      "step": 2,
+      "name": "Superposition",
+      "description": "The entangled particles get into a state where they can be two things at the same time. For example, one particle might be spinning clockwise and counterclockwise at the same time!"
+    },
+    {
+      "step": 3,
+      "name": "Measurement",
+      "description": "When someone observes or 'measures' one of the entangled particles, it instantly affects the other particle, no matter how far apart they are."
+    },
+    {
+      "step": 4,
+      "name": "Entanglement Breaks Down",
+      "description": "As time goes on and the particles get farther apart, their connection starts to break down, making it harder for them to stay entangled."
+    }
+  ],
+  "core_principles": [
+    {
+      "name": "Quantum Non-Locality",
+      "description": "The idea that something can be connected and affected by another thing, even when they're really far apart."
+    },
+    {
+      "name": "Wave-Particle Duality",
+      "description": "The ability of tiny particles to behave like both waves and particles at the same time."
+    }
+  ],
+  "relevant_vocabulary": [
+    "Entangled",
+    "Superposition",
+    "Quantum States",
+    "Measurement",
+    "Non-Locality"
+  ]
+}

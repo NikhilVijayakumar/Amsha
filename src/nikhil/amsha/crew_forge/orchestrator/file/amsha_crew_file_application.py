@@ -136,7 +136,8 @@ class AmshaCrewFileApplication(CrewApplication):
 
         self.logger.info("Preparing crew inputs", extra={
             "crew_name": crew_name,
-            "num_inputs": len(inputs_def)
+            "num_inputs": len(inputs_def),
+            "has_external_overrides": bool(self.external_inputs)
         })
 
         # Loop through each input definition in the list
@@ -148,10 +149,18 @@ class AmshaCrewFileApplication(CrewApplication):
 
             if external_data is not None:
                 final_inputs[key_name] = external_data
+                self.logger.debug("Using external input", extra={
+                    "key_name": key_name,
+                    "source": input_item.get("source"),
+                    "is_file": input_item.get("source") == "file",
+                    "file_path": input_item.get("path") if input_item.get("source") == "file" else None
+                })
             else:
                 # STEP 2: Fallback to existing YAML logic via the common processor
                 self.logger.debug("Loading input from YAML config", extra={
-                    "key_name": key_name
+                    "key_name": key_name,
+                    "source": input_item.get("source"),
+                    "file_path": input_item.get("path") if input_item.get("source") == "file" else None
                 })
                 final_inputs[key_name] = self._process_input_item(input_item)
 
@@ -268,7 +277,9 @@ class AmshaCrewFileApplication(CrewApplication):
                 self.logger.info("Crew validation successful", extra={
                     "crew_name": crew_name,
                     "attempt": attempt,
-                    "output_file": output_file
+                    "output_file": output_file,
+                    "model_name": self.model_name,
+                    "llm_type": self.llm_type.value
                 })
                 success = True
                 break
@@ -316,7 +327,9 @@ class AmshaCrewFileApplication(CrewApplication):
         if output_file:
             self.logger.info("Output file generated", extra={
                 "class_name": class_name,
-                "output_file": output_file
+                "output_file": output_file,
+                "model_name": self.model_name,
+                "model_alias": self.output_config.alias if self.output_config else None
             })
             valid=self.clean_json(output_filename=output_file, output_folder=output_folder)
         return valid

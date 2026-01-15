@@ -112,9 +112,12 @@ class SharedLLMInitializationService:
             
             # Log successful initialization with configuration details
             llm_config_dict = {
+                "llm_type": llm_type.value,  # CREATIVE or EVALUATION
                 "model": model_config.model if model_config else "from_config",
                 "temperature": llm_params.temperature if llm_params else "from_config",
+                "top_p": llm_params.top_p if llm_params else "from_config",
                 "max_tokens": llm_params.max_completion_tokens if llm_params else "from_config",
+                "has_base_url": bool(model_config.base_url) if model_config else False,
             }
             
             metrics_logger.log_llm_config(model_name, llm_config_dict)

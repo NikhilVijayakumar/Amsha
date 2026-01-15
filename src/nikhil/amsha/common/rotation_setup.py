@@ -83,9 +83,10 @@ def setup_rotation_config(
         'max_size_mb': max_size_mb,
         'rotation_interval_hours': rotation_interval_hours,
         'archive_retention_days': archive_retention_days,
+        'backup_count': 5,
         'log_data_dir': 'logs/data',
         'archive_dir': 'logs/archive',
-        'timestamp_format': '%Y-%m-%d_%H-%M-%S'
+        'timestamp_format': '%Y-%m-%d'
     }
     
     with open(config_file, 'w') as f:
@@ -179,9 +180,10 @@ def setup_rotation_for_environment(
         'max_size_mb': env_config.get('max_size_mb', 10),
         'rotation_interval_hours': env_config.get('rotation_interval_hours', 24),
         'archive_retention_days': env_config.get('archive_retention_days', 30),
+        'backup_count': env_config.get('backup_count', 5),
         'log_data_dir': env_config.get('log_data_dir', 'logs/data'),
         'archive_dir': env_config.get('archive_dir', 'logs/archive'),
-        'timestamp_format': env_config.get('timestamp_format', '%Y-%m-%d_%H-%M-%S')
+        'timestamp_format': env_config.get('timestamp_format', '%Y-%m-%d')
     }
     
     if config_dir is None:
