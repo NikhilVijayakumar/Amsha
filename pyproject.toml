@@ -1,12 +1,13 @@
 [project]
 name = "Amsha"
-version = "2.2.6"
+version = "2.2.7"
 description = "Amsha is a lightweight library designed to provide common configuration and helper utilities for CrewAI orchestration. It serves as a foundational component for building scalable and maintainable AI agent systems"
 dependencies = [
     "Nibandha @ git+https://github.com/NikhilVijayakumar/Nibandha.git@main",
      "PyYAML ==6.0.3",
     "crewai == 1.8.0",
     "crewai-tools == 1.8.0",
+    "litellm  >=  1.72.1",
     "dependency-injector == 4.48.2",
      "pandas == 2.3.2",
     "openpyxl == 3.1.5",
