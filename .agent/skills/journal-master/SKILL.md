@@ -127,6 +127,11 @@ To prevent failures during long analysis sessions, the workflow is broken into *
    - Shared design principles
    - Protocol compliance
 
+4. **Novelty Analyst** → `docs/paper/cross_module/novelty.md`
+   - System-level innovations (e.g., hybrid orchestration)
+   - Synergy between modules (e.g., dynamic crew generation + validation)
+   - Comparison with existing multi-agent frameworks
+
 **Output:** 3 files in `docs/paper/cross_module/`
 
 ---

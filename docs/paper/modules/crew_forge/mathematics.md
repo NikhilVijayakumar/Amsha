@@ -1,270 +1,117 @@
-# Crew Forge Module - Mathematical Foundations
+# Crew Forge: Mathematical Foundations
 
-## Overview
-The `crew_forge` module implements the Repository Pattern for agent and task management   with clean separation between domain logic and persistence adapters. This document formalizes the core algorithms and data flow patterns.
+This document formalizes the logical and structural operations within the `crew_forge` module. While the module is primarily architectural, its core function—the composition of autonomous agents into a cohesive crew—can be modeled using Set Theory.
 
----
+## 1. Set-Theoretic Construction of Multi-Agent Systems
 
-## 1. Repository Pattern - Generic CRUD Operations
+The `CrewBuilderService` orchestrates the assembly of a Crew from discrete Agent and Task entities. This process is formally modeled as a constructive set operation.
 
-### Algorithm: Find One
+### Code Verification
+- **Source:** `src/nikhil/amsha/crew_forge/service/crew_builder_service.py`
+- **Lines:** 35-51 (`add_agent`), 53-74 (`add_task`), 76-88 (`build`)
 
-**Source:** [`i_repository.py:13-15`](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/repo/interfaces/i_repository.py#L13-L15)
+### Formalization
 
-**Purpose:** Retrieve a single document matching a query predicate.
+Let $\mathcal{A}$ be the universe of all possible Agents and $\mathcal{T}$ be the universe of all possible Tasks.
 
-**Logical Formalization:**
+A **Crew** $\mathcal{C}$ is defined as a 3-tuple:
 
 $$
-\text{findOne}: \mathcal{Q} \rightarrow \mathcal{D} \cup \{\emptyset\}
+\mathcal{C} = (A, T, P)
 $$
 
-where:
-- $\mathcal{Q}$ = set of all possible query predicates (dictionaries)
-- $\mathcal{D}$ = set of all documents in the collection
-- $\emptyset$ = null/not found
+Where:
+- $A \subseteq \mathcal{A}$ is the ordered set of agents: $A = \{a_1, a_2, \dots, a_n\}$
+- $T \subseteq \mathcal{T}$ is the ordered set of tasks: $T = \{t_1, t_2, \dots, t_m\}$
+- $P$ is the execution process (Sequential or Hierarchical)
 
-**Implementation Logic:**
-```python
-def find_one(self, query: dict) -> Optional[Any]:
-    return self.collection.find_one(query)
-```
+### Construction Algorithm
 
-**Variable Mapping:**
+The construction function $Build$ is an accumulation process over the state $S_i = (A_i, T_i)$:
+
+$$
+S_{i+1} = \begin{cases}
+(A_i \cup \{a\}, T_i) & \text{if operation is add\_agent}(a) \\
+(A_i, T_i \cup \{t\}) & \text{if operation is add\_task}(t)
+\end{cases}
+$$
+
+The final `build()` validation enforces:
+
+$$
+|A| \ge 1 \land |T| \ge 1
+$$
+
+### Complexity Analysis
+- **Time Complexity:** $O(1)$ for each add operation (amortized). Total construction time is $O(|A| + |T|)$.
+- **Space Complexity:** $O(|A| + |T|)$ to store the references.
+
+### Variable Mapping
 
 | LaTeX Symbol | Code Variable | Description |
-|:-------------|:--------------|:------------|
-| $\mathcal{Q}$ | `query: dict` | Query predicate |
-| $\mathcal{D}$ | `Any` | Document type |
-| $\emptyset$ | `None` | Not found |
-
-**Complexity:** $O(n)$ where $n$ is the number of documents (worst case: linear scan without index)
+| :--- | :--- | :--- |
+| $A$ | `self._agents` | List of Agent objects |
+| $T$ | `self._tasks` | List of Task objects |
+| $P$ | `process` | Execution Process Enum |
+| $a$ | `agent` | Single Agent instance |
+| $t$ | `task` | Single Task instance |
 
 ---
 
-### Algorithm: Find Many
+## 2. Text Normalization for Configuration
 
-**Source:** [`i_repository.py:17-19`](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/repo/interfaces/i_repository.py#L17-L19)
+The `CrewParser` implements a normalization algorithm to sanitise multi-line YAML inputs (goals and backstories) into single-line descriptors required for LLM context windows.
 
-**Purpose:** Retrieve all documents matching a query predicate.
+### Code Verification
+- **Source:** `src/nikhil/amsha/crew_forge/seeding/parser/crew_parser.py`
+- **Lines:** 11-14 (`clean_multiline_string`)
 
-**Logical Formalization:**
+### Formalization
+
+Let $S$ be the input string containing potential whitespace irregularities (newlines, tabs). We define a transformation function $f_{norm}: \Sigma^* \to \Sigma^*$:
 
 $$
-\text{findMany}: \mathcal{Q} \rightarrow \mathcal{P}(\mathcal{D})
+f_{norm}(S) = \text{trim}(R_2(R_1(S)))
 $$
 
-where:
-- $\mathcal{P}(\mathcal{D})$ = power set of documents (list of matching documents)
+Where $R_1$ and $R_2$ are regular expression substitution operators:
 
-**Implementation Logic:**
-```python
-def find_many(self, query=None) -> List[Any]:
-    if query is None:
-        query = {}
-    return list(self.collection.find(query))
-```
+$$
+R_1(S) : S \xrightarrow{[\setminus n \setminus t]+} \text{" "} \quad \text{(Replace newlines/tabs with space)}
+$$
 
-**Variable Mapping:**
+$$
+R_2(S) : S \xrightarrow{\setminus s\{2,\}} \text{" "} \quad \text{(Collapse multiple spaces)}
+$$
+
+### Complexity Analysis
+- **Time Complexity:** $O(L)$ where $L$ is the length of the string, as regex pass is linear.
+- **Space Complexity:** $O(L)$ to store the new string.
+
+---
+
+## 3. Database Indexing Logic
+
+The `MongoRepository` enforces uniqueness through compound indexing, formally ensuring data integrity.
+
+### Code Verification
+- **Source:** `src/nikhil/amsha/crew_forge/repo/adapters/mongo/mongo_repository.py`
+- **Lines:** 34-42 (`create_unique_compound_index`)
+
+### Formalization
+
+Let $K = \{k_1, k_2, \dots, k_r\}$ be the set of keys for the index. The database enforces a uniqueness constraint $Unq$ on the collection $D$:
+
+$$
+\forall d_i, d_j \in D, i \neq j \implies \pi_K(d_i) \neq \pi_K(d_j)
+$$
+
+Where $\pi_K(d)$ is the projection of document $d$ onto the keys $K$.
+
+### Variable Mapping
 
 | LaTeX Symbol | Code Variable | Description |
-|:-------------|:--------------|:------------|
-| $\mathcal{Q}$ | `query: dict` | Query predicate |
-| $\mathcal{P}(\mathcal{D})$ | `List[Any]` | Result set |
-
-**Complexity:** $O(n + k)$ where $n$ is total documents and $k$ is the result size
-
----
-
-### Algorithm: Insert One
-
-**Source:** [`i_repository.py:21-23`](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/repo/interfaces/i_repository.py#L21-L23)
-
-**Purpose:** Insert a single document into the collection.
-
-**Logical Formalization:**
-
-$$
-\text{insertOne}: \mathcal{D}' \rightarrow \mathcal{D} \cup \{\text{InsertResult}\}
-$$
-
-where:
-- $\mathcal{D}'$ = document to insert (without ID)
-- $\mathcal{D}$ = persisted document (with generated ID)
-
-**Implementation Logic:**
-```python
-def insert_one(self, data: dict) -> Any:
-    return self.collection.insert_one(data)
-```
-
-**Complexity:** $O(1)$ amortized (MongoDB index update is logarithmic)
-
----
-
-### Algorithm: Update One
-
-**Source:** [`i_repository.py:25-27`](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/repo/interfaces/i_repository.py#L25-L27)
-
-**Purpose:** Update a single document matching the query.
-
-**Logical Formalization:**
-
-$$
-\text{updateOne}: \mathcal{Q} \times \mathcal{U} \rightarrow \{\text{UpdateResult}\}
-$$
-
-where:
-- $\mathcal{U}$ = update specification (partial document)
-
-**MongoDB Update Operator:**
-```python
-def update_one(self, query: dict, data: dict) -> Any:
-    return self.collection.update_one(query, {"$set": data})
-```
-
-**$set Operator Semantics:**
-
-$$
-\mathcal{D}_{\text{new}} = \mathcal{D}_{\text{old}} \oplus \mathcal{U}
-$$
-
-where $\oplus$ denotes field-level merge (overwrite matching fields, preserve others).
-
-**Complexity:** $O(\log n)$ with index on query field
-
----
-
-### Algorithm: Delete One
-
-**Source:** [`i_repository.py:29-31`](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/repo/interfaces/i_repository.py#L29-L31)
-
-**Purpose:** Remove a single document matching the query.
-
-**Logical Formalization:**
-
-$$
-\text{deleteOne}: \mathcal{Q} \rightarrow \{\text{true}, \text{false}\}
-$$
-
-**Implementation Logic:**
-```python
-def delete_one(self, query: dict) -> bool:
-    return self.collection.delete_one(query)
-```
-
-**Complexity:** $O(\log n)$ with index
-
----
-
-## 2. Atomic Crew Builder - Incremental Construction
-
-### Algorithm: Build Atomic Crew
-
-**Source:** [`atomic_crew_db_manager.py:43-116`](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/db/atomic_crew_db_manager.py#L43-L116)
-
-**Purpose:** Incrementally construct a crew by fetching agents and tasks from the repository and assembling them into a CrewAI `Crew` object.
-
-**Logical Formalization:**
-
-Let:
-- $A = \{a_1, a_2, \ldots, a_n\}$ = set of agent IDs
-- $T = \{t_1, t_2, \ldots, t_m\}$ = set of task IDs
-- $\text{Steps} = [(t_i, a_j, K_i)]$ = ordered list of (task_id, agent_id, knowledge_sources)
-
-**Crew Construction:**
-
-$$
-\text{Crew} = \bigcup_{i=1}^{m} (\text{Agent}(a_i) \bowtie \text{Task}(t_i) \bowtie \text{Knowledge}(K_i))
-$$
-
-where $\bowtie$ denotes relational join (task assigned to agent with knowledge).
-
-**Pseudo-Algorithm:**
-
-```
-FOR each step in crew_def['steps']:
-    agent_id ← fetch from master_blueprint.agents[agent_key]
-    task_id ← fetch from master_blueprint.tasks[task_key]
-    knowledge_paths ← step.get('knowledge_sources', [])
-    
-    crew_builder.add_agent(agent_id, knowledge_sources)
-    crew_builder.add_task(task_id, agent, output_filename)
-END FOR
-
-RETURN crew_builder.build(knowledge_sources=crew_level_knowledge)
-```
-
-**Variable Mapping:**
-
-| LaTeX Symbol | Code Variable | Description |
-|:-------------|:--------------|:------------|
-| $A$ | `master_blueprint.agents` | Agent registry |
-| $T$ | `master_blueprint.tasks` | Task registry |
-| $\text{Steps}$ | `crew_def['steps']` | Job config steps |
-| $K_i$ | `knowledge_sources` | Knowledge file paths |
-
-**Time Complexity:**
-
-$$
-T(m, k) = O(m \cdot (L_a + L_t + k))
-$$
-
-where:
-- $m$ = number of steps
-- $L_a$ = agent lookup time (database query)
-- $L_t$ = task lookup time (database query)
-- $k$ = number of knowledge files to load
-
-**Space Complexity:** $O(m \cdot k)$ for storing agents, tasks, and knowledge embeddings.
-
----
-
-## 3. Unique Compound Index Creation
-
-### Algorithm: Create Unique Compound Index
-
-**Source:** [`mongo_repository.py:34-42`](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/repo/adapters/mongo/mongo_repository.py#L34-L42)
-
-**Purpose:** Enforce uniqueness constraint across multiple fields.
-
-**Logical Formalization:**
-
-Given a list of keys $K = [k_1, k_2, \ldots, k_n]$, create an index:
-
-$$
-\text{Index}(K) = \{(d[k_1], d[k_2], \ldots, d[k_n]) \mid d \in \mathcal{D}\}
-$$
-
-with uniqueness constraint:
-
-$$
-\forall d_i, d_j \in \mathcal{D}, \, i \neq j \implies \exists k \in K : d_i[k] \neq d_j[k]
-$$
-
-**Implementation Logic:**
-```python
-def create_unique_compound_index(self, keys: list[str]):
-    if not keys:
-        raise ValueError("List of keys cannot be empty.")
-    index_keys = [(key, pymongo.ASCENDING) for key in keys]
-    self.collection.create_index(index_keys, unique=True)
-```
-
-**Complexity:** $O(n \log n)$ for initial index build on $n$ documents.
-
----
-
-## Summary
-
-| Algorithm | Time Complexity | Space Complexity | Source |
-|:----------|:---------------:|:----------------:|:-------|
-| Find One | $O(n)$ | $O(1)$ | `i_repository.py:13` |
-| Find Many | $O(n + k)$ | $O(k)$ | `i_repository.py:17` |
-| Insert One | $O(1)$ | $O(1)$ | `i_repository.py:21` |
-| Update One | $O(\log n)$ | $O(1)$ | `i_repository.py:25` |
-| Delete One | $O(\log n)$ | $O(1)$ | `i_repository.py:29` |
-| Build Atomic Crew | $O(m \cdot (L_a + L_t + k))$ | $O(m \cdot k)$ | `atomic_crew_db_manager.py:43` |
-| Create Compound Index | $O(n \log n)$ | $O(n)$ | `mongo_repository.py:34` |
-
-**Total:** 7 algorithms formalized with strict code traceability.
+| :--- | :--- | :--- |
+| $K$ | `keys` | List of field names for index |
+| $D$ | `self.collection` | MongoDB Collection |
+| $\pi_K(d)$ | Document fields | The values of the specified keys |

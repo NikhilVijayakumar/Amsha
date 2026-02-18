@@ -116,6 +116,7 @@ output:
     - interactions.md        # How modules communicate
     - dependencies.md        # Dependency graph and analysis
     - patterns.md           # Recurring patterns across modules
+    - novelty.md            # System-level innovation and synergy
   
   # Final synthesis
   final_draft: ${base_dir}/drafts/FINAL_JOURNAL_REPORT.md
