@@ -1,40 +1,136 @@
 # Crew Monitor: Research Gap Analysis
 
-## 1. Quality Assurance Gaps (CRITICAL)
+This document identifies gaps against Scopus-indexed publication standards, categorized by severity and effort.
 
-### Missing Unit Tests
-The `tests/unit/crew_monitor` directory structure exists but contains **zero test files**. The monitoring logic and contribution analysis are unverified.
+---
 
-- **Gap ID:** QA-003
-- **Severity:** Critical +
-- **Description:** No automated verification of metrics calculation or CSV/Excel export.
-- **Impact:** High risk of incorrect performance data in the final paper.
-- **Recommendation:** Implement `test-scaffolder` to verify `CrewPerformanceMonitor` with mock `psutil`/`pynvml`.
+## 1. Quality Assurance Gaps
 
-## 2. Implementation Gaps
+### GAP QA-001: Zero Unit Tests for All Services (CRITICAL)
 
-### Hardware-Specific Dependency (Minor)
- The module relies on `pynvml` which is specific to NVIDIA GPUs.
+The `tests/unit/crew_monitor/` directory contains **zero test files**. All three services (`CrewPerformanceMonitor`, `ContributionAnalyzer`, `ReportingTool`) are completely unverified.
 
-- **Gap ID:** HW-001
-- **Severity:** Minor
-- **Description:** No support for AMD (ROCm) or Apple Silicon (MPS) acceleration tracking.
-- **Source Reference:** `src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py:6` (`import pynvml`)
-- **Recommendation:** Abstract the GPU interface to support `torch.cuda` or platform-agnostic libraries.
+- **Severity:** Critical ⛔
+- **Impact:** This module IS the scientific instrument — if metrics are wrong, **all experimental data in the paper is invalid**. This is a double risk: module reliability AND paper credibility.
+- **Source:** No test files in `tests/unit/crew_monitor/`.
+- **Recommendation:** Priority test targets:
+  1. `CrewPerformanceMonitor.get_metrics()` — Mock `psutil` and `pynvml`, verify delta calculations
+  2. `ContributionAnalyzer._calculate_feature_contribution()` — Test with known contributor counts
+  3. `ReportingTool._generate_single_report()` — Verify Mean row calculation
+  4. `ReportingTool._combine_reports()` — Verify melt-pivot output shape
+- **Estimated Effort:** 3 days
 
-### Synchronous Blocking Calls (Moderate)
-The `psutil` and file I/O operations are synchronous.
+### GAP QA-002: No Schema Validation in Monitor (MODERATE)
 
-- **Gap ID:** PERF-003
+The `CrewPerformanceMonitor.get_metrics()` returns a raw dict. The Pydantic `PerformanceMetrics` schema in `domain/schemas.py` is **defined but never used** in the monitor itself.
+
 - **Severity:** Moderate
-- **Description:** Monitoring calls block the main thread, potentially affecting the observed agent latency.
-- **Recommendation:** Offload monitoring snapshots to a background thread.
+- **Impact:** No guarantee that returned metrics conform to the schema.
+- **Source:** [schemas.py](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/domain/schemas.py) defined but not imported in [crew_performance_monitor.py](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py).
+- **Recommendation:** Have `get_metrics()` return `PerformanceMetrics` instead of raw dict.
+- **Estimated Effort:** 0.5 days
 
-## 3. Experimental Gaps
+---
 
-### Lack of Overhead Analysis
-There is no data on the "Observer Effect" - how much the monitor itself slows down the system.
+## 2. Experimental Gaps
 
-- **Gap ID:** EXP-001
+### GAP EXP-001: No Observer Effect Analysis (CRITICAL)
+
+No data exists on how much the monitor itself affects the measured system — the classic "Observer Effect" in instrumentation.
+
+- **Severity:** Critical ⛔
+- **Description:** `psutil.cpu_percent()` and `pynvml` calls consume CPU/memory themselves. Without quantifying this overhead, all measurements have an unknown systematic error.
+- **Source:** [crew_performance_monitor.py:L27–L62](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L27-L62)
+- **Recommendation:** Run identical crews with and without monitoring, compare execution times.
+- **Estimated Effort:** 1 day
+
+### GAP EXP-002: No Consensus Accuracy Validation (CRITICAL)
+
+The consensus metric $P(F)$ is never validated against ground truth. There is no evidence that higher consensus correlates with higher accuracy.
+
+- **Severity:** Critical ⛔
+- **Description:** The claim that "100% consensus = high confidence feature" is assumed but untested. All LLMs could unanimously hallucinate.
+- **Source:** [contribution_analyzer.py:L65–L79](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py#L65-L79)
+- **Recommendation:** Create labeled ground truth dataset, compute correlation between $P(F)$ and accuracy.
+- **Estimated Effort:** 3 days
+
+### GAP EXP-003: No Statistical Significance (MODERATE)
+
+The Mean row in `ReportingTool` reports arithmetic mean without confidence intervals or standard deviation.
+
+- **Severity:** Moderate
+- **Source:** [reporting_tool.py:L79–L81](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py#L79-L81) — Only computes `mean()`.
+- **Recommendation:** Add std, median, and 95% confidence interval rows.
+- **Estimated Effort:** 0.5 days
+
+---
+
+## 3. Implementation Gaps
+
+### GAP HW-001: NVIDIA-Only GPU Support (MODERATE)
+
+GPU monitoring depends on `pynvml` which only supports NVIDIA GPUs.
+
+- **Severity:** Moderate
+- **Description:** AMD (ROCm), Apple Silicon (MPS), and Intel ARC GPUs are unsupported.
+- **Source:** [crew_performance_monitor.py:L6](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L6) — `import pynvml`
+- **Recommendation:** Abstract GPU interface behind a Protocol, implement per-vendor adapters.
+- **Estimated Effort:** 2 days
+
+### GAP IMPL-001: Synchronous Blocking Calls (MODERATE)
+
+All `psutil` and `pynvml` calls block the main thread synchronously.
+
+- **Severity:** Moderate
+- **Description:** The monitoring overhead is injected into the critical path. In performance-sensitive scenarios, this adds latency to the measured execution.
+- **Source:** [crew_performance_monitor.py:L31–L32, L48–L49](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L31-L32)
+- **Recommendation:** Offload snapshots to a background thread.
+- **Estimated Effort:** 1 day
+
+### GAP IMPL-002: GPU Memory Leak Risk (MINOR)
+
+If `stop_monitoring()` is never called (e.g., exception during crew execution), `pynvml.nvmlShutdown()` is never invoked.
+
 - **Severity:** Minor
-- **Recommendation:** Measure system performance with and without the monitor attached.
+- **Description:** NVML resource handle may leak if the lifecycle is interrupted.
+- **Source:** [crew_performance_monitor.py:L60](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L60) — `nvmlShutdown()` only in `stop_monitoring()`
+- **Recommendation:** Use context manager (`__enter__` / `__exit__`) pattern for automatic cleanup.
+- **Estimated Effort:** 0.5 days
+
+### GAP IMPL-003: CPU Snapshot vs Average (MINOR)
+
+`cpu_percent(interval=None)` returns an instantaneous snapshot, not an average over the execution window.
+
+- **Severity:** Minor
+- **Description:** A single-point CPU reading is unreliable (could be 5% or 95% depending on the instant).
+- **Source:** [crew_performance_monitor.py:L31](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L31) — `interval=None`
+- **Recommendation:** Sample CPU at intervals during execution and compute average.
+- **Estimated Effort:** 1 day
+
+### GAP IMPL-004: Private Method Used as Public API (MINOR)
+
+`JsonUtils._load_json_from_directory()` is called directly in `ReportingTool` despite the leading underscore indicating it's private.
+
+- **Severity:** Minor
+- **Source:** [reporting_tool.py:L51](file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py#L51)
+- **Recommendation:** Either make it public (`load_json_from_directory`) or add a proper public method.
+- **Estimated Effort:** 5 minutes
+
+---
+
+## 4. Gap Summary Matrix
+
+| Gap ID | Category | Severity | Effort | Priority |
+|--------|----------|----------|--------|----------|
+| QA-001 | Testing | Critical ⛔ | 3 days | P0 |
+| QA-002 | Schema | Moderate | 0.5 day | P2 |
+| EXP-001 | Benchmark | Critical ⛔ | 1 day | P0 |
+| EXP-002 | Validation | Critical ⛔ | 3 days | P0 |
+| EXP-003 | Statistics | Moderate | 0.5 day | P2 |
+| HW-001 | Hardware | Moderate | 2 days | P2 |
+| IMPL-001 | Performance | Moderate | 1 day | P2 |
+| IMPL-002 | Resource | Minor | 0.5 day | P3 |
+| IMPL-003 | Accuracy | Minor | 1 day | P3 |
+| IMPL-004 | API | Minor | 5 min | P3 |
+
+**Total Critical Gaps:** 3 | **Total Gaps:** 10 | **Estimated Total Effort:** ~13 days
