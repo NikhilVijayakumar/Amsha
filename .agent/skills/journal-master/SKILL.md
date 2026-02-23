@@ -132,7 +132,17 @@ To prevent failures during long analysis sessions, the workflow is broken into *
    - Synergy between modules (e.g., dynamic crew generation + validation)
    - Comparison with existing multi-agent frameworks
 
-**Output:** 3 files in `docs/paper/cross_module/`
+5. **Math Extractor** → `docs/paper/cross_module/mathematics.md`
+   - System-wide mathematical models
+   - Cross-module algorithmic dependencies
+   - Global complexity analysis
+
+6. **Visual Generator** → `docs/paper/cross_module/architecture.md`
+   - High-level system architecture diagrams
+   - End-to-end data flow (Amsha to Yantra)
+   - Global performance metrics
+
+**Output:** 6 files in `docs/paper/cross_module/`
 
 ---
 
@@ -260,10 +270,13 @@ elif phase == "CROSS_MODULE_ANALYSIS":
     if len(completed_modules) < 2:
         raise ValueError("Need at least 2 modules analyzed before cross-module analysis")
     
-    # Analyze interactions
+    # Analyze interactions and global architecture
     analyze_module_interactions(completed_modules, "docs/paper/cross_module/interactions.md")
     analyze_dependencies(completed_modules, "docs/paper/cross_module/dependencies.md")
     analyze_patterns(completed_modules, "docs/paper/cross_module/patterns.md")
+    analyze_cross_module_novelty(completed_modules, "docs/paper/cross_module/novelty.md")
+    run_math_extractor_cross_module(completed_modules, "docs/paper/cross_module/mathematics.md")
+    run_visual_generator_cross_module(completed_modules, "docs/paper/cross_module/architecture.md")
     
     update_progress("cross_module", status="completed")
 ```
@@ -400,7 +413,7 @@ Output: `docs/paper/modules/llm_factory/{mathematics,architecture,gaps,summary}.
 ```
 "Lutapi, run cross-module analysis for the paper"
 ```
-Output: `docs/paper/cross_module/{interactions,dependencies,patterns}.md`
+Output: `docs/paper/cross_module/{interactions,dependencies,patterns,novelty,mathematics,architecture}.md`
 
 **Step 5: Final synthesis**
 ```
@@ -462,7 +475,10 @@ docs/paper/
 ├── cross_module/                 # Cross-module analysis (modular mode only)
 │   ├── interactions.md
 │   ├── dependencies.md
-│   └── patterns.md
+│   ├── patterns.md
+│   ├── novelty.md
+│   ├── mathematics.md
+│   └── architecture.md
 ├── mathematics/                  # Unified mode outputs
 │   └── math_logic.md
 ├── architecture/                 # Unified mode outputs

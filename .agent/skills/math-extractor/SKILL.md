@@ -1,6 +1,6 @@
 ---
 name: math-extractor
-description: Scans the codebase for logic and algorithms. It must output formal LaTeX equations to docs/paper/mathematics/math_logic.md.
+description: Scans the codebase for logic and algorithms. It must output formal LaTeX equations to docs/paper/mathematics/math_logic.md (or module/cross-module specific paths).
 ---
 
 # Math Extractor Skill
@@ -12,7 +12,7 @@ This skill scans the codebase to identify mathematical logic, algorithms, and fo
 1.  **Scan Codebase**: specificially looking for algorithmic logic, mathematical computations, and data transformations.
 2.  **Verify Source**: strict verification against the actual source code is required. Do not hallicinate equations. Ensure variable names in the LaTeX match the code or are clearly mapped.
 3.  **Output**:
-    -   File: `docs/paper/mathematics/math_logic.md`
+    -   File: `docs/paper/mathematics/math_logic.md` (Unified Mode) OR `docs/paper/modules/{module}/mathematics.md` (Modular Phase 1) OR `docs/paper/cross_module/mathematics.md` (Cross-Module Phase 2)
     -   Format: Markdown with LaTeX equations (using `$...$` or `$$...$$`).
     -   Content:
         -   Description of the algorithm/logic.

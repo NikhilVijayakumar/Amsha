@@ -1,6 +1,6 @@
 ---
 name: visual-generator
-description: Generates Mermaid.js diagrams for the 3-tier architecture (Amsha, Bodha, Yantra) and creates Markdown tables for performance metrics. Save to docs/paper/architecture/visuals.md.
+description: Generates Mermaid.js diagrams for the 3-tier architecture (Amsha, Bodha, Yantra) and creates Markdown tables for performance metrics. Save to docs/paper/architecture/visuals.md (or module/cross-module specific paths).
 ---
 
 # Visual Generator Skill
@@ -90,7 +90,7 @@ flowchart TD
 - Cross-reference performance data with actual measurements
 
 ### 6. Output Format
-    -   File: `docs/paper/architecture/visuals.md`
+    -   File: `docs/paper/architecture/visuals.md` (Unified Mode) OR `docs/paper/modules/{module}/architecture.md` (Modular Phase 1) OR `docs/paper/cross_module/architecture.md` (Cross-Module Phase 2)
     -   Format: Markdown with Mermaid code blocks and tables.
     -   Content:
         -   Architectural diagrams.
