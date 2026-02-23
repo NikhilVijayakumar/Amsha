@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Report</title>
+    <style>
+        /* Modern Dashboard Layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --accent: #667eea;
+    --accent-dark: #5568d3;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --sidebar-width: 260px;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-tertiary: #4a5568;
+    --text-primary: #f7fafc;
+    --text-secondary: #cbd5e0;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-primary);
+    border-right: 1px solid var(--bg-tertiary);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: var(--bg-secondary);
+}
+
+.grade-badge.grade-a { background: var(--success); color: white; }
+.grade-badge.grade-b { background: var(--info); color: white; }
+.grade-badge.grade-c { background: var(--warning); color: white; }
+.grade-badge.grade-d,
+.grade-badge.grade-f { background: var(--danger); color: white; }
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.nav-link.active {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    border-right: 3px solid var(--accent);
+}
+
+.nav-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.theme-toggle {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    background: var(--bg-primary);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.status-complete { background: #d1fae5; color: #065f46; }
+.status-badge.status-in-progress { background: #fef3c7; color: #92400e; }
+.status-badge.status-critical { background: #fee2e2; color: #991b1b; }
+
+.topbar-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Content */
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1400px;
+}
+
+.content-section {
+    margin-bottom: 3rem;
+}
+
+/* Metric Cards Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.card-green .card-icon { background: #d1fae5; }
+.card-red .card-icon { background: #fee2e2; }
+.card-yellow .card-icon { background: #fef3c7; }
+.card-blue .card-icon { background: #dbeafe; }
+
+.card-content {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Section Content Styling */
+.section-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.section-content h2 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.section-content h3 {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.section-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-content th {
+    background: var(--accent);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.section-content td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.section-content tr:last-child td {
+    border-bottom: none;
+}
+
+.section-content tr:hover {
+    background: var(--bg-secondary);
+}
+
+.section-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-md);
+}
+
+.section-content pre {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.section-content code {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.section-content ul,
+.section-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.section-content li {
+    margin: 0.5rem 0;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar,
+    .topbar {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metric-card {
+        break-inside: avoid;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for diagram rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <!-- MathJax for LaTeX mathematical equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">Nibandha</h1>
+                <div class="grade-badge grade-n/a">
+                    N/A
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#architecture" class="nav-link" data-section="architecture">
+                    <span class="nav-icon">🏗️</span>
+                    <span class="nav-text">Architecture</span>
+                </a>
+                <a href="#gaps" class="nav-link" data-section="gaps">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Gaps</span>
+                </a>
+                <a href="#mathematics" class="nav-link" data-section="mathematics">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Mathematics</span>
+                </a>
+                <a href="#novelty" class="nav-link" data-section="novelty">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Novelty</span>
+                </a>
+                <a href="#summary" class="nav-link" data-section="summary">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Summary</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="icon">🌙</span>
+                    <span class="text">Dark Mode</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <span class="status-badge status-complete">
+                        Complete
+                    </span>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <span>📄 Print</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportPDF()">
+                        <span>📥 Export PDF</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <section id="architecture" class="content-section">
+                    <div class="section-content">
+                        <h2 id="1-architectural-overview">1. Architectural Overview</h2>
+
+<p>The <code>output_process</code> module implements a <strong>three-stage post-processing pipeline</strong> for multi-agent AI outputs: <strong>Optimization</strong> (LLM output sanitization), <strong>Validation</strong> (pre-execution config checks + post-execution file auditing), and <strong>Evaluation</strong> (rubric scoring → relative grading → multi-model consolidation). With <strong>10 Python files</strong> across <strong>3 sub-packages</strong>, it transforms raw, noisy agent outputs into structured, graded, and publication-ready data.</p>
+
+<h3 id="layered-pipeline-diagram">Layered Pipeline Diagram</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    classDef opt fill:#fff3e0,stroke:#333,stroke-width:2px;
+    classDef val fill:#e8f5e9,stroke:#333,stroke-width:2px;
+    classDef eval fill:#e3f2fd,stroke:#333,stroke-width:2px;
+    classDef data fill:#f3e5f5,stroke:#333,stroke-width:2px;
+
+    subgraph "Stage 1: Optimization"
+        Raw["Raw LLM Output"]:::data
+        Cleaner["JsonCleanerUtils"]:::opt
+        CleanJSON["Clean JSON"]:::data
+    end
+
+    subgraph "Stage 2: Validation"
+        ConfigVal["CrewConfigValidator"]:::val
+        OutputVal["JSONOutputManager"]:::val
+    end
+
+    subgraph "Stage 3: Evaluation"
+        Scorer["EvaluationProcessingTool"]:::eval
+        Aggregator["EvaluationAggregationTool"]:::eval
+        Reporter["EvaluationReportTool"]:::eval
+    end
+
+    Raw --> Cleaner --> CleanJSON
+    CleanJSON --> Scorer
+    Scorer --> Aggregator
+    Aggregator --> Reporter
+    ConfigVal -.->|Pre-execution| Raw
+    OutputVal -.->|Post-execution audit| CleanJSON
+</div>
+
+<hr />
+
+<h2 id="2-sub-package-structure">2. Sub-Package Structure</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Sub-Package</th>
+  <th style="text-align:center;">Files</th>
+  <th style="text-align:left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>optimization/</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;"><code>JsonCleanerUtils</code> — Multi-pass LLM output sanitization (fence stripping, concatenation, quote repair)</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>validation/</code></td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;"><code>CrewConfigValidator</code> — YAML config validation; <code>JSONOutputManager</code> — directory set-difference audit</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>evaluation/</code></td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;"><code>EvaluationProcessingTool</code> — rubric-weighted scoring; <code>EvaluationAggregationTool</code> — Z-score grading; <code>EvaluationReportTool</code> — multi-model pivot consolidation</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Total:</strong> 10 Python files, 3 sub-packages</p>
+
+<hr />
+
+<h2 id="3-class-design">3. Class Design</h2>
+
+<h3 id="class-diagram">Class Diagram</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+classDiagram
+    note "Three-stage pipeline: Optimization → Validation → Evaluation"
+
+    class JsonCleanerUtils {
+        -input_file_path: Path
+        -output_file_path: Path
+        +process_file() bool
+        +process_content(str) bool
+        -_clean_and_parse_string(str)$ Any
+        -_derive_output_path() Path
+        -_get_unique_filepath(Path)$ Path
+    }
+
+    class CrewConfigValidator {
+        -crew_parser: CrewParser
+        +validate(root_path, output_dir) dict
+        -_collect_files_to_validate(root) dict
+        -_process_and_validate_files(files) dict
+        -_generate_summary(details)$ dict
+        -_save_report_to_file(report, path)
+    }
+
+    class JSONOutputManager {
+        -intermediate_dir: Path
+        -final_dir: Path
+        -output_filepath: str
+        +run_comparison() List~Path~
+        -_find_json_files(dir)$ List~Path~
+        -_find_unique_files(source, comp)$ List~Path~
+    }
+
+    class EvaluationProcessingTool {
+        -config: Dict
+        +run_evaluations()
+        -_process_job(config)
+        -_calculate_evaluation_score(result, rubric, keys) Dict
+        -_get_score_description(score, ranges)$ Tuple
+    }
+
+    class EvaluationAggregationTool {
+        -config: Dict
+        -score_summary: str
+        -title: str
+        +run()
+        -_process_job(config)
+        -_apply_relative_grading(df, scale) DataFrame
+        -_load_all_evaluations(dir) List
+        -_save_to_excel(df, summary, path)
+    }
+
+    class EvaluationReportTool {
+        -config: Dict
+        -grading_scale: Dict
+        +run()
+        -_generate_evaluation_report(config)
+        -_apply_relative_grading(df) DataFrame
+    }
+
+    EvaluationProcessingTool ..> EvaluationAggregationTool : feeds
+    EvaluationAggregationTool ..> EvaluationReportTool : feeds
+    CrewConfigValidator --> CrewParser : uses
+</div>
+
+<hr />
+
+<h2 id="4-evaluation-pipeline-full-3-stage-flow">4. Evaluation Pipeline: Full 3-Stage Flow</h2>
+
+<h3 id="sequence-diagram">Sequence Diagram</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    autonumber
+    actor User as Researcher
+    participant Clean as JsonCleanerUtils
+    participant Scorer as EvaluationProcessingTool
+    participant Agg as EvaluationAggregationTool
+    participant Report as EvaluationReportTool
+    participant FS as FileSystem
+    participant NP as NumPy/Pandas
+
+    Note over User,Report: Stage 1: Optimization
+    User->>Clean: process_file()
+    Clean->>FS: read raw LLM output
+    Clean->>Clean: Fence extraction → Direct parse → Concat → Quote repair
+    Clean->>FS: write clean JSON
+
+    Note over User,Report: Stage 2: Rubric Scoring
+    User->>Scorer: run_evaluations()
+    Scorer->>FS: Load rubric JSON
+    loop For each evaluation file
+        Scorer->>FS: Load evaluation JSON
+        Scorer->>Scorer: Calculate weighted scores (Σ rk × wk)
+        Scorer->>Scorer: Compute F% = Σ Sw / Smax × 100
+        Scorer->>Scorer: Classify tier (Weak/Moderate/Strong/Excellent)
+        Scorer->>FS: Save scored JSON
+    end
+
+    Note over User,Report: Stage 3: Relative Grading
+    User->>Agg: run()
+    Agg->>FS: Load all scored JSONs from directory
+    Agg->>NP: Calculate μ and σ
+    loop For each evaluation
+        Agg->>Agg: G(si) = Z-score grade (A/B/C/D)
+        Agg->>Agg: F(si) = W(G) × si
+    end
+    Agg->>Agg: CGPA = mean(grade_points)
+    Agg->>FS: Save graded JSON + Excel
+
+    Note over User,Report: Stage 4: Multi-Model Consolidation
+    User->>Report: run()
+    Report->>FS: Load multiple aggregated JSONs
+    Report->>Report: Extract eval_model from filename
+    Report->>Report: Pivot: gen_model × eval_model → score
+    Report->>Report: totalFinalScore = Σ across eval_models
+    Report->>Report: Re-apply relative grading on totals
+    Report->>FS: Save multi-sheet Excel + JSON
+</div>
+
+<hr />
+
+<h2 id="5-json-sanitization-pipeline">5. JSON Sanitization Pipeline</h2>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef pass fill:#e3f2fd,stroke:#333;
+    classDef fail fill:#ffcdd2,stroke:#333;
+    classDef ok fill:#c8e6c9,stroke:#333;
+
+    Input["Raw LLM Output"]
+    S1["Stage 1: Strip Markdown Fences"]:::pass
+    S2{"Stage 2: json.loads()"}
+    S3["Stage 3: Extract {..} objects"]:::pass
+    S4["Stage 4: Fix quote errors"]:::pass
+    OK["✅ Valid JSON"]:::ok
+    FAIL["❌ Parse Failed"]:::fail
+
+    Input --> S1
+    S1 --> S2
+    S2 -->|Success| OK
+    S2 -->|Fail| S3
+    S3 -->|Success| OK
+    S3 -->|Fail| S4
+    S4 -->|Success| OK
+    S4 -->|Fail| FAIL
+</div>
+
+<hr />
+
+<h2 id="6-validation-workflow">6. Validation Workflow</h2>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef val fill:#e8f5e9,stroke:#333;
+    classDef audit fill:#fff3e0,stroke:#333;
+
+    subgraph "Pre-Execution: Config Validation"
+        Walk["os.walk(root)"]:::val
+        Parse["CrewParser.parse_agent/task"]:::val
+        Valid{"Valid?"}
+        Report["Validation Report JSON"]:::val
+    end
+
+    subgraph "Post-Execution: Output Audit"
+        Inter["intermediate/ directory"]:::audit
+        Final["final/ directory"]:::audit
+        Diff["Set Difference: I \ F"]:::audit
+        Missing["Unprocessed Files List"]:::audit
+    end
+
+    Walk --> Parse --> Valid
+    Valid -->|Yes| Report
+    Valid -->|No| Report
+    Inter --> Diff
+    Final --> Diff
+    Diff --> Missing
+</div>
+
+<hr />
+
+<h2 id="7-cross-module-dependencies">7. Cross-Module Dependencies</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Dependency</th>
+  <th style="text-align:left;">Direction</th>
+  <th style="text-align:left;">Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>crew_forge.seeding.parser.CrewParser</code></td>
+  <td style="text-align:left;">← imports</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/crew_validator.py#L7">crew_validator.py:L7</a> uses parser for validation</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>amsha.utils.json_utils.JsonUtils</code></td>
+  <td style="text-align:left;">← imports</td>
+  <td style="text-align:left;">Multiple files use shared JSON I/O</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>amsha.utils.yaml_utils.YamlUtils</code></td>
+  <td style="text-align:left;">← imports</td>
+  <td style="text-align:left;">Config loading in all tools</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="8-design-patterns-catalog">8. Design Patterns Catalog</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">Pattern</th>
+  <th style="text-align:left;">Implementation</th>
+  <th style="text-align:left;">File</th>
+  <th style="text-align:left;">Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;"><strong>Pipeline</strong></td>
+  <td style="text-align:left;">Optimization → Scoring → Grading → Reporting</td>
+  <td style="text-align:left;">Entire module</td>
+  <td style="text-align:left;">Sequential transformation of agent output</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;"><strong>Cascading Parser</strong></td>
+  <td style="text-align:left;">4-stage JSON sanitization</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py">json<em>cleaner</em>utils.py</a></td>
+  <td style="text-align:left;">Handles noisy LLM outputs robustly</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;"><strong>Configuration Object</strong></td>
+  <td style="text-align:left;">YAML-driven jobs in all tools</td>
+  <td style="text-align:left;">All evaluation tools</td>
+  <td style="text-align:left;">Zero-code job definition</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;"><strong>Batch Processor</strong></td>
+  <td style="text-align:left;">Loop over <code>evaluations</code>/<code>aggregation_jobs</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_processing_tool.py">evaluation<em>processing</em>tool.py</a></td>
+  <td style="text-align:left;">Config-driven multi-job execution</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td style="text-align:left;"><strong>Statistical Strategy</strong></td>
+  <td style="text-align:left;">Z-score grading with configurable scale</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py">evaluation<em>aggregate</em>tool.py</a></td>
+  <td style="text-align:left;">Population-relative fairness</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td style="text-align:left;"><strong>Pivot Table</strong></td>
+  <td style="text-align:left;">Multi-model cross-comparison</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_report_tool.py">evaluation<em>report</em>tool.py</a></td>
+  <td style="text-align:left;">Multi-dimensional evaluation</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td style="text-align:left;"><strong>Set Difference</strong></td>
+  <td style="text-align:left;">Directory comparison for audit</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/json_output_validator.py">json<em>output</em>validator.py</a></td>
+  <td style="text-align:left;">Identifies failed processing</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td style="text-align:left;"><strong>Unique Path Generator</strong></td>
+  <td style="text-align:left;">Counter-based file deduplication</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py#L48-L67">json<em>cleaner</em>utils.py:L48–L67</a></td>
+  <td style="text-align:left;">Prevents output overwrites</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="9-module-metrics">9. Module Metrics</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Total Python Files</td>
+  <td style="text-align:left;">10</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sub-Packages</td>
+  <td style="text-align:left;">3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Design Patterns</td>
+  <td style="text-align:left;">8</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Diagrams in this Document</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Total Source Lines</td>
+  <td style="text-align:left;">~860</td>
+</tr>
+<tr>
+  <td style="text-align:left;">External Dependencies</td>
+  <td style="text-align:left;">3 (numpy, pandas, openpyxl)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Cross-Module Imports</td>
+  <td style="text-align:left;">3 (CrewParser, JsonUtils, YamlUtils)</td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="gaps" class="content-section">
+                    <div class="section-content">
+                        <p>This document identifies gaps against Scopus-indexed publication standards, categorized by severity and effort.</p>
+
+<hr />
+
+<h2 id="1-quality-assurance-gaps">1. Quality Assurance Gaps</h2>
+
+<h3 id="gap-qa-001-missing-evaluationvalidation-unit-tests-critical">GAP QA-001: Missing Evaluation/Validation Unit Tests (CRITICAL)</h3>
+
+<p>Only the <code>optimization</code> sub-package has tests. The core <code>evaluation</code> (rubric scoring, relative grading, multi-model consolidation) and <code>validation</code> (config validator) sub-packages have <strong>zero test files</strong>.</p>
+
+<ul>
+<li><strong>Severity:</strong> Critical ⛔</li>
+<li><strong>Impact:</strong> Grading logic is the "fairness" layer — incorrect <span class="math inline">\(\mu/\sigma\)</span> calculations or grade boundaries produce invalid rankings.</li>
+<li><strong>Source:</strong> <code>tests/unit/output_process/</code> — Only optimization tests exist.</li>
+<li><strong>Recommendation:</strong> Priority test targets:
+<ol>
+<li><code>_apply_relative_grading()</code> — Verify grade boundaries with known <span class="math inline">\(\mu/\sigma\)</span></li>
+<li><code>_calculate_evaluation_score()</code> — Verify weighted scoring with known rubric</li>
+<li><code>_clean_and_parse_string()</code> — Test all 4 cascade stages</li>
+<li><code>_generate_summary()</code> — Verify boolean algebra validity counts</li>
+</ol></li>
+<li><strong>Estimated Effort:</strong> 3 days</li>
+</ul>
+
+<h3 id="gap-qa-002-missing-import-in-evaluationaggregationtool-bug">GAP QA-002: Missing Import in EvaluationAggregationTool (BUG)</h3>
+
+<p><code>JsonUtils</code> is used on L64 (<code>JsonUtils.save_json_to_file</code>) but is never imported.</p>
+
+<ul>
+<li><strong>Severity:</strong> High (Runtime Error)</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py#L64">evaluation<em>aggregate</em>tool.py:L64</a> — <code>NameError: JsonUtils not defined</code></li>
+<li><strong>Recommendation:</strong> Add <code>from amsha.utils.json_utils import JsonUtils</code> to imports.</li>
+<li><strong>Estimated Effort:</strong> 5 minutes</li>
+</ul>
+
+<h3 id="gap-qa-003-missing-import-in-evaluationprocessingtool-bug">GAP QA-003: Missing Import in EvaluationProcessingTool (BUG)</h3>
+
+<p><code>JsonUtils</code> is used on L86, L103, L115 but is never imported.</p>
+
+<ul>
+<li><strong>Severity:</strong> High (Runtime Error)</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_processing_tool.py#L86">evaluation<em>processing</em>tool.py:L86</a> — <code>NameError: JsonUtils not defined</code></li>
+<li><strong>Recommendation:</strong> Add <code>from amsha.utils.json_utils import JsonUtils</code> to imports.</li>
+<li><strong>Estimated Effort:</strong> 5 minutes</li>
+</ul>
+
+<hr />
+
+<h2 id="2-methodology-gaps">2. Methodology Gaps</h2>
+
+<h3 id="gap-meth-001-no-inter-rater-reliability-critical">GAP METH-001: No Inter-Rater Reliability (CRITICAL)</h3>
+
+<p>The Z-score grading normalizes scores from a single LLM judge. If the judge itself is biased, the relative grading merely normalizes that bias without detecting it.</p>
+
+<ul>
+<li><strong>Severity:</strong> Critical ⛔</li>
+<li><strong>Description:</strong> A biased LLM judge (e.g., systematically scoring creative outputs lower) produces biased grades even after normalization.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py#L89-L111">evaluation<em>aggregate</em>tool.py:L89–L111</a></li>
+<li><strong>Recommendation:</strong> Implement Cohen's Kappa or Fleiss' Kappa to measure inter-rater agreement across multiple LLM judges.</li>
+<li><strong>Estimated Effort:</strong> 3 days</li>
+</ul>
+
+<h3 id="gap-meth-002-hardcoded-tier-boundaries-moderate">GAP METH-002: Hardcoded Tier Boundaries (MODERATE)</h3>
+
+<p>The percentage tier ranges (<code>Weak: 0-64.99</code>, <code>Moderate: 65-74.99</code>, etc.) are hardcoded.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_processing_tool.py#L62-L67">evaluation<em>processing</em>tool.py:L62–L67</a></li>
+<li><strong>Recommendation:</strong> Move to YAML config or rubric definition.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<h3 id="gap-meth-003-no-confidence-intervals-on-cgpa-moderate">GAP METH-003: No Confidence Intervals on CGPA (MODERATE)</h3>
+
+<p>The reported CGPA has no confidence interval or standard error — just a single point estimate.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py#L45-L47">evaluation<em>aggregate</em>tool.py:L45–L47</a></li>
+<li><strong>Recommendation:</strong> Report 95% CI: <span class="math inline">\(\texttt{CGPA} \pm 1.96 \times \frac{\sigma}{\sqrt{n}}\)</span>.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<hr />
+
+<h2 id="3-implementation-gaps">3. Implementation Gaps</h2>
+
+<h3 id="gap-impl-001-hardcoded-directory-names-in-validator-minor">GAP IMPL-001: Hardcoded Directory Names in Validator (MINOR)</h3>
+
+<p>The <code>CrewConfigValidator</code> assumes <code>agents/</code> and <code>tasks/</code> directory names.</p>
+
+<ul>
+<li><strong>Severity:</strong> Minor</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/crew_validator.py#L79-L82">crew_validator.py:L79–L82</a></li>
+<li><strong>Recommendation:</strong> Make configurable via constructor parameters.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<h3 id="gap-impl-002-no-error-recovery-in-json-cleaner-moderate">GAP IMPL-002: No Error Recovery in JSON Cleaner (MODERATE)</h3>
+
+<p>If all 4 cascade stages fail, <code>_clean_and_parse_string</code> returns <code>None</code> without preserving the original content for debugging.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py#L118-L119">json<em>cleaner</em>utils.py:L118–L119</a></li>
+<li><strong>Recommendation:</strong> Log the raw content to a <code>.failed</code> debug file for post-mortem analysis.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<h3 id="gap-impl-003-debug-print-in-production-code-minor">GAP IMPL-003: Debug Print in Production Code (MINOR)</h3>
+
+<p><code>process_content()</code> contains a debug <code>print(f"process_content:parsed_data\n{parsed_data}")</code> that should be removed or use logging.</p>
+
+<ul>
+<li><strong>Severity:</strong> Minor</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py#L139">json<em>cleaner</em>utils.py:L139</a></li>
+<li><strong>Recommendation:</strong> Replace with <code>logging.debug()</code>.</li>
+<li><strong>Estimated Effort:</strong> 5 minutes</li>
+</ul>
+
+<h3 id="gap-impl-004-duplicate-grading-logic-moderate">GAP IMPL-004: Duplicate Grading Logic (MODERATE)</h3>
+
+<p><code>_apply_relative_grading()</code> is implemented <strong>twice</strong> — once in <code>EvaluationAggregationTool</code> (L89) and once in <code>EvaluationReportTool</code> (L33) with slightly different implementations.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py#L89">evaluation<em>aggregate</em>tool.py:L89</a>, <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_report_tool.py#L33">evaluation<em>report</em>tool.py:L33</a></li>
+<li><strong>Recommendation:</strong> Extract into a shared <code>GradingService</code> class.</li>
+<li><strong>Estimated Effort:</strong> 1 day</li>
+</ul>
+
+<hr />
+
+<h2 id="4-gap-summary-matrix">4. Gap Summary Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Gap ID</th>
+  <th>Category</th>
+  <th>Severity</th>
+  <th>Effort</th>
+  <th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>QA-001</td>
+  <td>Testing</td>
+  <td>Critical ⛔</td>
+  <td>3 days</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>QA-002</td>
+  <td>Bug</td>
+  <td>High</td>
+  <td>5 min</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>QA-003</td>
+  <td>Bug</td>
+  <td>High</td>
+  <td>5 min</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>METH-001</td>
+  <td>Methodology</td>
+  <td>Critical ⛔</td>
+  <td>3 days</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>METH-002</td>
+  <td>Config</td>
+  <td>Moderate</td>
+  <td>0.5 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>METH-003</td>
+  <td>Statistics</td>
+  <td>Moderate</td>
+  <td>0.5 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>IMPL-001</td>
+  <td>Config</td>
+  <td>Minor</td>
+  <td>0.5 day</td>
+  <td>P3</td>
+</tr>
+<tr>
+  <td>IMPL-002</td>
+  <td>Resiliency</td>
+  <td>Moderate</td>
+  <td>0.5 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>IMPL-003</td>
+  <td>Code Quality</td>
+  <td>Minor</td>
+  <td>5 min</td>
+  <td>P3</td>
+</tr>
+<tr>
+  <td>IMPL-004</td>
+  <td>DRY</td>
+  <td>Moderate</td>
+  <td>1 day</td>
+  <td>P2</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Total Critical Gaps:</strong> 2 | <strong>Total Bugs:</strong> 2 | <strong>Total Gaps:</strong> 10 | <strong>Estimated Total Effort:</strong> ~10 days</p>
+
+                    </div>
+                </section>
+                <section id="mathematics" class="content-section">
+                    <div class="section-content">
+                        <p>This document formalizes the algorithms within the <code>output_process</code> module, covering rubric-weighted scoring, Z-score relative grading, LLM output sanitization, configuration validation, directory set-difference comparison, and multi-model pivot consolidation.</p>
+
+<hr />
+
+<h2 id="1-rubric-weighted-evaluation-scoring">1. Rubric-Weighted Evaluation Scoring</h2>
+
+<p>The <code>EvaluationProcessingTool</code> implements a weighted scoring algorithm that maps raw LLM evaluation scores to a normalized percentage using a configurable rubric.</p>
+
+<h3 id="code-verification">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_processing_tool.py">evaluation<em>processing</em>tool.py</a></li>
+<li><strong>Lines:</strong> L32–L79 (<code>_calculate_evaluation_score</code>)</li>
+</ul>
+
+<h3 id="formalization">Formalization</h3>
+
+<p>Let <span class="math inline">\(\mathcal{M} = \{m_1, m_2, \dots, m_K\}\)</span> be the set of evaluation metrics defined in the rubric. Each metric <span class="math inline">\(m_k\)</span> has:<br />
+- <span class="math inline">\(w_k\)</span> = weight<br />
+- <span class="math inline">\([l_k, h_k]\)</span> = scoring range<br />
+- <span class="math inline">\(r_k\)</span> = raw score from the LLM judge</p>
+
+<p>The <strong>Weighted Score</strong> for metric <span class="math inline">\(m_k\)</span>:</p>
+
+<p><span class="math display">\[S_w(m_k) = r_k \times w_k\]</span></p>
+
+<p>The <strong>Maximum Possible Score</strong>:</p>
+
+<p><span class="math display">\[S_{max} = \sum_{k=1}^{K} h_k \times w_k\]</span></p>
+
+<p>The <strong>Final Percentage</strong>:</p>
+
+<p><span class="math display">\[F\% = \frac{\sum_{k=1}^{K} S_w(m_k)}{S_{max}} \times 100 \quad \text{(guarded: } S_{max} > 0\text{)}\]</span></p>
+
+<h3 id="tier-classification">Tier Classification</h3>
+
+<p>The final percentage is mapped to a descriptive tier:</p>
+
+<p><span class="math display">\[\texttt{Tier}(F\%) = \begin{cases}
+\texttt{Excellent} & \text{if } 91.0 \leq F\% \leq 100.0 \\
+\texttt{Strong} & \text{if } 75.0 \leq F\% < 91.0 \\
+\texttt{Moderate} & \text{if } 65.0 \leq F\% < 75.0 \\
+\texttt{Weak} & \text{if } 0.0 \leq F\% < 65.0
+\end{cases}\]</span></p>
+
+<h3 id="variable-mapping">Variable Mapping</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">LaTeX Symbol</th>
+  <th style="text-align:left;">Code Variable</th>
+  <th style="text-align:left;">File</th>
+  <th style="text-align:left;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(w_k\)</span></td>
+  <td style="text-align:left;"><code>weight</code></td>
+  <td style="text-align:left;"><code>evaluation_processing_tool.py</code></td>
+  <td style="text-align:left;">L52</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(r_k\)</span></td>
+  <td style="text-align:left;"><code>raw_score</code></td>
+  <td style="text-align:left;"><code>evaluation_processing_tool.py</code></td>
+  <td style="text-align:left;">L50</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(S_w\)</span></td>
+  <td style="text-align:left;"><code>item['weightedScore']</code></td>
+  <td style="text-align:left;"><code>evaluation_processing_tool.py</code></td>
+  <td style="text-align:left;">L53</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(S_{max}\)</span></td>
+  <td style="text-align:left;"><code>max_possible_score</code></td>
+  <td style="text-align:left;"><code>evaluation_processing_tool.py</code></td>
+  <td style="text-align:left;">L43</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(F\%\)</span></td>
+  <td style="text-align:left;"><code>final_percentage</code></td>
+  <td style="text-align:left;"><code>evaluation_processing_tool.py</code></td>
+  <td style="text-align:left;">L60</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="complexity">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(K)\)</span> per evaluation — Linear in number of rubric metrics.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(K)\)</span> for updated evaluation list.</li>
+</ul>
+
+<hr />
+
+<h2 id="2-z-score-relative-grading-gaussian-normalization">2. Z-Score Relative Grading (Gaussian Normalization)</h2>
+
+<p>The <code>EvaluationAggregationTool</code> applies <strong>psychometric-inspired</strong> relative grading where grades are assigned based on each score's position relative to the population mean using standard deviations.</p>
+
+<h3 id="code-verification-2">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py">evaluation<em>aggregate</em>tool.py</a></li>
+<li><strong>Lines:</strong> L89–L111 (<code>_apply_relative_grading</code>)</li>
+</ul>
+
+<h3 id="formalization-2">Formalization</h3>
+
+<p>Let <span class="math inline">\(S = \{s_1, s_2, \dots, s_n\}\)</span> be the set of <code>finalScorePercentage</code> values.</p>
+
+<p><strong>Population Parameters:</strong></p>
+
+<p><span class="math display">\[\mu = \frac{1}{n} \sum_{i=1}^{n} s_i \qquad \sigma = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (s_i - \mu)^2}\]</span></p>
+
+<p><strong>Grade Assignment</strong> based on Z-score intervals:</p>
+
+<p><span class="math display">\[G(s_i) = \begin{cases}
+A & \text{if } s_i > \mu + \sigma \\
+B & \text{if } \mu < s_i \leq \mu + \sigma \\
+C & \text{if } \mu - \sigma < s_i \leq \mu \\
+D & \text{if } s_i \leq \mu - \sigma
+\end{cases}\]</span></p>
+
+<p><strong>Grade Point Mapping</strong> <span class="math inline">\(W: \{A, B, C, D\} \to \mathbb{R}\)</span> (configurable via <code>grading_scale</code>):</p>
+
+<p><span class="math display">\[W = \{A \mapsto 4.0,\; B \mapsto 3.0,\; C \mapsto 2.0,\; D \mapsto 1.0\}\]</span></p>
+
+<p><strong>Final Score</strong> incorporating grade weight:</p>
+
+<p><span class="math display">\[F(s_i) = W(G(s_i)) \times s_i\]</span></p>
+
+<p><strong>CGPA</strong> (Cumulative Grade Point Average):</p>
+
+<p><span class="math display">\[\texttt{CGPA} = \frac{1}{n} \sum_{i=1}^{n} W(G(s_i))\]</span></p>
+
+<h3 id="properties">Properties</h3>
+
+<ul>
+<li><strong>Population-Relative:</strong> Grades depend on peer performance, not absolute thresholds.</li>
+<li><strong>Robust to Grader Bias:</strong> If a strict judge gives low scores to all, relative ordering is preserved.</li>
+<li><strong>Normal Distribution Assumption:</strong> Works best when <span class="math inline">\(n \geq 10\)</span> and scores approximately follow <span class="math inline">\(\mathcal{N}(\mu, \sigma^2)\)</span>.</li>
+</ul>
+
+<h3 id="complexity-2">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(n)\)</span> — Two linear passes (compute <span class="math inline">\(\mu/\sigma\)</span>, assign grades).</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(n)\)</span> for DataFrame storage.</li>
+</ul>
+
+<hr />
+
+<h2 id="3-multi-pass-llm-output-sanitization">3. Multi-Pass LLM Output Sanitization</h2>
+
+<p>The <code>JsonCleanerUtils</code> implements a <strong>3-stage cascading parser</strong> for extracting valid JSON from raw LLM text output, handling markdown fences, concatenated objects, and quote errors.</p>
+
+<h3 id="code-verification-3">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py">json<em>cleaner</em>utils.py</a></li>
+<li><strong>Lines:</strong> L73–L119 (<code>_clean_and_parse_string</code>)</li>
+</ul>
+
+<h3 id="formalization-3">Formalization</h3>
+
+<p>Let <span class="math inline">\(C\)</span> be the raw LLM output string. The sanitization pipeline applies cascading transformations:</p>
+
+<p><strong>Stage 1 — Fence Extraction:</strong></p>
+
+<p><span class="math display">\[C_1 = \begin{cases}
+\texttt{split}(C, \texttt{```json})[1] & \text{if } \texttt{```json} \in C \\
+\texttt{split}(C, \texttt{```})[1] & \text{if } \texttt{```} \in C \\
+C & \text{otherwise}
+\end{cases}\]</span></p>
+
+<p>Then strip residual fences: <span class="math inline">\(C_1' = \texttt{re.sub}(\texttt{```}, \texttt{""}, C_1)\)</span></p>
+
+<p><strong>Stage 2 — Direct Parse Attempt:</strong></p>
+
+<p><span class="math display">\[\texttt{Parse}_1(C_1') = \begin{cases}
+\texttt{json.loads}(C_1') & \text{if valid JSON} \\
+\bot & \text{otherwise (proceed to Stage 3)}
+\end{cases}\]</span></p>
+
+<p><strong>Stage 3 — Concatenated Object Extraction:</strong></p>
+
+<p><span class="math display">\[\texttt{Parse}_2(C_1') = \texttt{findall}(\texttt{r"\{.*?\}"}, C_1') \xrightarrow{\text{parse each}} \begin{cases}
+J_0 & \text{if } |matches| = 1 \\
+[J_0, J_1, \dots] & \text{if } |matches| > 1
+\end{cases}\]</span></p>
+
+<p><strong>Stage 4 — Quote Repair:</strong></p>
+
+<p><span class="math display">\[\texttt{Parse}_3(C_1') = \texttt{json.loads}(\texttt{re.sub}(\texttt{r'"\\s*[\'"]'}, \texttt{'"'}, C_1'))\]</span></p>
+
+<p>The full pipeline is a short-circuit cascade:</p>
+
+<p><span class="math display">\[\texttt{Clean}(C) = \texttt{Parse}_1(C_1') \lor \texttt{Parse}_2(C_1') \lor \texttt{Parse}_3(C_1') \lor \bot\]</span></p>
+
+<h3 id="complexity-3">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(|C|)\)</span> per stage — Each regex pass is linear.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(|C|)\)</span> for intermediate strings.</li>
+</ul>
+
+<hr />
+
+<h2 id="4-output-path-derivation-with-uniqueness-guarantee">4. Output Path Derivation with Uniqueness Guarantee</h2>
+
+<p>The <code>JsonCleanerUtils</code> derives output paths with automatic deduplication.</p>
+
+<h3 id="code-verification-4">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py">json<em>cleaner</em>utils.py</a></li>
+<li><strong>Lines:</strong> L30–L67 (<code>_derive_output_path</code>, <code>_get_unique_filepath</code>)</li>
+</ul>
+
+<h3 id="formalization-4">Formalization</h3>
+
+<p><strong>Path Derivation:</strong> <span class="math inline">\(\texttt{derive}: Path \to Path\)</span></p>
+
+<p><span class="math display">\[\texttt{derive}(p) = \texttt{filter}(\texttt{replace}(p, \texttt{"intermediate"} \to \texttt{"final"}),\; \neg\texttt{match}(\texttt{r"output\_\\d+"}))\]</span></p>
+
+<p><strong>Uniqueness:</strong> <span class="math inline">\(\texttt{unique}: Path \to Path\)</span></p>
+
+<p><span class="math display">\[\texttt{unique}(p) = \begin{cases}
+p & \text{if } \neg\exists\, p \\
+p_k & \text{where } p_k = \texttt{stem}(p) + \texttt{"\_"} + k + \texttt{ext}(p),\; k = \min\{i \geq 1 : \neg\exists\, p_i\}
+\end{cases}\]</span></p>
+
+<h3 id="complexity-4">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(k)\)</span> where <span class="math inline">\(k\)</span> = number of existing duplicates (typically <span class="math inline">\(k < 10\)</span>).</li>
+</ul>
+
+<hr />
+
+<h2 id="5-configuration-validation-boolean-algebra">5. Configuration Validation (Boolean Algebra)</h2>
+
+<p>The <code>CrewConfigValidator</code> applies boolean verification over YAML agent/task configurations.</p>
+
+<h3 id="code-verification-5">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/crew_validator.py">crew_validator.py</a></li>
+<li><strong>Lines:</strong> L64–L103 (<code>_collect_files_to_validate</code>, <code>_process_and_validate_files</code>), L105–L130 (<code>_generate_summary</code>)</li>
+</ul>
+
+<h3 id="formalization-5">Formalization</h3>
+
+<p>Let <span class="math inline">\(U\)</span> be the set of use cases. For <span class="math inline">\(u \in U\)</span>, <span class="math inline">\(A_u\)</span> = agent files, <span class="math inline">\(T_u\)</span> = task files.</p>
+
+<p>The validation predicate <span class="math inline">\(V(f)\)</span>:</p>
+
+<p><span class="math display">\[V(f) = \begin{cases}
+\texttt{True} & \text{if } \texttt{CrewParser.parse}(f) \text{ succeeds} \\
+\texttt{False} & \text{if exception raised}
+\end{cases}\]</span></p>
+
+<p><strong>Global Validity:</strong></p>
+
+<p><span class="math display">\[V_{global} = \underbrace{\left( \bigwedge_{u \in U} \bigwedge_{f \in A_u} V(f) \right)}_{\texttt{all\_agents\_valid}} \land \underbrace{\left( \bigwedge_{u \in U} \bigwedge_{f \in T_u} V(f) \right)}_{\texttt{all\_tasks\_valid}}\]</span></p>
+
+<p><strong>Summary Metrics:</strong></p>
+
+<p><span class="math display">\[N_{total} = \sum_{u \in U} (|A_u| + |T_u|) \qquad N_{valid} = \sum_f \mathbb{1}[V(f)] \qquad N_{invalid} = N_{total} - N_{valid}\]</span></p>
+
+<h3 id="complexity-5">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(N \times P)\)</span> where <span class="math inline">\(N\)</span> = files, <span class="math inline">\(P\)</span> = parsing cost per file.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(N)\)</span> for the report structure.</li>
+</ul>
+
+<hr />
+
+<h2 id="6-directory-set-difference-comparison">6. Directory Set-Difference Comparison</h2>
+
+<p>The <code>JSONOutputManager</code> identifies files present in an intermediate directory but not in a final directory — a set-difference operation.</p>
+
+<h3 id="code-verification-6">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/json_output_validator.py">json<em>output</em>validator.py</a></li>
+<li><strong>Lines:</strong> L32–L36 (<code>_find_unique_files</code>), L52–L72 (<code>run_comparison</code>)</li>
+</ul>
+
+<h3 id="formalization-6">Formalization</h3>
+
+<p>Let <span class="math inline">\(I\)</span> = set of JSON filenames in intermediate directory, <span class="math inline">\(F\)</span> = set in final directory.</p>
+
+<p><span class="math display">\[\texttt{Unique} = I \setminus F = \{ f \in I \mid f.\texttt{name} \notin \{g.\texttt{name} \mid g \in F\} \}\]</span></p>
+
+<p>This identifies <strong>unprocessed files</strong> that failed the cleaning pipeline.</p>
+
+<h3 id="complexity-6">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(|I| + |F|)\)</span> — Set construction + lookup.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(|F|)\)</span> for the comparison name set.</li>
+</ul>
+
+<hr />
+
+<h2 id="7-multi-model-pivot-consolidation">7. Multi-Model Pivot Consolidation</h2>
+
+<p>The <code>EvaluationReportTool</code> combines evaluations from multiple evaluator models (Gemini, GPT, Llama, Qwen) into a cross-model comparison matrix using pivot-table transformation.</p>
+
+<h3 id="code-verification-7">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_report_tool.py">evaluation<em>report</em>tool.py</a></li>
+<li><strong>Lines:</strong> L115–L167 (pivot + grading)</li>
+</ul>
+
+<h3 id="formalization-7">Formalization</h3>
+
+<p><strong>Step 1 — Model Name Extraction</strong> via regex:</p>
+
+<p><span class="math display">\[\texttt{gen\_model}(filename) = \texttt{regex}(filename, \texttt{r"[^\_]+\_(.+)\\.json\$"})\]</span></p>
+
+<p><span class="math display">\[\texttt{eval\_model}(filename) = \texttt{replace}(basename, \texttt{"aggregated\_results\_"} \to \texttt{""})\]</span></p>
+
+<p><strong>Step 2 — Pivot Transformation:</strong></p>
+
+<p><span class="math display">\[\texttt{Pivot}: (\texttt{gen\_model}, \texttt{plotTitle}) \times \texttt{eval\_model} \to \texttt{finalScore}\]</span></p>
+
+<p><strong>Step 3 — Cross-Model Total:</strong></p>
+
+<p><span class="math display">\[\texttt{totalFinalScore}(g) = \sum_{e \in \texttt{eval\_models}} \texttt{Pivot}[g, e]\]</span></p>
+
+<p><strong>Step 4 — Re-apply Relative Grading</strong> on <code>totalFinalScore</code> (see §2).</p>
+
+<h3 id="complexity-7">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(|files| \times |evals|)\)</span> for loading + <span class="math inline">\(O(|rows| \times |cols|)\)</span> for pivot.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(|gen\_models| \times |eval\_models|)\)</span> for pivot table.</li>
+</ul>
+
+<hr />
+
+<h2 id="algorithm-index">Algorithm Index</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Algorithm</th>
+  <th>Source File</th>
+  <th>Lines</th>
+  <th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td>Rubric-Weighted Scoring</td>
+  <td><code>evaluation_processing_tool.py</code></td>
+  <td>L32–L79</td>
+  <td><span class="math inline">\(O(K)\)</span></td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>Z-Score Relative Grading</td>
+  <td><code>evaluation_aggregate_tool.py</code></td>
+  <td>L89–L111</td>
+  <td><span class="math inline">\(O(n)\)</span></td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>Multi-Pass JSON Sanitization</td>
+  <td><code>json_cleaner_utils.py</code></td>
+  <td>L73–L119</td>
+  <td><span class="math inline">\(O(|C|)\)</span></td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>Output Path Uniqueness</td>
+  <td><code>json_cleaner_utils.py</code></td>
+  <td>L30–L67</td>
+  <td><span class="math inline">\(O(k)\)</span></td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>Configuration Validation</td>
+  <td><code>crew_validator.py</code></td>
+  <td>L64–L130</td>
+  <td><span class="math inline">\(O(N \times P)\)</span></td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>Directory Set-Difference</td>
+  <td><code>json_output_validator.py</code></td>
+  <td>L32–L72</td>
+  <td><span class="math inline">\(O(|I| + |F|)\)</span></td>
+</tr>
+<tr>
+  <td>7</td>
+  <td>Multi-Model Pivot Consolidation</td>
+  <td><code>evaluation_report_tool.py</code></td>
+  <td>L115–L167</td>
+  <td><span class="math inline">\(O(|files| \times |evals|)\)</span></td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="novelty" class="content-section">
+                    <div class="section-content">
+                        <h2 id="novelty-classification">Novelty Classification</h2>
+
+<p><strong>Status:</strong> MODERATE<br />
+<strong>Confidence:</strong> HIGH</p>
+
+<p>The <code>output_process</code> module applies <strong>psychometric grading principles</strong> (Gaussian normalization) and <strong>cascading sanitization</strong> to the evaluation of AI agent outputs, constituting a novel evaluation pipeline for Multi-Agent Systems.</p>
+
+<hr />
+
+<h2 id="contribution-1-psychometric-relative-grading-for-stochastic-ai-outputs">Contribution 1: Psychometric Relative Grading for Stochastic AI Outputs</h2>
+
+<ul>
+<li><strong>Type:</strong> Methodological Innovation</li>
+<li><strong>Novelty Level:</strong> ⭐⭐⭐ (Moderate-High)</li>
+<li><strong>Claim:</strong> Replaces brittle absolute thresholds with <strong>population-relative Z-score grading</strong> that handles the inherent variability in LLM-as-a-Judge scenarios. If all agents score low due to a strict judge, relative grading still identifies the best performers.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py#L89-L111">EvaluationAggregationTool.<em>apply</em>relative<em>grading()</a></li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_report_tool.py#L33-L61">EvaluationReportTool.<em>apply</em>relative</em>grading()</a></li>
+<li>Z-score grading formalized in Mathematics §2</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>Standard LLM benchmarks (MMLU, HellaSwag):</strong> Use absolute pass/fail thresholds — sensitive to grader calibration.</li>
+<li><strong>Amsha:</strong> Uses <span class="math inline">\(\mu \pm \sigma\)</span> intervals — ranking is invariant to grader bias scale.</li>
+</ul></li>
+<li><strong>Publication Angle:</strong> <em>"Standardizing the Subjective: A Psychometric Approach to Multi-Agent Evaluation"</em></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-2-multi-pass-cascading-json-sanitization">Contribution 2: Multi-Pass Cascading JSON Sanitization</h2>
+
+<ul>
+<li><strong>Type:</strong> Engineering Innovation</li>
+<li><strong>Novelty Level:</strong> ⭐⭐⭐ (Moderate-High)</li>
+<li><strong>Claim:</strong> A <strong>4-stage short-circuit cascade</strong> for extracting valid JSON from noisy LLM text output — handling markdown fences, concatenated objects, and quote errors common in production LLM systems.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py#L73-L119">JsonCleanerUtils.<em>clean</em>and<em>parse</em>string()</a></li>
+<li>Cascade pipeline formalized in Mathematics §3</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>LangChain OutputParser:</strong> Custom per-prompt parsers with rigid format expectations.</li>
+<li><strong>Guardrails AI:</strong> Schema-based validation but no multi-pass repair.</li>
+<li><strong>Amsha:</strong> 4-stage cascading repair that progressively relaxes parsing strictness.</li>
+</ul></li>
+<li><p><strong>Cascade Stages:</strong></p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Stage</th>
+  <th style="text-align:left;">Strategy</th>
+  <th style="text-align:left;">Handles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">1</td>
+  <td style="text-align:left;">Fence extraction</td>
+  <td style="text-align:left;"><code>```json ... ```</code> wrappers</td>
+</tr>
+<tr>
+  <td style="text-align:left;">2</td>
+  <td style="text-align:left;">Direct parse</td>
+  <td style="text-align:left;">Well-formed JSON</td>
+</tr>
+<tr>
+  <td style="text-align:left;">3</td>
+  <td style="text-align:left;">Object extraction</td>
+  <td style="text-align:left;"><code>{...}{...}</code> concatenation</td>
+</tr>
+<tr>
+  <td style="text-align:left;">4</td>
+  <td style="text-align:left;">Quote repair</td>
+  <td style="text-align:left;">Stray internal quotes</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong>Publication Angle:</strong> <em>"Robust JSON Recovery from Noisy LLM Outputs: A Cascading Parser Approach"</em></p></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-3-multi-model-cross-evaluation-consolidation">Contribution 3: Multi-Model Cross-Evaluation Consolidation</h2>
+
+<ul>
+<li><strong>Type:</strong> Methodological</li>
+<li><strong>Novelty Level:</strong> ⭐⭐ (Moderate)</li>
+<li><strong>Claim:</strong> Multiple evaluator models (Gemini, GPT, Llama, Qwen) independently score the same generation models, and results are consolidated via <strong>pivot-table transformation</strong> into a cross-model comparison matrix with aggregated scoring.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_report_tool.py#L63-L220">EvaluationReportTool.<em>generate</em>evaluation_report()</a></li>
+<li>Multi-model pivot in Mathematics §7</li>
+</ul></li>
+<li><strong>Differentiation:</strong> No existing MAS framework provides automated cross-evaluator consolidation where multiple judge models produce a unified ranking.</li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-4-rubric-weighted-evaluation-with-tier-classification">Contribution 4: Rubric-Weighted Evaluation with Tier Classification</h2>
+
+<ul>
+<li><strong>Type:</strong> Engineering</li>
+<li><strong>Novelty Level:</strong> ⭐⭐ (Moderate)</li>
+<li><strong>Claim:</strong> Configurable evaluation rubrics with per-metric weights and scoring ranges, producing both a weighted percentage and a descriptive tier classification.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_processing_tool.py#L32-L79">EvaluationProcessingTool.<em>calculate</em>evaluation_score()</a></li>
+<li>Weighted scoring in Mathematics §1</li>
+</ul></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-5-pre-execution-configuration-validation">Contribution 5: Pre-Execution Configuration Validation</h2>
+
+<ul>
+<li><strong>Type:</strong> Engineering</li>
+<li><strong>Novelty Level:</strong> ⭐⭐ (Moderate)</li>
+<li><strong>Claim:</strong> Static analysis of agent/task YAML definitions <strong>before</strong> runtime, catching structural errors without invoking LLMs (saving cost and time).</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/crew_validator.py#L19-L43">CrewConfigValidator.validate()</a></li>
+<li>Boolean algebra validation in Mathematics §5</li>
+</ul></li>
+</ul>
+
+<hr />
+
+<h2 id="suggested-empirical-studies">Suggested Empirical Studies</h2>
+
+<h3 id="study-1-absolute-vs-relative-grading-stability">Study 1: Absolute vs. Relative Grading Stability</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Run the same task 10 times, compare ranking stability under absolute vs. Z-score grading</li>
+<li><strong>Hypothesis:</strong> Relative grading shows &gt;50% lower Kendall tau-distance variance than absolute scoring</li>
+<li><strong>Validates:</strong> Contribution 1</li>
+</ul>
+
+<h3 id="study-2-json-sanitization-recovery-rate">Study 2: JSON Sanitization Recovery Rate</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Collect 1000 raw LLM outputs, measure parse success rate per cascade stage</li>
+<li><strong>Hypothesis:</strong> &gt;90% recovery by stage 2, &gt;98% by stage 3</li>
+<li><strong>Validates:</strong> Contribution 2</li>
+</ul>
+
+<h3 id="study-3-cross-evaluator-agreement">Study 3: Cross-Evaluator Agreement</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Measure Fleiss' Kappa across 4 evaluator models on the same generation set</li>
+<li><strong>Hypothesis:</strong> κ &gt; 0.6 (substantial agreement) for factual tasks, κ &lt; 0.4 for creative tasks</li>
+<li><strong>Validates:</strong> Contribution 3</li>
+</ul>
+
+<h3 id="study-4-inter-rater-reliability-of-llm-judges">Study 4: Inter-Rater Reliability of LLM Judges</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Compare grade assignments between 2 different LLM judges on the same outputs</li>
+<li><strong>Method:</strong> Cohen's Kappa for agreement measurement</li>
+<li><strong>Validates:</strong> Exposes METH-001 gap</li>
+</ul>
+
+<hr />
+
+<h2 id="publication-strategy">Publication Strategy</h2>
+
+<h3 id="recommended-paper-titles">Recommended Paper Titles</h3>
+
+<ol>
+<li><em>"Fair Evaluation in Stochastic Environments: Psychometric Grading for Multi-Agent AI Systems"</em></li>
+<li><em>"From Noise to Knowledge: A Cascading Parser for Robust LLM Output Processing"</em></li>
+<li><em>"Cross-Model Consensus Evaluation: A Multi-Judge Framework for Agent Assessment"</em></li>
+</ol>
+
+<h3 id="target-venues">Target Venues</h3>
+
+<ul>
+<li><strong>Journal:</strong> ACM Computing Surveys — Evaluation methodology review</li>
+<li><strong>Conference:</strong> EMNLP (Eval track) — LLM evaluation methodology</li>
+<li><strong>Workshop:</strong> LLM Evaluation Workshop @ ACL — Practical evaluation tools</li>
+</ul>
+
+<hr />
+
+<h2 id="novelty-summary-matrix">Novelty Summary Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">Contribution</th>
+  <th style="text-align:center;">Novelty</th>
+  <th style="text-align:left;">Type</th>
+  <th style="text-align:center;">Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;">Psychometric Relative Grading</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+  <td style="text-align:left;">Methodological</td>
+  <td style="text-align:center;">Mathematics §2</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;">Multi-Pass JSON Sanitization</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+  <td style="text-align:left;">Engineering</td>
+  <td style="text-align:center;">Mathematics §3</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;">Multi-Model Consolidation</td>
+  <td style="text-align:center;">⭐⭐</td>
+  <td style="text-align:left;">Methodological</td>
+  <td style="text-align:center;">Mathematics §7</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;">Rubric-Weighted Scoring</td>
+  <td style="text-align:center;">⭐⭐</td>
+  <td style="text-align:left;">Engineering</td>
+  <td style="text-align:center;">Mathematics §1</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td style="text-align:left;">Pre-Execution Validation</td>
+  <td style="text-align:center;">⭐⭐</td>
+  <td style="text-align:left;">Engineering</td>
+  <td style="text-align:center;">Mathematics §5</td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="summary" class="content-section">
+                    <div class="section-content">
+                        <h2 id="overview">Overview</h2>
+
+<p>The <code>output_process</code> module is the <strong>post-processing pipeline</strong> of the Amsha framework. With <strong>10 Python files</strong> across <strong>3 sub-packages</strong> (~860 lines), it transforms raw, noisy agent outputs into structured, graded, and publication-ready data through a three-stage pipeline: <strong>Optimization</strong> (JSON sanitization), <strong>Validation</strong> (config checks + output auditing), and <strong>Evaluation</strong> (rubric scoring → Z-score grading → multi-model consolidation).</p>
+
+<hr />
+
+<h2 id="key-findings">Key Findings</h2>
+
+<h3 id="1-mathematical-foundation-7-algorithms-formalized">1. Mathematical Foundation (7 Algorithms Formalized)</h3>
+
+<ul>
+<li><strong>Rubric-Weighted Scoring:</strong> <span class="math inline">\(F\% = \frac{\sum r_k \times w_k}{S_{max}} \times 100\)</span> with tier classification.</li>
+<li><strong>Z-Score Relative Grading:</strong> <span class="math inline">\(G(s) = f(s, \mu, \sigma)\)</span> with configurable grade-point scale and CGPA.</li>
+<li><strong>Cascading JSON Sanitization:</strong> 4-stage short-circuit parser (fence → direct → concat → quote fix).</li>
+<li><strong>Output Path Uniqueness:</strong> Counter-based deduplication with <code>intermediate</code> → <code>final</code> derivation.</li>
+<li><strong>Boolean Configuration Validation:</strong> <span class="math inline">\(V_{global} = \bigwedge V(agents) \land \bigwedge V(tasks)\)</span>.</li>
+<li><strong>Directory Set-Difference:</strong> <span class="math inline">\(\texttt{Unique} = I \setminus F\)</span> for identifying unprocessed files.</li>
+<li><strong>Multi-Model Pivot Consolidation:</strong> Regex model extraction → pivot → cross-evaluator total.</li>
+</ul>
+
+<h3 id="2-architecture-design-8-patterns-6-diagrams">2. Architecture &amp; Design (8 Patterns, 6 Diagrams)</h3>
+
+<ul>
+<li><strong>Pipeline:</strong> Optimization → Scoring → Grading → Reporting (4 sequential stages).</li>
+<li><strong>Cascade:</strong> 4-stage JSON sanitization with progressive relaxation.</li>
+<li><strong>Diagrams:</strong> Pipeline architecture, class diagram, full evaluation sequence (4-stage), JSON sanitization cascade, dual validation workflow, cross-module dependency.</li>
+</ul>
+
+<h3 id="3-research-gaps-10-identified">3. Research Gaps (10 Identified)</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Severity</th>
+  <th style="text-align:center;">Count</th>
+  <th style="text-align:left;">Key Items</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Critical ⛔</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;">Missing eval/validation tests, no inter-rater reliability</td>
+</tr>
+<tr>
+  <td style="text-align:left;">High</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;"><strong>Missing <code>JsonUtils</code> imports</strong> in 2 evaluation files (runtime bugs)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Moderate</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:left;">Hardcoded tiers, no confidence intervals, duplicate grading logic, no error recovery</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Minor</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;">Hardcoded directory names, debug print in production</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Bugs Discovered:</strong><br />
+- <code>JsonUtils</code> used but <strong>never imported</strong> in <code>evaluation_aggregate_tool.py</code> (L64) and <code>evaluation_processing_tool.py</code> (L86, L103, L115).<br />
+- <strong>Duplicate code:</strong> <code>_apply_relative_grading()</code> implemented twice with slightly different signatures.</p>
+
+<p><strong>Total Estimated Effort:</strong> ~10 days to close all gaps.</p>
+
+<h3 id="4-novelty-assessment">4. Novelty Assessment</h3>
+
+<ul>
+<li><strong>Status:</strong> <strong>MODERATE</strong> (upgraded from INCREMENTAL)</li>
+<li><strong>5 Contributions Identified:</strong>
+<ol>
+<li>⭐⭐⭐ Psychometric Relative Grading for Stochastic AI Outputs</li>
+<li>⭐⭐⭐ Multi-Pass Cascading JSON Sanitization</li>
+<li>⭐⭐ Multi-Model Cross-Evaluation Consolidation</li>
+<li>⭐⭐ Rubric-Weighted Scoring with Tier Classification</li>
+<li>⭐⭐ Pre-Execution Configuration Validation</li>
+</ol></li>
+<li><strong>Publication Angle:</strong> <em>"Fair Evaluation in Stochastic Environments: Psychometric Grading for Multi-Agent AI"</em></li>
+<li><strong>Target Venues:</strong> ACM Computing Surveys, EMNLP Eval track, LLM Evaluation Workshop @ ACL</li>
+</ul>
+
+<hr />
+
+<h2 id="module-statistics">Module Statistics</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Total Python Files</td>
+  <td style="text-align:left;">10</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sub-Packages</td>
+  <td style="text-align:left;">3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Design Patterns</td>
+  <td style="text-align:left;">8</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Formalized Algorithms</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Architecture Diagrams</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Identified Research Gaps</td>
+  <td style="text-align:left;">10</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Novel Contributions</td>
+  <td style="text-align:left;">5</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Total Source Lines</td>
+  <td style="text-align:left;">~860</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Runtime Bugs Found</td>
+  <td style="text-align:left;">2 (missing imports)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Unit Test Files (eval/val)</td>
+  <td style="text-align:left;">0 ⚠️</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The <code>output_process</code> module provides the <strong>fairness layer</strong> to the monitoring instrument — ensuring that agent outputs are not only measured but <strong>fairly graded</strong>. The psychometric Z-score approach and the cascading JSON sanitizer are the strongest novel contributions. However, the <strong>two missing imports</strong> (QA-002, QA-003) are immediate runtime bugs that must be fixed before any evaluation pipeline can execute. The duplicate grading logic (IMPL-004) indicates technical debt that should be addressed via a shared <code>GradingService</code>.</p>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Toggle
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    
+    const btn = document.querySelector('.theme-toggle .text');
+    btn.textContent = newTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+    
+    const icon = document.querySelector('.theme-toggle .icon');
+    icon.textContent = newTheme === 'light' ? '🌙' : '☀️';
+    
+    localStorage.setItem('theme', newTheme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if (savedTheme === 'dark') {
+    document.querySelector('.theme-toggle .text').textContent = 'Light Mode';
+    document.querySelector('.theme-toggle .icon').textContent = '☀️';
+}
+
+// Smooth scrolling for navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        // Smooth scroll to section
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+    });
+});
+
+// Set first link as active on load
+document.querySelector('.nav-link')?.classList.add('active');
+
+// Export PDF function (placeholder)
+function exportPDF() {
+    window.print();
+}
+
+// Intersection Observer for active nav highlighting
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${id}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.content-section').forEach(section => {
+    observer.observe(section);
+});
+
+
+        // Initialize Mermaid
+        document.addEventListener('DOMContentLoaded', () => {
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+        mermaid.initialize({ startOnLoad: true, theme: theme });
+        });
+    </script>
+</body>
+
+</html>
