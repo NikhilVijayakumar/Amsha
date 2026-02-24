@@ -53,7 +53,12 @@ To prevent failures during long analysis sessions, the workflow is broken into *
 "Lutapi, run cross-module analysis for the paper"
 ```
 
-**Phase 3 - Final Synthesis:**
+**Phase 3 - Cross-Library Analysis:**
+```
+"Lutapi, run cross-library analysis for the paper"
+```
+
+**Phase 4 - Final Synthesis:**
 ```
 "Lutapi, synthesize the final journal report"
 ```
@@ -74,34 +79,34 @@ To prevent failures during long analysis sessions, the workflow is broken into *
 **Input:** `.agent/paper_config.yaml` (reads module configuration)
 
 **Process:**
-1. **Math Extractor** → `docs/paper/modules/{module}/mathematics.md`
+1. **Math Extractor** → `docs/paper/Amsha/modules/{module}/mathematics.md`
    - Extract algorithms specific to this module
    - Minimum 1 algorithm per module
    - LaTeX formalization with variable mapping
 
-2. **Visual Generator** → `docs/paper/modules/{module}/architecture.md`
+2. **Visual Generator** → `docs/paper/Amsha/modules/{module}/architecture.md`
    - Module-specific class/sequence diagrams
    - Minimum 2 diagrams per module
    - Performance tables if applicable
 
-3. **Research Gap Analyst** → `docs/paper/modules/{module}/gaps.md`
+3. **Research Gap Analyst** → `docs/paper/Amsha/modules/{module}/gaps.md`
    - Module-specific gaps against Scopus standards
    - Categorized by severity (critical/moderate/minor)
    - Effort estimation for each gap
 
-4. **Novelty Analyst** → `docs/paper/modules/{module}/novelty.md` ⭐ **NEW**
+4. **Novelty Analyst** → `docs/paper/Amsha/modules/{module}/novelty.md` ⭐ **NEW**
    - Academic contribution analysis
    - Novel vs. standard classification
    - Suggests research angles if novelty is weak
    - Proposes empirical studies to strengthen contribution
 
-5. **Summary Generator** → `docs/paper/modules/{module}/summary.md`
+5. **Summary Generator** → `docs/paper/Amsha/modules/{module}/summary.md`
    - Quick overview of module findings
    - Key metrics and highlights
 
-**Output:** 5 files in `docs/paper/modules/{module}/`
+**Output:** 5 files in `docs/paper/Amsha/modules/{module}/`
 
-**Status Tracking:** Updates `docs/paper/.progress.yaml` with completion status
+**Status Tracking:** Updates `docs/paper/Amsha/.progress.yaml` with completion status
 
 ---
 
@@ -112,63 +117,113 @@ To prevent failures during long analysis sessions, the workflow is broken into *
 **Prerequisites:** At least 2 modules must be analyzed in Phase 1
 
 **Process:**
-1. **Interaction Analyzer** → `docs/paper/cross_module/interactions.md`
+1. **Interaction Analyzer** → `docs/paper/Amsha/cross_module/interactions.md`
    - How modules communicate
    - Data flow diagrams
    - Dependency matrix
 
-2. **Dependency Analyzer** → `docs/paper/cross_module/dependencies.md`
+2. **Dependency Analyzer** → `docs/paper/Amsha/cross_module/dependencies.md`
    - Module dependency graph (Mermaid)
    - Coupling analysis
    - Architectural layer validation
 
-3. **Pattern Analyzer** → `docs/paper/cross_module/patterns.md`
+3. **Pattern Analyzer** → `docs/paper/Amsha/cross_module/patterns.md`
    - Recurring architectural patterns
    - Shared design principles
    - Protocol compliance
 
-4. **Novelty Analyst** → `docs/paper/cross_module/novelty.md`
+4. **Novelty Analyst** → `docs/paper/Amsha/cross_module/novelty.md`
    - System-level innovations (e.g., hybrid orchestration)
    - Synergy between modules (e.g., dynamic crew generation + validation)
    - Comparison with existing multi-agent frameworks
 
-5. **Math Extractor** → `docs/paper/cross_module/mathematics.md`
+5. **Math Extractor** → `docs/paper/Amsha/cross_module/mathematics.md`
    - System-wide mathematical models
    - Cross-module algorithmic dependencies
    - Global complexity analysis
 
-6. **Visual Generator** → `docs/paper/cross_module/architecture.md`
+6. **Visual Generator** → `docs/paper/Amsha/cross_module/architecture.md`
    - High-level system architecture diagrams
    - End-to-end data flow (Amsha to Yantra)
    - Global performance metrics
 
-**Output:** 6 files in `docs/paper/cross_module/`
+**Output:** 6 files in `docs/paper/Amsha/cross_module/`
 
 ---
 
-### Phase 3: Final Synthesis
+### Phase 3: Cross-Library Analysis
+
+**Trigger:** "Lutapi, run cross-library analysis for the paper"
+
+**Prerequisites:** 
+- Phase 2 completed (cross-module analysis) OR
+- Multiple libraries detected in `docs/paper/`
+
+**Process:**
+1. **Library Interaction Analyzer** → `docs/paper/cross_library/interactions.md`
+   - How libraries (Amsha, Bodha, Yantra) interact with each other
+   - High-level system architecture diagrams
+2. **Library Dependency Analyzer** → `docs/paper/cross_library/dependencies.md`
+   - Dependency graph mapping shared layers
+3. **Library Pattern Analyzer** → `docs/paper/cross_library/patterns.md`
+   - Universal patterns spanning across libraries
+4. **Library Novelty Analyst** → `docs/paper/cross_library/novelty.md`
+   - Macro-level innovations across the entire suite of libraries
+
+**Output:** 4 files in `docs/paper/cross_library/`
+
+---
+
+### Phase 4: Final Synthesis
 
 **Trigger:** "Lutapi, synthesize the final journal report"
 
 **Prerequisites:** 
 - Phase 1 completed for at least 2 modules
 - Phase 2 completed (cross-module analysis)
+- Phase 3 completed (cross-library analysis, if applicable)
 
 **Process:**
-1. Read all module analyses from `docs/paper/modules/*/`
-2. Read cross-module analysis from `docs/paper/cross_module/`
-3. Compile into publication-ready format
-4. Generate:
+1. Read all module analyses from `docs/paper/Amsha/modules/*/` (and other libraries)
+2. Read cross-module analysis from `docs/paper/Amsha/cross_module/`
+3. Read cross-library analysis from `docs/paper/cross_library/`
+4. Compile into publication-ready format
+5. Generate:
    - Abstract
    - Introduction
-   - Module-by-module analysis sections
-   - Cross-module insights
+   - Library-by-library analysis sections
+   - Cross-Library insights
    - Experimental evaluation (if data available)
    - Discussion & Limitations
    - Conclusion
    - Appendix (algorithm index, pattern summary)
 
 **Output:** `docs/paper/drafts/FINAL_JOURNAL_REPORT.md`
+
+---
+
+### Phase 5: User Input Template Generation
+
+**Trigger:** "Lutapi, generate user input templates for the paper"
+
+**Prerequisites:** Phase 2 completed (cross-module analysis)
+
+**Purpose:** Auto-generates intelligent, data-aware templates in `docs/paper/Amsha/user_inputs/` for sections that require user-provided data. These templates are pre-filled with insights inferred from existing analysis.
+
+**Process:**
+1. **Execution Results Template** → `docs/paper/Amsha/user_inputs/app_execution_results.md`
+   - Reads `mathematics.md`, `novelty.md`, and `gaps.md` across all libraries
+   - Suggests relevant metrics (F1, Precision, Recall) and baselines (Drain, Spell)
+   - Suggests experiment structures (chunk size sensitivity, noise injection)
+   - User fills in actual empirical values
+
+2. **Practical Implications Document** → `docs/paper/Amsha/user_inputs/practical_implications.md`
+   - Reads `paper_config.yaml` (via Dakini), `architecture.md`, and `novelty.md`
+   - **Auto-generates** industry applicability, cost/efficiency claims, and deployment considerations
+   - Each claim has a verification checkbox for user to confirm (✅) or reject (❌)
+   - User reviews, updates, and adds their own observations
+
+**Output:** 2 files in `docs/paper/Amsha/user_inputs/`
 
 ## Configuration Reference
 
@@ -224,6 +279,8 @@ if "analyze module" in user_request:
     phase = f"MODULE_ANALYSIS_{module_name}"
 elif "cross-module" in user_request:
     phase = "CROSS_MODULE_ANALYSIS"
+elif "cross-library" in user_request:
+    phase = "CROSS_LIBRARY_ANALYSIS"
 elif "synthesize" in user_request or "final report" in user_request:
     phase = "FINAL_SYNTHESIS"
 else:
@@ -251,11 +308,11 @@ if phase.startswith("MODULE_ANALYSIS_"):
         raise ValueError(f"Module '{module_name}' not found in paper_config.yaml")
     
     # Execute sub-skills for this module only
-    run_math_extractor(module_config['path'], f"docs/paper/modules/{module_name}/mathematics.md")
-    run_visual_generator(module_config['path'], f"docs/paper/modules/{module_name}/architecture.md")
-    run_research_gap_analyst(module_config['path'], f"docs/paper/modules/{module_name}/gaps.md")
-    run_novelty_analyst(module_config['path'], f"docs/paper/modules/{module_name}/novelty.md")
-    generate_module_summary(module_name, f"docs/paper/modules/{module_name}/summary.md")
+    run_math_extractor(module_config['path'], f"docs/paper/Amsha/modules/{module_name}/mathematics.md")
+    run_visual_generator(module_config['path'], f"docs/paper/Amsha/modules/{module_name}/architecture.md")
+    run_research_gap_analyst(module_config['path'], f"docs/paper/Amsha/modules/{module_name}/gaps.md")
+    run_novelty_analyst(module_config['path'], f"docs/paper/Amsha/modules/{module_name}/novelty.md")
+    generate_module_summary(module_name, f"docs/paper/Amsha/modules/{module_name}/summary.md")
     
     # Update progress tracker
     update_progress(module_name, status="completed")
@@ -271,17 +328,33 @@ elif phase == "CROSS_MODULE_ANALYSIS":
         raise ValueError("Need at least 2 modules analyzed before cross-module analysis")
     
     # Analyze interactions and global architecture
-    analyze_module_interactions(completed_modules, "docs/paper/cross_module/interactions.md")
-    analyze_dependencies(completed_modules, "docs/paper/cross_module/dependencies.md")
-    analyze_patterns(completed_modules, "docs/paper/cross_module/patterns.md")
-    analyze_cross_module_novelty(completed_modules, "docs/paper/cross_module/novelty.md")
-    run_math_extractor_cross_module(completed_modules, "docs/paper/cross_module/mathematics.md")
-    run_visual_generator_cross_module(completed_modules, "docs/paper/cross_module/architecture.md")
+    analyze_module_interactions(completed_modules, "docs/paper/Amsha/cross_module/interactions.md")
+    analyze_dependencies(completed_modules, "docs/paper/Amsha/cross_module/dependencies.md")
+    analyze_patterns(completed_modules, "docs/paper/Amsha/cross_module/patterns.md")
+    analyze_cross_module_novelty(completed_modules, "docs/paper/Amsha/cross_module/novelty.md")
+    run_math_extractor_cross_module(completed_modules, "docs/paper/Amsha/cross_module/mathematics.md")
+    run_visual_generator_cross_module(completed_modules, "docs/paper/Amsha/cross_module/architecture.md")
     
     update_progress("cross_module", status="completed")
 ```
 
-#### Phase 3: Final Synthesis
+#### Phase 3: Cross-Library Analysis
+
+```python
+elif phase == "CROSS_LIBRARY_ANALYSIS":
+    library_config = load_yaml('.agent/library_config.yaml')
+    libraries = library_config['libraries']
+    
+    # Analyze library interactions
+    analyze_library_interactions(libraries, "docs/paper/cross_library/interactions.md")
+    analyze_library_dependencies(libraries, "docs/paper/cross_library/dependencies.md")
+    analyze_library_patterns(libraries, "docs/paper/cross_library/patterns.md")
+    analyze_library_novelty(libraries, "docs/paper/cross_library/novelty.md")
+    
+    update_progress("cross_library", status="completed")
+```
+
+#### Phase 4: Final Synthesis
 
 ```python
 elif phase == "FINAL_SYNTHESIS":
@@ -292,8 +365,9 @@ elif phase == "FINAL_SYNTHESIS":
     
     # Compile all analyses
     synthesize_final_report(
-        module_analyses=glob("docs/paper/modules/*/"),
-        cross_module_dir="docs/paper/cross_module/",
+        module_analyses=glob("docs/paper/*/modules/*/"),
+        cross_module_dir="docs/paper/*/cross_module/",
+        cross_library_dir="docs/paper/cross_library/",
         output="docs/paper/drafts/FINAL_JOURNAL_REPORT.md"
     )
     
@@ -319,7 +393,7 @@ elif phase == "FULL_PIPELINE":
 
 ```python
 elif "show progress" in user_request or "check progress" in user_request:
-    progress = load_yaml("docs/paper/.progress.yaml")
+    progress = load_yaml("docs/paper/Amsha/.progress.yaml")
     
     # Display current status
     modules_completed = [m for m, data in progress['modules'].items() if data['status'] == 'completed']
@@ -331,12 +405,15 @@ elif "show progress" in user_request or "check progress" in user_request:
     print(f"  🔄 In Progress: {', '.join(modules_in_progress) if modules_in_progress else 'None'}")
     print(f"  ❌ Failed: {', '.join(modules_failed) if modules_failed else 'None'}")
     print(f"  📈 Cross-Module: {progress['cross_module']['status']}")
+    print(f"  📚 Cross-Library: {progress['cross_library']['status']}")
     print(f"  📄 Final Report: {progress['final_report']['status']}")
     
     # Recommend next step
     if len(modules_completed) == progress['stats']['total_modules'] and progress['cross_module']['status'] != 'completed':
         print("\n💡 Next: Run cross-module analysis")
-    elif progress['cross_module']['status'] == 'completed' and progress['final_report']['status'] != 'completed':
+    elif progress['cross_module']['status'] == 'completed' and progress['cross_library']['status'] != 'completed':
+        print("\n💡 Next: Run cross-library analysis")
+    elif progress['cross_library']['status'] == 'completed' and progress['final_report']['status'] != 'completed':
         print("\n💡 Next: Synthesize final journal report")
 ```
 
@@ -363,16 +440,16 @@ elif "show progress" in user_request or "check progress" in user_request:
 
 **Structure:**
 ```markdown
-# Final Paper Structure (Modular Mode)
+# Final Paper Structure (Multi-Library Mode)
 
 1. Abstract
 2. Introduction
 3. Related Work
-4. Module Analyses:
-   - 4.1 Crew Forge Module
-   - 4.2 Output Process Module
-   - ... (one section per module)
-5. Cross-Module Analysis
+4. Library Overviews:
+   - 4.1 Amsha Framework
+   - 4.2 Bodha Engine
+   - 4.3 Yantra Core
+5. Cross-Library Interactions
 6. System-Level Performance
 7. Discussion & Future Work
 8. Conclusion
@@ -382,8 +459,9 @@ elif "show progress" in user_request or "check progress" in user_request:
 ### Step 5: Output
 
 Generate `docs/paper/drafts/FINAL_JOURNAL_REPORT.md` with:
-- All module sections integrated
+- All library modules integrated
 - Cross-module insights
+- Cross-library interactions
 - Comprehensive appendix
 - Traceability matrix
 
@@ -395,13 +473,13 @@ Generate `docs/paper/drafts/FINAL_JOURNAL_REPORT.md` with:
 ```
 "Lutapi, analyze module crew_forge for the paper"
 ```
-Output: `docs/paper/modules/crew_forge/{mathematics,architecture,gaps,summary}.md`
+Output: `docs/paper/Amsha/modules/crew_forge/{mathematics,architecture,gaps,summary}.md`
 
 **Step 2: Analyze second module**
 ```
 "Lutapi, analyze module llm_factory for the paper"
 ```
-Output: `docs/paper/modules/llm_factory/{mathematics,architecture,gaps,summary}.md`
+Output: `docs/paper/Amsha/modules/llm_factory/{mathematics,architecture,gaps,summary}.md`
 
 **Step 3: Continue for remaining critical modules**
 ```
@@ -413,9 +491,15 @@ Output: `docs/paper/modules/llm_factory/{mathematics,architecture,gaps,summary}.
 ```
 "Lutapi, run cross-module analysis for the paper"
 ```
-Output: `docs/paper/cross_module/{interactions,dependencies,patterns,novelty,mathematics,architecture}.md`
+Output: `docs/paper/Amsha/cross_module/{interactions,dependencies,patterns,novelty,mathematics,architecture}.md`
 
-**Step 5: Final synthesis**
+**Step 5: Cross-library analysis**
+```
+"Lutapi, run cross-library analysis for the paper"
+```
+Output: `docs/paper/cross_library/{interactions,dependencies,patterns,novelty}.md`
+
+**Step 6: Final synthesis**
 ```
 "Lutapi, synthesize the final journal report"
 ```
@@ -463,34 +547,31 @@ Attempts all phases sequentially. **Warning:** May fail on large projects with 5
 
 ```
 docs/paper/
-├── modules/                      # Per-module analysis (modular mode only)
-│   ├── crew_forge/
-│   │   ├── mathematics.md
-│   │   ├── architecture.md
-│   │   ├── gaps.md
-│   │   └── summary.md
-│   ├── output_process/
-│   │   └── ...
-│   └── ... (one dir per module)
-├── cross_module/                 # Cross-module analysis (modular mode only)
+├── Amsha/
+│   ├── modules/
+│   │   ├── crew_forge/
+│   │   │   ├── mathematics.md
+│   │   │   ├── architecture.md
+│   │   │   ├── gaps.md
+│   │   │   └── summary.md
+│   │   ├── output_process/
+│   │   │   └── ...
+│   ├── cross_module/
+│   │   ├── interactions.md
+│   │   ├── dependencies.md
+│   │   └── patterns.md
+│   └── ...
+├── Bodha/
+│   └── ...
+├── Yantra/
+│   └── ...
+├── cross_library/
 │   ├── interactions.md
 │   ├── dependencies.md
 │   ├── patterns.md
-│   ├── novelty.md
-│   ├── mathematics.md
-│   └── architecture.md
-├── mathematics/                  # Unified mode outputs
-│   └── math_logic.md
-├── architecture/                 # Unified mode outputs
-│   └── visuals.md
-├── analysis/                     # Unified mode outputs
-│   └── gap_report.md
-├── appendix/                     # Supporting materials
-│   ├── module_comparison_table.md
-│   ├── algorithm_index.md
-│   └── gap_summary.md
+│   └── novelty.md
 └── drafts/
-    └── FINAL_JOURNAL_REPORT.md   # Final compiled paper
+    └── FINAL_JOURNAL_REPORT.md   # Final compiled overarching paper
 ```
 
 ## Benefits of Modular Mode

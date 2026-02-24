@@ -54,14 +54,34 @@ After at least 2 modules are analyzed:
 1. Interaction Analyzer → `interactions.md` (data flow, dependencies)
 2. Dependency Analyzer → `dependencies.md` (module graph)
 3. Pattern Analyzer → `patterns.md` (shared design patterns)
+4. Novelty Analyst → `novelty.md` (system-level innovations)
+5. Math Extractor → `mathematics.md` (cross-module mathematical models)
+6. Visual Generator → `architecture.md` (high-level system diagrams)
 
-**Output:** 3 files in `docs/paper/cross_module/`
+**Output:** 6 files in `docs/paper/cross_module/`
 
 ---
 
-### Phase 3: Final Synthesis
+### Phase 3: Cross-Library Analysis
 
-After cross-module analysis is complete:
+After cross-module analysis is complete or when multiple libraries exist:
+```
+"Lutapi, run cross-library analysis for the paper"
+```
+
+**Execution:**
+1. Interaction Analyzer → `interactions.md` (how libraries communicate)
+2. Dependency Analyzer → `dependencies.md` (inter-library map)
+3. Pattern Analyzer → `patterns.md` (universal architecture patterns)
+4. Novelty Analyst → `novelty.md` (macro-level innovations)
+
+**Output:** 4 files in `docs/paper/cross_library/`
+
+---
+
+### Phase 4: Final Synthesis
+
+After cross-library analysis is complete (or if skipped, cross-module):
 ```
 "Lutapi, synthesize the final journal report"
 ```
@@ -69,11 +89,31 @@ After cross-module analysis is complete:
 **Execution:**
 1. Read all module analyses
 2. Read cross-module analysis
-3. Compile into publication-ready format
-4. Generate Abstract, Introduction, Module sections, Discussion, Conclusion
-5. Create Appendix (algorithm index, pattern summary)
+3. Read cross-library analysis
+4. Compile into publication-ready format
+5. Generate Abstract, Introduction, Library/Module sections, Discussion, Conclusion
+6. Create Appendix (algorithm index, pattern summary)
 
 **Output:** `docs/paper/drafts/FINAL_JOURNAL_REPORT.md` (15-20 pages)
+
+---
+
+### Phase 5: User Input Template Generation ⭐ NEW
+
+After cross-module analysis is complete:
+```
+"Lutapi, generate user input templates for the paper"
+```
+
+**Execution:**
+1. Execution Results Template → `docs/paper/Amsha/user_inputs/app_execution_results.md`
+   - Suggests relevant metrics and baselines inferred from codebase analysis
+   - User fills in actual empirical values
+2. Practical Implications Document → `docs/paper/Amsha/user_inputs/practical_implications.md`
+   - Auto-generates industry applicability claims with verification checkboxes
+   - User reviews, updates, and confirms claims
+
+**Output:** 2 files in `docs/paper/Amsha/user_inputs/`
 
 ---
 
@@ -91,6 +131,7 @@ Check what's been completed:
   🔄 In Progress: None
   ❌ Failed: None
   📈 Cross-Module: not_started
+  📚 Cross-Library: not_started
   📄 Final Report: not_started
 
 💡 Next: "Lutapi, analyze module output_process for the paper"
@@ -121,7 +162,8 @@ Day 5: "Lutapi, analyze module crew_monitor for the paper"
 ### Week 3: Integration
 ```
 Day 6: "Lutapi, run cross-module analysis for the paper"
-Day 7: "Lutapi, synthesize the final journal report"
+Day 7: "Lutapi, run cross-library analysis for the paper"
+Day 8: "Lutapi, synthesize the final journal report"
 ```
 
 **Result:** Complete research paper with 10+ algorithms, 12+ diagrams, gap analysis, and novelty assessment.
@@ -146,7 +188,15 @@ docs/paper/
 ├── cross_module/
 │   ├── interactions.md        # Data flow & dependencies
 │   ├── dependencies.md        # Module graph
-│   └── patterns.md            # Shared patterns
+│   ├── patterns.md            # Shared patterns
+│   ├── novelty.md             # System-level innovations
+│   ├── mathematics.md         # Cross-module math models
+│   └── architecture.md        # High-level system diagrams
+├── cross_library/             # Multi-library mode outputs
+│   ├── interactions.md        # How libraries interact
+│   ├── dependencies.md        # Macro-level dependencies
+│   ├── patterns.md            # System-wide architecture
+│   └── novelty.md             # Global innovations
 └── drafts/
     └── FINAL_JOURNAL_REPORT.md # Publication-ready paper
 ```
@@ -305,12 +355,14 @@ Invoke Journal Master when:
 | Command | Phase | Output |
 |:--------|:------|:-------|
 | `"Lutapi, analyze module X"` | 1.x | 5 files per module |
-| `"Lutapi, cross-module analysis"` | 2 | 3 cross-module files |
-| `"Lutapi, synthesize final report"` | 3 | Final journal paper |
+| `"Lutapi, cross-module analysis"` | 2 | 6 cross-module files |
+| `"Lutapi, run cross-library analysis"` | 3 | 4 cross-library files |
+| `"Lutapi, synthesize final report"` | 4 | Final overarching journal paper |
+| `"Lutapi, generate user input templates"` | 5 | 2 user input template files |
 | `"Lutapi, show progress"` | - | Progress status |
 
 ---
 
 **Status:** ✅ Active (Phase-Wise Model)  
-**Last Updated:** 2026-02-10  
+**Last Updated:** 2026-02-25  
 **Version:** 2.0
