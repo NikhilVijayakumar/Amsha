@@ -9,6 +9,18 @@ modules:
     status: completed
 cross_module:
   status: completed
+  files:
+    - interactions.md
+    - dependencies.md
+    - patterns.md
+    - novelty.md
+    - mathematics.md
+    - architecture.md
+user_inputs:
+  status: completed
+  files:
+    - app_execution_results.md
+    - practical_implications.md
 final_report:
   status: completed
 stats:
