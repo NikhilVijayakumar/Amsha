@@ -1,0 +1,26 @@
+{
+    "experiment": "end_to_end",
+    "model_id": "azure/gpt-5-mini",
+    "dataset": "complex_task",
+    "timestamp": "20260226_163802",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "pipeline_timing": {
+            "total_time_s": 19.84,
+            "init_time_s": 0.0,
+            "exec_time_s": 19.84,
+            "tokens_used": 2080,
+            "initialized_successfully": true,
+            "crew_output_preview": "{\"scientificConcept\":\"The Water Cycle\",\"coreConcept\":\"The water cycle is how water moves around Earth, changing between liquid, vapor, and ice and traveling through the sky, land, and oceans. It is powered by the Sun and helps plants grow, fills rivers, and keeps weather and life working together.\","
+        },
+        "comparative": {
+            "amsha_loc": 1500,
+            "crewai_loc": 2200
+        }
+    }
+}

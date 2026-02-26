@@ -1,0 +1,41 @@
+{
+    "experiment": "evaluation_pipeline",
+    "model_id": "azure/gpt-5-mini",
+    "dataset": "medium_task",
+    "timestamp": "20260226_163709",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "sanitization": {
+            "total_cases": 5,
+            "standard_loads_success_rate": 0.2,
+            "amsha_cleaner_recovery_rate": 1.0,
+            "cases": {
+                "valid": {
+                    "std_loads_success": true,
+                    "amsha_cleaner_success": true
+                },
+                "markdown_fences": {
+                    "std_loads_success": false,
+                    "amsha_cleaner_success": true
+                },
+                "stray_text": {
+                    "std_loads_success": false,
+                    "amsha_cleaner_success": true
+                },
+                "concatenated": {
+                    "std_loads_success": false,
+                    "amsha_cleaner_success": true
+                },
+                "stray_quotes": {
+                    "std_loads_success": false,
+                    "amsha_cleaner_success": true
+                }
+            }
+        }
+    }
+}

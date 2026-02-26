@@ -18,6 +18,14 @@ dependencies = [
     "nvidia-ml-py == 13.580.82"
 ]
 
+[project.optional-dependencies]
+research = [
+    "scikit-learn >= 1.3.0",
+    "matplotlib >= 3.7.0",
+    "seaborn >= 0.12.0",
+    "jupyter >= 1.0.0"
+]
+
 [tool.setuptools]
 package-dir = { "" = "src/nikhil" }
 

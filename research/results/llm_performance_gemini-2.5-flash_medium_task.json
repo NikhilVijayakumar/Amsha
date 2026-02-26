@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "gemini-2.5-flash",
+    "dataset": "medium_task",
+    "timestamp": "20260226_164453",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 6.17,
+            "tokens_in": 216,
+            "tokens_out": 280,
+            "error": null,
+            "output_preview": "Here are 3 variations of ad copy for the AquaPure Filter Bottle:\n\n1.  **Headline:** Pure Water, Anywhere. Your Daily Essential.\n    **Body Text:** Stay hydrated and healthy with the AquaPure Filter Bo..."
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 6.93,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "Here are 3 variations of ad copy for the AquaPure Filter Bottle:\n\n1.  **Headline:** Pure Hydration On-The-Go. Stay Healthy.\n    **Body:** Elevate your daily hydration with the AquaPure Filter Bottle, ..."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 5.63,
+            "tokens_in": 0,
+            "tokens_out": 1521,
+            "error": null,
+            "output_preview": "1. **Headline:** Pure Water, Anywhere. Your Urban Essential.\n**Body:** Stay hydrated and healthy with the AquaPure Filter Bottle, featuring lab-tested triple-stage filtration that eliminates 99.9% of ..."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": 0.76,
+            "amsha_crew_overhead_s": -1.3
+        }
+    }
+}

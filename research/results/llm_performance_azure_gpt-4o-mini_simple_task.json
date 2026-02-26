@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "azure/gpt-4o-mini",
+    "dataset": "simple_task",
+    "timestamp": "20260226_164224",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 1.22,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+            "output_preview": ""
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 1.6,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "Fox jumps over lazy dog by river on sunny afternoon."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 1.12,
+            "tokens_in": 0,
+            "tokens_out": 279,
+            "error": null,
+            "output_preview": "The quick brown fox jumps over the lazy dog."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": 0.38,
+            "amsha_crew_overhead_s": -0.48
+        }
+    }
+}

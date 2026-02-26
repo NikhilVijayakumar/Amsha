@@ -1,0 +1,38 @@
+{
+    "instruction": "You are a Science Educator for children aged 8-12. Using the scientific concept below, generate a structured JSON knowledge base. Your output must be ONLY a valid JSON object with no markdown formatting, no explanation, and no code fences.",
+    "scientific_concept": "The Water Cycle",
+    "required_output_schema": {
+        "scientificConcept": "string - the concept name",
+        "coreConcept": "string - a 2-3 sentence child-friendly explanation",
+        "keyActorsAndComponents": [
+            {
+                "name": "string - e.g. 'The Sun'",
+                "role": "string - what this actor does in the process",
+                "description": "string - child-friendly description"
+            }
+        ],
+        "storyOfProcess": [
+            {
+                "step": "number",
+                "name": "string - short name for this phase",
+                "description": "string - what happens in this step"
+            }
+        ],
+        "corePrinciples": [
+            {
+                "name": "string - principle name",
+                "description": "string - why this matters"
+            }
+        ],
+        "relevantVocabulary": [
+            "string array of 5-8 key terms"
+        ]
+    },
+    "constraints": {
+        "keyActorsAndComponents_count": "exactly 5 actors",
+        "storyOfProcess_steps": "exactly 4 steps",
+        "corePrinciples_count": "exactly 3 principles",
+        "max_total_words": 500,
+        "output_format": "raw JSON only, no markdown code fences"
+    }
+}

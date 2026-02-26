@@ -1,0 +1,3 @@
+Summarize the following sentence in exactly 10 words:
+
+"The quick brown fox jumps over the lazy dog near the river bank on a sunny afternoon while birds chirp overhead."

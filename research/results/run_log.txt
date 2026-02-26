@@ -1,0 +1,1350 @@
+2026-02-26 16:33:28,340 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/azure/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 404 Resource Not Found"
+[92m16:33:28 - LiteLLM:INFO[0m: utils.py:3258 - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:33:28,353 - INFO - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:33:32,079 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 200 OK"
+
+>> Executing with Model Context: azure/gpt-5-mini (azure)
+🔗 Generated dynamic Amsha LLM config at: research/temp_llm_config.yaml
+--- Running Experiment 2: research.experiments.2_llm_performance on dataset: simple_task ---
+📄 Loaded dataset 'simple_task' (170 chars)
+
+  → Running Tier: native_sdk [azure]...
+
+  → Running Tier: amsha_llm [azure]...
+⚙️  Setting up LLM...
+CrewAI telemetry disabled successfully.
+[Manager] Initializing Factory...
+--- [Orchestrator] Initializing pure runner ---
+Fox leaps over lazy dog by river during sunny afternoon.
+  → Running Tier: amsha_crew [azure]...
+⚙️  Setting up LLM...
+CrewAI telemetry disabled successfully.
+[Manager] Initializing Factory...
+--- [Orchestrator] Initializing pure runner ---
+
+[Orchestrator] Request received to run crew: 'research_crew'
+[Manager] Building atomic crew: 'research_crew'...
+CrewBuilderService:_gpt-5-mini
+[Manager] Finished building 'research_crew'.
+[Orchestrator] Kicking off crew with inputs: {'dataset_content': 'Summarize the following sentence in exactly 10 words:\n\n"The quick brown fox jumps over the lazy dog near the river bank on a sunny afternoon while birds chirp overhead."\n'}
+[CrewPerformanceMonitor] GPU monitoring failed to start: NVML Shared Library Not Found
+╭─ Crew Execution S─╮
+│                   │
+│  Crew Execution   │
+│  Started          │
+│  Name: crew       │
+│  ID:              │
+│  2c4b2ebb-c660-4  │
+│  9ed-b0b8-86ecc9  │
+│  f675d8           │
+│  Tool Args:       │
+│                   │
+│                   │
+╰───────────────────╯
+
+Telemetry method called and noop'd
+
+Telemetry method called and noop'd
+
+🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    fd68a32c-984c-419
+    7-a627-36d687da9d
+    d5)
+    Status: Executing
+    Task...╭─ 🤖 Agent Started─╮
+│                   │
+│  Agent: Data      │
+│  Analyst          │
+│                   │
+│  Task: Process    │
+│  the following    │
+│  dataset content  │
+│  exactly          │
+│  according to     │
+│  its embedded     │
+│  instructions.    │
+│  Dataset          │
+│  Content:         │
+│  Summarize the    │
+│  following        │
+│  sentence in      │
+│  exactly 10       │
+│  words:           │
+│                   │
+│  "The quick       │
+│  brown fox jumps  │
+│  over the lazy    │
+│  dog near the     │
+│  river bank on a  │
+│  sunny afternoon  │
+│  while birds      │
+│  chirp            │
+│  overhead."       │
+│                   │
+│                   │
+╰───────────────────╯
+
+[92m16:33:32 - LiteLLM:INFO[0m: utils.py:3258 - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:33:32,456 - INFO - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:33:41,912 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 200 OK"
+Thought: I now can give a great answer
+Final Answer: Quick fox jumps over dog near river as birds chirp.🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    fd68a32c-984c-419
+    7-a627-36d687da9d
+    d5)
+    Status: Executing
+    Task...╭─ ✅ Agent Final A─╮
+│                   │
+│  Agent: Data      │
+│  Analyst          │
+│                   │
+│  Final Answer:    │
+│  Quick fox jumps  │
+│  over dog near    │
+│  river as birds   │
+│  chirp.           │
+│                   │
+╰───────────────────╯
+
+🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    fd68a32c-984c-419
+    7-a627-36d687da9d
+    d5)
+    Assigned to: Data
+    Analyst
+    Status: ✅ 
+    Completed╭─ Task Completion ─╮
+│                   │
+│  Task Completed   │
+│  Name: Dataset    │
+│  Processing Task  │
+│  Agent: Data      │
+│  Analyst          │
+│  Tool Args:       │
+│                   │
+│                   │
+╰───────────────────╯
+
+Telemetry method called and noop'd
+
+╭─ Crew Completion ─╮
+│                   │
+│  Crew Execution   │
+│  Completed        │
+│  Name: crew       │
+│  ID:              │
+│  2c4b2ebb-c660-4  │
+│  9ed-b0b8-86ecc9  │
+│  f675d8           │
+│  Tool Args:       │
+│  Final Output:    │
+│  Quick fox jumps  │
+│  over dog near    │
+│  river as birds   │
+│  chirp.           │
+│                   │
+│                   │
+╰───────────────────╯
+
+2026-02-26 16:33:45,162 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/azure/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 404 Resource Not Found"
+[92m16:33:45 - LiteLLM:INFO[0m: utils.py:3258 - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:33:45,169 - INFO - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:33:54,492 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 200 OK"
+[CrewPerformanceMonitor] GPU monitoring failed to stop: Uninitialized
+
+--- Execution Performance Summary ---
+Model: /gpt-5-mini
+Total Tokens: 995
+  - Prompt Tokens: 256
+  - Completion Tokens: 739
+Time Taken: 11.52 seconds
+CPU Usage: 16.8% (End)
+Memory Usage Change: 172.56 MB-------------------------------------
+
+[Orchestrator] Crew 'research_crew' finished.
+Warning: Could not capture GPU info: NVML Shared Library Not Found
+✅ Saved result chunk to research/results/llm_performance_azure_gpt-5-mini_simple_task.json
+--- Running Experiment 2: research.experiments.2_llm_performance on dataset: medium_task ---
+📄 Loaded dataset 'medium_task' (796 chars)
+
+  → Running Tier: native_sdk [azure]...
+
+  → Running Tier: amsha_llm [azure]...
+⚙️  Setting up LLM...
+CrewAI telemetry disabled successfully.
+[Manager] Initializing Factory...
+--- [Orchestrator] Initializing pure runner ---
+1.
+Pure Water, Confident Commute
+AquaPure Filter Bottle combines triple-stage filtration—activated carbon, UV-C and ceramic—with a BPA-free Tritan body and a 750ml capacity for everyday use. Lab-tested to remove 99.9% of waterborne pathogens and with a UV-C module offering 12-hour battery life, it’s the on-the-go purifier busy urban professionals trust.
+Shop yours today
+
+2.
+Smart Filtration for City Life
+Engineered for urban professionals, the AquaPure uses activated carbon, UV-C, and ceramic stages to deliver cleaner tasting water in a 750ml BPA-free Tritan bottle. With lab-tested removal of 99.9% of waterborne pathogens and a 12-hour UV-C battery, hydration on the go has never felt safer.
+Get yours now
+
+3.
+Trusted Clean Water, Anywhere
+This 750ml bottle pairs triple-stage filtration with a durable BPA-free Tritan body and a UV-C purifier that runs up to 12 hours. Lab-tested to eliminate 99.9% of waterborne pathogens, AquaPure offers professional-grade protection in a design made for busy city routines.
+Buy AquaPure today
+  → Running Tier: amsha_crew [azure]...
+⚙️  Setting up LLM...
+CrewAI telemetry disabled successfully.
+[Manager] Initializing Factory...
+--- [Orchestrator] Initializing pure runner ---
+
+[Orchestrator] Request received to run crew: 'research_crew'
+[Manager] Building atomic crew: 'research_crew'...
+CrewBuilderService:_gpt-5-mini
+[Manager] Finished building 'research_crew'.
+[Orchestrator] Kicking off crew with inputs: {'dataset_content': '# Product Copy Generation Brief\n\nYou are writing ad copy for a new product. Use the details below to generate exactly **3 variations** of ad copy text.\n\n## Product Details\n- **Name**: AquaPure Filter Bottle\n- **Category**: Health & Fitness\n- **Target Audience**: Urban professionals aged 25-40\n- **Key Features**:\n  - Triple-stage filtration (activated carbon, UV-C, ceramic)\n  - BPA-free Tritan plastic body\n  - 750ml capacity\n  - 12-hour battery life for UV-C\n- **Tone**: Professional yet approachable\n- **Unique Selling Point**: Lab-tested to remove 99.9% of waterborne pathogens\n\n## Output Format\nFor each variation, provide:\n1. A headline (max 8 words)\n2. Body text (exactly 2 sentences)\n3. A call-to-action (max 5 words)\n\nOutput as a numbered list with clear separation between variations.\n'}
+[CrewPerformanceMonitor] GPU monitoring failed to start: NVML Shared Library Not Found
+✅ Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    fd68a32c-984c-419
+    7-a627-36d687da9d
+    d5)
+    Assigned to: Data
+    Analyst
+    Status: ✅ 
+    Completed╭─ Crew Execution S─╮
+│                   │
+│  Crew Execution   │
+│  Started          │
+│  Name: crew       │
+│  ID:              │
+│  bddd41ac-f438-4  │
+│  c23-961e-c8ec2b  │
+│  e98441           │
+│  Tool Args:       │
+│                   │
+│                   │
+╰───────────────────╯
+
+Telemetry method called and noop'd
+
+Telemetry method called and noop'd
+
+🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    251507d1-7a72-475
+    2-9cdf-3841eacce2
+    58)
+    Status: Executing
+    Task...╭─ 🤖 Agent Started─╮
+│                   │
+│  Agent: Data      │
+│  Analyst          │
+│                   │
+│  Task: Process    │
+│  the following    │
+│  dataset content  │
+│  exactly          │
+│  according to     │
+│  its embedded     │
+│  instructions.    │
+│  Dataset          │
+│  Content: #       │
+│  Product Copy     │
+│  Generation       │
+│  Brief            │
+│                   │
+│  You are writing  │
+│  ad copy for a    │
+│  new product.     │
+│  Use the details  │
+│  below to         │
+│  generate         │
+│  exactly **3      │
+│  variations** of  │
+│  ad copy text.    │
+│                   │
+│  ## Product       │
+│  Details          │
+│  - **Name**:      │
+│  AquaPure Filter  │
+│  Bottle           │
+│  - **Category**:  │
+│  Health &         │
+│  Fitness          │
+│  - **Target       │
+│  Audience**:      │
+│  Urban            │
+│  professionals    │
+│  aged 25-40       │
+│  - **Key          │
+│  Features**:      │
+│    -              │
+│  Triple-stage     │
+│  filtration       │
+│  (activated       │
+│  carbon, UV-C,    │
+│  ceramic)         │
+│    - BPA-free     │
+│  Tritan plastic   │
+│  body             │
+│    - 750ml        │
+│  capacity         │
+│    - 12-hour      │
+│  battery life     │
+│  for UV-C         │
+│  - **Tone**:      │
+│  Professional     │
+│  yet              │
+│  approachable     │
+│  - **Unique       │
+│  Selling          │
+│  Point**:         │
+│  Lab-tested to    │
+│  remove 99.9% of  │
+│  waterborne       │
+│  pathogens        │
+│                   │
+│  ## Output        │
+│  Format           │
+│  For each         │
+│  variation,       │
+│  provide:         │
+│  1. A headline    │
+│  (max 8 words)    │
+│  2. Body text     │
+│  (exactly 2       │
+│  sentences)       │
+│  3. A             │
+│  call-to-action   │
+│  (max 5 words)    │
+│                   │
+│  Output as a      │
+│  numbered list    │
+│  with clear       │
+│  separation       │
+│  between          │
+│  variations.      │
+│                   │
+│                   │
+╰───────────────────╯
+
+[92m16:33:56 - LiteLLM:INFO[0m: utils.py:3258 - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:33:56,949 - INFO - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:34:12,034 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 200 OK"
+Thought: I now can give a great answer
+Final Answer:
+1. Headline: AquaPure Clean Water, Anywhere
+   Body: Designed for busy urban professionals, the AquaPure Filter Bottle combines triple-stage filtration—activated carbon, UV-C, and ceramic—with a BPA-free Tritan body and a 750ml capacity. Lab-tested to remove 99.9% of waterborne pathogens and featuring a 12-hour UV-C battery life, it delivers reliable, on-the-go hydration.
+   Call-to-action: Get yours today
+
+2. Headline: Portable Lab-Tested Water Purity
+   Body: This 750ml filter bottle fits your commute and keeps your water safe with triple-stage filtration and a BPA-free Tritan build. With UV-C protection lasting up to 12 hours and lab-tested removal of 99.9% of pathogens, it's the smart choice for health-conscious professionals.
+   Call-to-action: Order yours now
+
+3. Headline: Smart Hydration for Urban Professionals
+   Body: AquaPure uses activated carbon, ceramic, and UV-C filtration to ensure clean water in a durable, BPA-free 750ml bottle. Tested to remove 99.9% of waterborne pathogens and offering a 12-hour UV-C battery, it makes healthy hydration effortless.
+   Call-to-action: Buy now🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    251507d1-7a72-475
+    2-9cdf-3841eacce2
+    58)
+    Status: Executing
+    Task...╭─ ✅ Agent Final A─╮
+│                   │
+│  Agent: Data      │
+│  Analyst          │
+│                   │
+│  Final Answer:    │
+│  1. Headline:     │
+│  AquaPure Clean   │
+│  Water, Anywhere  │
+│     Body:         │
+│  Designed for     │
+│  busy urban       │
+│  professionals,   │
+│  the AquaPure     │
+│  Filter Bottle    │
+│  combines         │
+│  triple-stage     │
+│  filtration—acti  │
+│  vated carbon,    │
+│  UV-C, and        │
+│  ceramic—with a   │
+│  BPA-free Tritan  │
+│  body and a       │
+│  750ml capacity.  │
+│  Lab-tested to    │
+│  remove 99.9% of  │
+│  waterborne       │
+│  pathogens and    │
+│  featuring a      │
+│  12-hour UV-C     │
+│  battery life,    │
+│  it delivers      │
+│  reliable,        │
+│  on-the-go        │
+│  hydration.       │
+│     Call-to-acti  │
+│  on: Get yours    │
+│  today            │
+│                   │
+│  2. Headline:     │
+│  Portable         │
+│  Lab-Tested       │
+│  Water Purity     │
+│     Body: This    │
+│  750ml filter     │
+│  bottle fits      │
+│  your commute     │
+│  and keeps your   │
+│  water safe with  │
+│  triple-stage     │
+│  filtration and   │
+│  a BPA-free       │
+│  Tritan build.    │
+│  With UV-C        │
+│  protection       │
+│  lasting up to    │
+│  12 hours and     │
+│  lab-tested       │
+│  removal of       │
+│  99.9% of         │
+│  pathogens, it's  │
+│  the smart        │
+│  choice for       │
+│  health-consciou  │
+│  s                │
+│  professionals.   │
+│     Call-to-acti  │
+│  on: Order yours  │
+│  now              │
+│                   │
+│  3. Headline:     │
+│  Smart Hydration  │
+│  for Urban        │
+│  Professionals    │
+│     Body:         │
+│  AquaPure uses    │
+│  activated        │
+│  carbon,          │
+│  ceramic, and     │
+│  UV-C filtration  │
+│  to ensure clean  │
+│  water in a       │
+│  durable,         │
+│  BPA-free 750ml   │
+│  bottle. Tested   │
+│  to remove 99.9%  │
+│  of waterborne    │
+│  pathogens and    │
+│  offering a       │
+│  12-hour UV-C     │
+│  battery, it      │
+│  makes healthy    │
+│  hydration        │
+│  effortless.      │
+│     Call-to-acti  │
+│  on: Buy now      │
+│                   │
+╰───────────────────╯
+
+🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    251507d1-7a72-475
+    2-9cdf-3841eacce2
+    58)
+    Assigned to: Data
+    Analyst
+    Status: ✅ 
+    Completed╭─ Task Completion ─╮
+│                   │
+│  Task Completed   │
+│  Name: Dataset    │
+│  Processing Task  │
+│  Agent: Data      │
+│  Analyst          │
+│  Tool Args:       │
+│                   │
+│                   │
+╰───────────────────╯
+
+Telemetry method called and noop'd
+
+╭─ Crew Completion ─╮
+│                   │
+│  Crew Execution   │
+│  Completed        │
+│  Name: crew       │
+│  ID:              │
+│  bddd41ac-f438-4  │
+│  c23-961e-c8ec2b  │
+│  e98441           │
+│  Tool Args:       │
+│  Final Output:    │
+│  1. Headline:     │
+│  AquaPure Clean   │
+│  Water, Anywhere  │
+│     Body:         │
+│  Designed for     │
+│  busy urban       │
+│  professionals,   │
+│  the AquaPure     │
+│  Filter Bottle    │
+│  combines         │
+│  triple-stage     │
+│  filtration—acti  │
+│  vated carbon,    │
+│  UV-C, and        │
+│  ceramic—with a   │
+│  BPA-free Tritan  │
+│  body and a       │
+│  750ml capacity.  │
+│  Lab-tested to    │
+│  remove 99.9% of  │
+│  waterborne       │
+│  pathogens and    │
+│  featuring a      │
+│  12-hour UV-C     │
+│  battery life,    │
+│  it delivers      │
+│  reliable,        │
+│  on-the-go        │
+│  hydration.       │
+│     Call-to-acti  │
+│  on: Get yours    │
+│  today            │
+│                   │
+│  2. Headline:     │
+│  Portable         │
+│  Lab-Tested       │
+│  Water Purity     │
+│     Body: This    │
+│  750ml filter     │
+│  bottle fits      │
+│  your commute     │
+│  and keeps your   │
+│  water safe with  │
+│  triple-stage     │
+│  filtration and   │
+│  a BPA-free       │
+│  Tritan build.    │
+│  With UV-C        │
+│  protection       │
+│  lasting up to    │
+│  12 hours and     │
+│  lab-tested       │
+│  removal of       │
+│  99.9% of         │
+│  pathogens, it's  │
+│  the smart        │
+│  choice for       │
+│  health-consciou  │
+│  s                │
+│  professionals.   │
+│     Call-to-acti  │
+│  on: Order yours  │
+│  now              │
+│                   │
+│  3. Headline:     │
+│  Smart Hydration  │
+│  for Urban        │
+│  Professionals    │
+│     Body:         │
+│  AquaPure uses    │
+│  activated        │
+│  carbon,          │
+│  ceramic, and     │
+│  UV-C filtration  │
+│  to ensure clean  │
+│  water in a       │
+│  durable,         │
+│  BPA-free 750ml   │
+│  bottle. Tested   │
+│  to remove 99.9%  │
+│  of waterborne    │
+│  pathogens and    │
+│  offering a       │
+│  12-hour UV-C     │
+│  battery, it      │
+│  makes healthy    │
+│  hydration        │
+│  effortless.      │
+│     Call-to-acti  │
+│  on: Buy now      │
+│                   │
+│                   │
+╰───────────────────╯
+
+2026-02-26 16:34:16,387 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/azure/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 404 Resource Not Found"
+[92m16:34:16 - LiteLLM:INFO[0m: utils.py:3258 - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:34:16,396 - INFO - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:34:23,692 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 200 OK"
+[CrewPerformanceMonitor] GPU monitoring failed to stop: Uninitialized
+
+--- Execution Performance Summary ---
+Model: /gpt-5-mini
+Total Tokens: 1851
+  - Prompt Tokens: 421
+  - Completion Tokens: 1430
+Time Taken: 18.26 seconds
+CPU Usage: 14.7% (End)
+Memory Usage Change: 158.15 MB-------------------------------------
+
+[Orchestrator] Crew 'research_crew' finished.
+Warning: Could not capture GPU info: NVML Shared Library Not Found
+✅ Saved result chunk to research/results/llm_performance_azure_gpt-5-mini_medium_task.json
+--- Running Experiment 2: research.experiments.2_llm_performance on dataset: complex_task ---
+📄 Loaded dataset 'complex_task' (1537 chars)
+
+  → Running Tier: native_sdk [azure]...
+
+  → Running Tier: amsha_llm [azure]...
+⚙️  Setting up LLM...
+CrewAI telemetry disabled successfully.
+[Manager] Initializing Factory...
+--- [Orchestrator] Initializing pure runner ---
+{
+  "scientificConcept": "The Water Cycle",
+  "coreConcept": "The water cycle is how water moves around Earth in a continuous loop. Water changes between liquid, gas, and sometimes ice, traveling through air, land, and living things.",
+  "keyActorsAndComponents": [
+    {
+      "name": "The Sun",
+      "role": "Energy source",
+      "description": "The Sun heats water, giving it energy to turn into water vapor and start the cycle."
+    },
+    {
+      "name": "Bodies of Water (oceans, lakes, rivers)",
+      "role": "Main water sources",
+      "description": "These hold most of Earth's water and supply moisture that evaporates into the air."
+    },
+    {
+      "name": "Clouds and Atmosphere",
+      "role": "Storage and transport",
+      "description": "The air holds water vapor and forms clouds when vapor cools and condenses into tiny droplets."
+    },
+    {
+      "name": "Plants",
+      "role": "Transpiration contributors",
+      "description": "Plants release water vapor from their leaves, adding moisture to the atmosphere."
+    },
+    {
+      "name": "Soil and Groundwater",
+      "role": "Storage and movement underground",
+      "description": "Water soaks into soil, is stored as groundwater, and slowly moves back to rivers and oceans."
+    }
+  ],
+  "storyOfProcess": [
+    {
+      "step": 1,
+      "name": "Evaporation",
+      "description": "Heat from the Sun warms liquid water and turns it into invisible water vapor that rises into the air."
+    },
+    {
+      "step": 2,
+      "name": "Condensation",
+      "description": "As vapor rises and cools, it changes back into tiny liquid droplets that form clouds."
+    },
+    {
+      "step": 3,
+      "name": "Precipitation",
+      "description": "When droplets grow heavy, they fall as rain, snow, sleet, or hail back to Earth."
+    },
+    {
+      "step": 4,
+      "name": "Collection and Infiltration",
+      "description": "Water gathers in rivers, lakes, and oceans or soaks into the ground to be stored and used by plants."
+    }
+  ],
+  "corePrinciples": [
+    {
+      "name": "Conservation of Water",
+      "description": "Water is reused and recycled on Earth; the total amount stays about the same while it moves around."
+    },
+    {
+      "name": "Energy Drives Change",
+      "description": "The Sun's energy makes evaporation happen and helps move water through the cycle."
+    },
+    {
+      "name": "State Changes",
+      "description": "Water can be liquid, gas, or solid, and changing between these states makes the cycle work."
+    }
+  ],
+  "relevantVocabulary": [
+    "evaporation",
+    "condensation",
+    "precipitation",
+    "transpiration",
+    "runoff",
+    "groundwater",
+    "clouds"
+  ]
+}
+  → Running Tier: amsha_crew [azure]...
+⚙️  Setting up LLM...
+CrewAI telemetry disabled successfully.
+[Manager] Initializing Factory...
+--- [Orchestrator] Initializing pure runner ---
+
+[Orchestrator] Request received to run crew: 'research_crew'
+[Manager] Building atomic crew: 'research_crew'...
+CrewBuilderService:_gpt-5-mini
+[Manager] Finished building 'research_crew'.
+[Orchestrator] Kicking off crew with inputs: {'dataset_content': '{\n    "instruction": "You are a Science Educator for children aged 8-12. Using the scientific concept below, generate a structured JSON knowledge base. Your output must be ONLY a valid JSON object with no markdown formatting, no explanation, and no code fences.",\n    "scientific_concept": "The Water Cycle",\n    "required_output_schema": {\n        "scientificConcept": "string - the concept name",\n        "coreConcept": "string - a 2-3 sentence child-friendly explanation",\n        "keyActorsAndComponents": [\n            {\n                "name": "string - e.g. \'The Sun\'",\n                "role": "string - what this actor does in the process",\n                "description": "string - child-friendly description"\n            }\n        ],\n        "storyOfProcess": [\n            {\n                "step": "number",\n                "name": "string - short name for this phase",\n                "description": "string - what happens in this step"\n            }\n        ],\n        "corePrinciples": [\n            {\n                "name": "string - principle name",\n                "description": "string - why this matters"\n            }\n        ],\n        "relevantVocabulary": [\n            "string array of 5-8 key terms"\n        ]\n    },\n    "constraints": {\n        "keyActorsAndComponents_count": "exactly 5 actors",\n        "storyOfProcess_steps": "exactly 4 steps",\n        "corePrinciples_count": "exactly 3 principles",\n        "max_total_words": 500,\n        "output_format": "raw JSON only, no markdown code fences"\n    }\n}'}
+[CrewPerformanceMonitor] GPU monitoring failed to start: NVML Shared Library Not Found
+✅ Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    251507d1-7a72-475
+    2-9cdf-3841eacce2
+    58)
+    Assigned to: Data
+    Analyst
+    Status: ✅ 
+    Completed╭─ Crew Execution S─╮
+│                   │
+│  Crew Execution   │
+│  Started          │
+│  Name: crew       │
+│  ID:              │
+│  7b7e8b48-5296-4  │
+│  d9d-8054-c29737  │
+│  111aa0           │
+│  Tool Args:       │
+│                   │
+│                   │
+╰───────────────────╯
+
+Telemetry method called and noop'd
+
+Telemetry method called and noop'd
+
+🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    74bd0033-d5ea-47a
+    6-938a-30690bf9a8
+    ea)
+    Status: Executing
+    Task...╭─ 🤖 Agent Started─╮
+│                   │
+│  Agent: Data      │
+│  Analyst          │
+│                   │
+│  Task: Process    │
+│  the following    │
+│  dataset content  │
+│  exactly          │
+│  according to     │
+│  its embedded     │
+│  instructions.    │
+│  Dataset          │
+│  Content: {       │
+│      "instructio  │
+│  n": "You are a   │
+│  Science          │
+│  Educator for     │
+│  children aged    │
+│  8-12. Using the  │
+│  scientific       │
+│  concept below,   │
+│  generate a       │
+│  structured JSON  │
+│  knowledge base.  │
+│  Your output      │
+│  must be ONLY a   │
+│  valid JSON       │
+│  object with no   │
+│  markdown         │
+│  formatting, no   │
+│  explanation,     │
+│  and no code      │
+│  fences.",        │
+│      "scientific  │
+│  _concept": "The  │
+│  Water Cycle",    │
+│      "required_o  │
+│  utput_schema":   │
+│  {                │
+│          "scient  │
+│  ificConcept":    │
+│  "string - the    │
+│  concept name",   │
+│          "coreCo  │
+│  ncept": "string  │
+│  - a 2-3          │
+│  sentence         │
+│  child-friendly   │
+│  explanation",    │
+│          "keyAct  │
+│  orsAndComponent  │
+│  s": [            │
+│              {    │
+│                   │
+│   "name":         │
+│  "string - e.g.   │
+│  'The Sun'",      │
+│                   │
+│   "role":         │
+│  "string - what   │
+│  this actor does  │
+│  in the           │
+│  process",        │
+│                   │
+│   "description":  │
+│   "string -       │
+│  child-friendly   │
+│  description"     │
+│              }    │
+│          ],       │
+│          "storyO  │
+│  fProcess": [     │
+│              {    │
+│                   │
+│   "step":         │
+│  "number",        │
+│                   │
+│   "name":         │
+│  "string - short  │
+│  name for this    │
+│  phase",          │
+│                   │
+│   "description":  │
+│   "string - what  │
+│  happens in this  │
+│  step"            │
+│              }    │
+│          ],       │
+│          "corePr  │
+│  inciples": [     │
+│              {    │
+│                   │
+│   "name":         │
+│  "string -        │
+│  principle        │
+│  name",           │
+│                   │
+│   "description":  │
+│   "string - why   │
+│  this matters"    │
+│              }    │
+│          ],       │
+│          "releva  │
+│  ntVocabulary":   │
+│  [                │
+│              "st  │
+│  ring array of    │
+│  5-8 key terms"   │
+│          ]        │
+│      },           │
+│      "constraint  │
+│  s": {            │
+│          "keyAct  │
+│  orsAndComponent  │
+│  s_count":        │
+│  "exactly 5       │
+│  actors",         │
+│          "storyO  │
+│  fProcess_steps"  │
+│  : "exactly 4     │
+│  steps",          │
+│          "corePr  │
+│  inciples_count"  │
+│  : "exactly 3     │
+│  principles",     │
+│          "max_to  │
+│  tal_words":      │
+│  500,             │
+│          "output  │
+│  _format": "raw   │
+│  JSON only, no    │
+│  markdown code    │
+│  fences"          │
+│      }            │
+│  }                │
+│                   │
+╰───────────────────╯
+
+[92m16:34:30 - LiteLLM:INFO[0m: utils.py:3258 - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:34:30,527 - INFO - 
+LiteLLM completion() model= gpt-5-mini; provider = azure
+2026-02-26 16:34:43,042 - INFO - HTTP Request: POST https://arsha-me2gu9wt-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-5-mini/chat/completions?api-version=2025-04-01-preview "HTTP/1.1 200 OK"
+Thought: I now can give a great answer
+Final Answer: {"scientificConcept":"The Water Cycle","coreConcept":"The water cycle is how water moves around Earth in a repeating loop: it heats up, rises, cools, and falls. This cycle keeps water moving through the air, land, and oceans so plants, animals, and people have water to use.","keyActorsAndComponents":[{"name":"The Sun","role":"Energy source","description":"The Sun warms Earth and gives energy that turns liquid water into vapor."},{"name":"Bodies of Water","role":"Water supply","description":"Oceans, lakes, and rivers hold most of Earth’s water that can evaporate into the air."},{"name":"The Atmosphere (Air)","role":"Transport and storage","description":"Air carries invisible water vapor and holds clouds that move water around the planet."},{"name":"Clouds","role":"Condensation and transport","description":"Clouds form when water vapor cools and sticks together into tiny droplets or ice crystals."},{"name":"Land and Plants","role":"Collection and release","description":"Land stores water in soil and rivers; plants release water vapor through transpiration and help return water to the air."}],"storyOfProcess":[{"step":1,"name":"Evaporation and Transpiration","description":"Sun heats water in oceans, lakes, and soil and plants release vapor, turning liquid water into invisible water vapor that rises into the air."},{"step":2,"name":"Cooling and Condensation","description":"As water vapor rises it cools and changes into tiny droplets or ice crystals, forming clouds."},{"step":3,"name":"Precipitation","description":"When droplets in clouds join and grow heavy, they fall as rain, snow, sleet, or hail back toward Earth."},{"step":4,"name":"Collection and Runoff","description":"Fallen water collects in rivers, lakes, soil, and oceans; some soaks into the ground and some flows back to larger bodies of water, ready to start the cycle again."}],"corePrinciples":[{"name":"Conservation of Mass","description":"Water is reused and reshaped but not created or destroyed, so the same water moves through the cycle over and over."},{"name":"Energy Drives Change","description":"Heat from the Sun causes evaporation and movement of water, so energy input controls how fast parts of the cycle happen."},{"name":"Phase Changes Matter","description":"Water changes between solid, liquid, and gas (ice, water, vapor); these phase changes cause clouds, precipitation, and storage in different places."}],"relevantVocabulary":["evaporation","condensation","precipitation","transpiration","collection","water vapor","clouds"]}🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    74bd0033-d5ea-47a
+    6-938a-30690bf9a8
+    ea)
+    Status: Executing
+    Task...╭─ ✅ Agent Final A─╮
+│                   │
+│  Agent: Data      │
+│  Analyst          │
+│                   │
+│  Final Answer:    │
+│  {"scientificCon  │
+│  cept":"The       │
+│  Water            │
+│  Cycle","coreCon  │
+│  cept":"The       │
+│  water cycle is   │
+│  how water moves  │
+│  around Earth in  │
+│  a repeating      │
+│  loop: it heats   │
+│  up, rises,       │
+│  cools, and       │
+│  falls. This      │
+│  cycle keeps      │
+│  water moving     │
+│  through the      │
+│  air, land, and   │
+│  oceans so        │
+│  plants,          │
+│  animals, and     │
+│  people have      │
+│  water to         │
+│  use.","keyActor  │
+│  sAndComponents"  │
+│  :[{"name":"The   │
+│  Sun","role":"En  │
+│  ergy             │
+│  source","descri  │
+│  ption":"The Sun  │
+│  warms Earth and  │
+│  gives energy     │
+│  that turns       │
+│  liquid water     │
+│  into             │
+│  vapor."},{"name  │
+│  ":"Bodies of     │
+│  Water","role":"  │
+│  Water            │
+│  supply","descri  │
+│  ption":"Oceans,  │
+│   lakes, and      │
+│  rivers hold      │
+│  most of Earth’s  │
+│  water that can   │
+│  evaporate into   │
+│  the              │
+│  air."},{"name":  │
+│  "The Atmosphere  │
+│  (Air)","role":"  │
+│  Transport and    │
+│  storage","descr  │
+│  iption":"Air     │
+│  carries          │
+│  invisible water  │
+│  vapor and holds  │
+│  clouds that      │
+│  move water       │
+│  around the       │
+│  planet."},{"nam  │
+│  e":"Clouds","ro  │
+│  le":"Condensati  │
+│  on and           │
+│  transport","des  │
+│  cription":"Clou  │
+│  ds form when     │
+│  water vapor      │
+│  cools and        │
+│  sticks together  │
+│  into tiny        │
+│  droplets or ice  │
+│  crystals."},{"n  │
+│  ame":"Land and   │
+│  Plants","role":  │
+│  "Collection and  │
+│  release","descr  │
+│  iption":"Land    │
+│  stores water in  │
+│  soil and         │
+│  rivers; plants   │
+│  release water    │
+│  vapor through    │
+│  transpiration    │
+│  and help return  │
+│  water to the     │
+│  air."}],"storyO  │
+│  fProcess":[{"st  │
+│  ep":1,"name":"E  │
+│  vaporation and   │
+│  Transpiration",  │
+│  "description":"  │
+│  Sun heats water  │
+│  in oceans,       │
+│  lakes, and soil  │
+│  and plants       │
+│  release vapor,   │
+│  turning liquid   │
+│  water into       │
+│  invisible water  │
+│  vapor that       │
+│  rises into the   │
+│  air."},{"step":  │
+│  2,"name":"Cooli  │
+│  ng and           │
+│  Condensation","  │
+│  description":"A  │
+│  s water vapor    │
+│  rises it cools   │
+│  and changes      │
+│  into tiny        │
+│  droplets or ice  │
+│  crystals,        │
+│  forming          │
+│  clouds."},{"ste  │
+│  p":3,"name":"Pr  │
+│  ecipitation","d  │
+│  escription":"Wh  │
+│  en droplets in   │
+│  clouds join and  │
+│  grow heavy,      │
+│  they fall as     │
+│  rain, snow,      │
+│  sleet, or hail   │
+│  back toward      │
+│  Earth."},{"step  │
+│  ":4,"name":"Col  │
+│  lection and      │
+│  Runoff","descri  │
+│  ption":"Fallen   │
+│  water collects   │
+│  in rivers,       │
+│  lakes, soil,     │
+│  and oceans;      │
+│  some soaks into  │
+│  the ground and   │
+│  some flows back  │
+│  to larger        │
+│  bodies of        │
+│  water, ready to  │
+│  start the cycle  │
+│  again."}],"core  │
+│  Principles":[{"  │
+│  name":"Conserva  │
+│  tion of          │
+│  Mass","descript  │
+│  ion":"Water is   │
+│  reused and       │
+│  reshaped but     │
+│  not created or   │
+│  destroyed, so    │
+│  the same water   │
+│  moves through    │
+│  the cycle over   │
+│  and              │
+│  over."},{"name"  │
+│  :"Energy Drives  │
+│  Change","descri  │
+│  ption":"Heat     │
+│  from the Sun     │
+│  causes           │
+│  evaporation and  │
+│  movement of      │
+│  water, so        │
+│  energy input     │
+│  controls how     │
+│  fast parts of    │
+│  the cycle        │
+│  happen."},{"nam  │
+│  e":"Phase        │
+│  Changes          │
+│  Matter","descri  │
+│  ption":"Water    │
+│  changes between  │
+│  solid, liquid,   │
+│  and gas (ice,    │
+│  water, vapor);   │
+│  these phase      │
+│  changes cause    │
+│  clouds,          │
+│  precipitation,   │
+│  and storage in   │
+│  different        │
+│  places."}],"rel  │
+│  evantVocabulary  │
+│  ":["evaporation  │
+│  ","condensation  │
+│  ","precipitatio  │
+│  n","transpirati  │
+│  on","collection  │
+│  ","water         │
+│  vapor","clouds"  │
+│  ]}               │
+│                   │
+╰───────────────────╯
+
+🚀 Crew: crew
+└── 📋 Task: Dataset 
+    Processing Task 
+    (ID: 
+    74bd0033-d5ea-47a
+    6-938a-30690bf9a8
+    ea)
+    Assigned to: Data
+    Analyst
+    Status: ✅ 
+    Completed╭─ Task Completion ─╮
+│                   │
+│  Task Completed   │
+│  Name: Dataset    │
+│  Processing Task  │
+│  Agent: Data      │
+│  Analyst          │
+│  Tool Args:       │
+│                   │
+│                   │
+╰───────────────────╯
+
+Telemetry method called and noop'd
+
+╭─ Crew Completion ─╮
+│                   │
+│  Crew Execution   │
+│  Completed        │
+│  Name: crew       │
+│  ID:              │
+│  7b7e8b48-5296-4  │
+│  d9d-8054-c29737  │
+│  111aa0           │
+│  Tool Args:       │
+│  Final Output:    │
+│  {"scientificCon  │
+│  cept":"The       │
+│  Water            │
+│  Cycle","coreCon  │
+│  cept":"The       │
+│  water cycle is   │
+│  how water moves  │
+│  around Earth in  │
+│  a repeating      │
+│  loop: it heats   │
+│  up, rises,       │
+│  cools, and       │
+│  falls. This      │
+│  cycle keeps      │
+│  water moving     │
+│  through the      │
+│  air, land, and   │
+│  oceans so        │
+│  plants,          │
+│  animals, and     │
+│  people have      │
+│  water to         │
+│  use.","keyActor  │
+│  sAndComponents"  │
+│  :[{"name":"The   │
+│  Sun","role":"En  │
+│  ergy             │
+│  source","descri  │
+│  ption":"The Sun  │
+│  warms Earth and  │
+│  gives energy     │
+│  that turns       │
+│  liquid water     │
+│  into             │
+│  vapor."},{"name  │
+│  ":"Bodies of     │
+│  Water","role":"  │
+│  Water            │
+│  supply","descri  │
+│  ption":"Oceans,  │
+│   lakes, and      │
+│  rivers hold      │
+│  most of Earth’s  │
+│  water that can   │
+│  evaporate into   │
+│  the              │
+│  air."},{"name":  │
+│  "The Atmosphere  │
+│  (Air)","role":"  │
+│  Transport and    │
+│  storage","descr  │
+│  iption":"Air     │
+│  carries          │
+│  invisible water  │
+│  vapor and holds  │
+│  clouds that      │
+│  move water       │
+│  around the       │
+│  planet."},{"nam  │
+│  e":"Clouds","ro  │
+│  le":"Condensati  │
+│  on and           │
+│  transport","des  │
+│  cription":"Clou  │
+│  ds form when     │
+│  water vapor      │
+│  cools and        │
+│  sticks together  │
+│  into tiny        │
+│  droplets or ice  │
+│  crystals."},{"n  │
+│  ame":"Land and   │
+│  Plants","role":  │
+│  "Collection and  │
+│  release","descr  │
+│  iption":"Land    │
+│  stores water in  │
+│  soil and         │
+│  rivers; plants   │
+│  release water    │
+│  vapor through    │
+│  transpiration    │
+│  and help return  │
+│  water to the     │
+│  air."}],"storyO  │
+│  fProcess":[{"st  │
+│  ep":1,"name":"E  │
+│  vaporation and   │
+│  Transpiration",  │
+│  "description":"  │
+│  Sun heats water  │
+│  in oceans,       │
+│  lakes, and soil  │
+│  and plants       │
+│  release vapor,   │
+│  turning liquid   │
+│  water into       │
+│  invisible water  │
+│  vapor that       │
+│  rises into the   │
+│  air."},{"step":  │
+│  2,"name":"Cooli  │
+│  ng and           │
+│  Condensation","  │
+│  description":"A  │
+│  s water vapor    │
+│  rises it cools   │
+│  and changes      │
+│  into tiny        │
+│  droplets or ice  │
+│  crystals,        │
+│  forming          │
+│  clouds."},{"ste  │
+│  p":3,"name":"Pr  │
+│  ecipitation","d  │
+│  escription":"Wh  │
+│  en droplets in   │
+│  clouds join and  │
+│  grow heavy,      │
+│  they fall as     │
+│  rain, snow,      │
+│  sleet, or hail   │
+│  back toward      │
+│  Earth."},{"step  │
+│  ":4,"name":"Col  │
+│  lection and      │
+│  Runoff","descri  │
+│  ption":"Fallen   │
+│  water collects   │
+│  in rivers,       │
+│  lakes, soil,     │
+│  and oceans;      │
+│  some soaks into  │
+│  the ground and   │
+│  some flows back  │
+│  to larger        │
+│  bodies of        │
+│  water, ready to  │
+│  start the cycle  │
+│  again."}],"core  │
+│  Principles":[{"  │
+│  name":"Conserva  │
+│  tion of          │
+│  Mass","descript  │
+│  ion":"Water is   │
+│  reused and       │
+│  reshaped but     │
+│  not created or   │
+│  destroyed, so    │
+│  the same water   │
+│  moves through    │
+│  the cycle over   │
+│  and              │
+│  over."},{"name"  │
+│  :"Energy Drives  │
+│  Change","descri  │
+│  ption":"Heat     │
+│  from the Sun     │
+│  causes           │
+│  evaporation and  │
+│  movement of      │
+│  water, so        │
+│  energy input     │
+│  controls how     │
+│  fast parts of    │
+│  the cycle        │
+│  happen."},{"nam  │
+│  e":"Phase        │
+│  Changes          │
+│  Matter","descri  │
+│  ption":"Water    │
+│  changes between  │
+│  solid, liquid,   │
+│  and gas (ice,    │
+│  water, vapor);   │
+│  these phase      │
+│  changes cause    │
+│  clouds,          │
+│  precipitation,   │
+│  and storage in   │
+│  different        │
+│  places."}],"rel  │
+│  evantVocabulary  │
+│  ":["evaporation  │
+│  ","condensation  │
+│  ","precipitatio  │
+│  n","transpirati  │
+│  on","collection  │
+│  ","water         │
+│  vapor","clouds"  │
+│  ]}               │
+│                   │
+│                   │
+╰───────────────────╯
+
+[CrewPerformanceMonitor] GPU monitoring failed to stop: Uninitialized
+
+--- Execution Performance Summary ---
+Model: /gpt-5-mini
+Total Tokens: 2154
+  - Prompt Tokens: 558
+  - Completion Tokens: 1596
+Time Taken: 17.93 seconds
+CPU Usage: 22.7% (End)
+Memory Usage Change: 163.99 MB-------------------------------------
+
+[Orchestrator] Crew 'research_crew' finished.
+Warning: Could not capture GPU info: NVML Shared Library Not Found
+✅ Saved result chunk to research/results/llm_performance_azure_gpt-5-mini_complex_task.json

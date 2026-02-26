@@ -70,15 +70,16 @@ class AtomicCrewFileManager:
             crew_builder.add_agent(
                 knowledge_sources=agent_text_source
             )
+            safe_model_name = self.model_name.replace("/", "_") if self.model_name else "default"
             if filename_suffix:
                 crew_builder.add_task(
                     agent=crew_builder.get_last_agent(),
-                    output_filename=f"{self.model_name}_{filename_suffix}"
+                    output_filename=f"{safe_model_name}_{filename_suffix}"
                 )
             else:
                 crew_builder.add_task(
                     agent=crew_builder.get_last_agent(),
-                    output_filename=f"{self.model_name}"
+                    output_filename=f"{safe_model_name}"
                 )
 
         self.output_file = crew_builder.get_last_file()

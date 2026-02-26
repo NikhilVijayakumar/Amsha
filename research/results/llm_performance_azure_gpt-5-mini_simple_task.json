@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "azure/gpt-5-mini",
+    "dataset": "simple_task",
+    "timestamp": "20260226_163343",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 1.56,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+            "output_preview": ""
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 4.1,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "Fox leaps over lazy dog by river during sunny afternoon."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 11.52,
+            "tokens_in": 0,
+            "tokens_out": 995,
+            "error": null,
+            "output_preview": "Quick fox jumps over dog near river as birds chirp."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": 2.54,
+            "amsha_crew_overhead_s": 7.42
+        }
+    }
+}

@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "gemini-2.5-flash",
+    "dataset": "simple_task",
+    "timestamp": "20260226_164435",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 5.13,
+            "tokens_in": 38,
+            "tokens_out": 11,
+            "error": null,
+            "output_preview": "Quick brown fox jumps over lazy dog near river bank."
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 2.24,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "Quick brown fox jumps over lazy dog near river bank."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 8.05,
+            "tokens_in": 0,
+            "tokens_out": 1860,
+            "error": null,
+            "output_preview": "Quick brown fox jumps over lazy dog near river bank."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": -2.89,
+            "amsha_crew_overhead_s": 5.81
+        }
+    }
+}

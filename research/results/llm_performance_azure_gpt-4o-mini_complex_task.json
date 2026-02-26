@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "azure/gpt-4o-mini",
+    "dataset": "complex_task",
+    "timestamp": "20260226_164249",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 1.09,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+            "output_preview": ""
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 8.09,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The water cycle is the journey water takes as it moves from the ground to the sky and back again. It includes processes like evaporati..."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 8.38,
+            "tokens_in": 0,
+            "tokens_out": 1259,
+            "error": null,
+            "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The water cycle is the continuous movement of water on, above, and below the surface of the Earth. It includes processes like evaporat..."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": 7.0,
+            "amsha_crew_overhead_s": 0.29
+        }
+    }
+}

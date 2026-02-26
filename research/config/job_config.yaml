@@ -1,0 +1,12 @@
+crew_name: "Research Benchmark Crew"
+usecase: "research_benchmark"
+module_name: "benchmarks"
+
+crews:
+  research_crew:
+    steps:
+      - task_file: "research/config/task.yaml"
+        agent_file: "research/config/agent.yaml"
+
+pipeline:
+  - "research_crew"

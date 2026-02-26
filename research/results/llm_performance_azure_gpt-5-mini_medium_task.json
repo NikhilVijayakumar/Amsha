@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "azure/gpt-5-mini",
+    "dataset": "medium_task",
+    "timestamp": "20260226_163415",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 1.16,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+            "output_preview": ""
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 11.77,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "1.\nPure Water, Confident Commute\nAquaPure Filter Bottle combines triple-stage filtration\u2014activated carbon, UV-C and ceramic\u2014with a BPA-free Tritan body and a 750ml capacity for everyday use. Lab-teste..."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 18.27,
+            "tokens_in": 0,
+            "tokens_out": 1851,
+            "error": null,
+            "output_preview": "1. Headline: AquaPure Clean Water, Anywhere\n   Body: Designed for busy urban professionals, the AquaPure Filter Bottle combines triple-stage filtration\u2014activated carbon, UV-C, and ceramic\u2014with a BPA-f..."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": 10.61,
+            "amsha_crew_overhead_s": 6.5
+        }
+    }
+}

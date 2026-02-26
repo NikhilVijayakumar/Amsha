@@ -1,0 +1,31 @@
+llm:
+  creative:
+    default: benchmark_model
+    models:
+      benchmark_model:
+        model: openai/gpt-oss-120b:free
+        api_key: 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
+        base_url: https://openrouter.ai/api/v1
+  evaluation:
+    default: benchmark_model
+    models:
+      benchmark_model:
+        model: openai/gpt-oss-120b:free
+        api_key: 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
+        base_url: https://openrouter.ai/api/v1
+llm_parameters:
+  creative:
+    temperature: 0.3
+    top_p: 0.9
+    max_completion_tokens: 8192
+    presence_penalty: 0.0
+    frequency_penalty: 0.0
+    stop:
+    - '###'
+  evaluation:
+    temperature: 0.0
+    top_p: 0.5
+    presence_penalty: 0.0
+    frequency_penalty: 0.0
+    stop:
+    - '###'

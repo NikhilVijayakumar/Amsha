@@ -1,0 +1,87 @@
+# research/config.yaml
+# Configuration for Amsha Empirical Evaluation Pipeline
+
+# ----------------------------------------------------------------------------
+# General Settings
+# ----------------------------------------------------------------------------
+experiment_settings:
+  timeout_seconds: 120
+  output_dir: "research/results"
+  retry_attempts: 3
+  
+  # Standardized prompt for latency and cost tests
+  standard_test_prompt: "In exactly two paragraphs, explain the role of a data contract in modern microservices architecture, emphasizing backwards compatibility."
+  standard_prompt_expected_tokens: 50
+
+# ----------------------------------------------------------------------------
+# Provider Configuration
+# ----------------------------------------------------------------------------
+providers:
+  google:
+    tier: "cloud"
+    api_key_env: "GEMINI_API_KEY"
+    endpoint: "https://generativelanguage.googleapis.com"
+    models:
+      - name: "gemini-2.5-flash"
+        context_window: 1048576
+        cost_per_m_in: 0.075
+        cost_per_m_out: 0.30
+      - name: "gemini-2.5-flash-lite"
+        context_window: 1048576
+        cost_per_m_in: 0.075
+        cost_per_m_out: 0.30
+
+  azure:
+    tier: "cloud"
+    api_key_env: "AZURE_OPENAI_API_KEY"
+    endpoint_env: "AZURE_OPENAI_ENDPOINT"
+    api_version_env: "AZURE_OPENAI_API_VERSION"
+    models:
+      - name: "azure/gpt-4o-mini"
+        context_window: 128000
+        cost_per_m_in: 5.0
+        cost_per_m_out: 15.0
+
+  openrouter:
+    tier: "cloud"
+    api_key_env: "OPENROUTER_API_KEY"
+    endpoint: "https://openrouter.ai/api/v1"
+    models:
+      - name: "openai/gpt-oss-120b:free"
+        context_window: 1048576
+        cost_per_m_in: 0.0
+        cost_per_m_out: 0.0
+      - name: "deepseek/deepseek-r1:free"
+        context_window: 128000
+        cost_per_m_in: 0.0
+        cost_per_m_out: 0.0
+
+  lmstudio:
+    tier: "local"
+    api_key_env: "LOCAL_BYPASS" # Ignored for local
+    endpoint: "http://localhost:1234/v1"
+    models:
+      - name: "qwen3-14b"
+        id: "qwen2.5-14b-instruct"
+        context_window: 32768
+        quantization: "Q6_K"
+        cost_per_m_in: 0.0
+        cost_per_m_out: 0.0
+      - name: "gpt-oss-20b"
+        id: "gpt-oss-20b"
+        context_window: 8192
+        quantization: "MXFP4"
+        cost_per_m_in: 0.0
+        cost_per_m_out: 0.0
+      - name: "llama-3.1-8b"
+        id: "llama-3.1-8b-instruct"
+        context_window: 131072
+        quantization: "Q6_K_L"
+        cost_per_m_in: 0.0
+        cost_per_m_out: 0.0
+      - name: "phi-4-reasoning"
+        id: "phi-4"
+        context_window: 16384
+        quantization: "Q4_K_M"
+        cost_per_m_in: 0.0
+        cost_per_m_out: 0.0
