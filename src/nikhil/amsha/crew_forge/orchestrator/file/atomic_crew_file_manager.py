@@ -1,4 +1,5 @@
 from typing import Optional, Dict, Any
+from pathlib import Path
 
 from amsha.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 from amsha.crew_forge.domain.models.crew_data import CrewData
@@ -45,17 +46,24 @@ class AtomicCrewFileManager:
 
         crew_builder: Optional[AtomicYamlBuilderService] = None
         for step in crew_def['steps']:
-            task_file = step['task_file']
-            agent_file = step['agent_file']
+            task_key = step['task_key']
+            agent_key = step['agent_key']
 
 
-            if not task_file:
-                raise ValueError(f"Task '{task_file}' not found in master blueprint.")
+            if not task_key:
+                raise ValueError(f"Task '{task_key}' not found in master blueprint.")
 
-            if not agent_file:
-                raise ValueError(f"Agent '{agent_file}' not found in master blueprint.")
+            if not agent_key:
+                raise ValueError(f"Agent '{agent_key}' not found in master blueprint.")
 
-            crew_builder = self.crew_container.atomic_yaml_builder(data=crew_data,task_yaml_file=task_file,agent_yaml_file=agent_file)
+            # Resolve paths based on domain_root_path
+            domain_root_path = Path(self.app_config.get("domain_root_path", "."))
+            # e.g .../copy/tasks/ad_copy_task.yaml
+            module_name = self.job_config.get("module_name", "")
+            task_yaml_file = str(domain_root_path / module_name / "tasks" / f"{task_key}.yaml")
+            agent_yaml_file = str(domain_root_path / module_name / "agents" / f"{agent_key}.yaml")
+
+            crew_builder = self.crew_container.atomic_yaml_builder(data=crew_data,task_yaml_file=task_yaml_file,agent_yaml_file=agent_yaml_file)
 
             agent_knowledge_paths = set()
             for path in step.get('knowledge_sources', []):
@@ -87,7 +95,8 @@ class AtomicCrewFileManager:
         crew_knowledge_paths = set()
 
         # 2. Add crew-level knowledge sources
-        for path in crew_def.get('knowledge_sources', []):
+        crew_knowledge = crew_def.get('knowledge_sources') or []
+        for path in crew_knowledge:
             print(f"knowledge_sources:{path}")
             crew_knowledge_paths.add(path)
         if crew_knowledge_paths:

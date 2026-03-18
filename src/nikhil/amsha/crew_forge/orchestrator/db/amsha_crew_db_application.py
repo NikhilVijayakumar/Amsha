@@ -8,6 +8,10 @@ from amsha.llm_factory.dependency.llm_container import LLMContainer
 from amsha.llm_factory.domain.llm_type import LLMType
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from amsha.utils.yaml_utils import YamlUtils
+from amsha.configuration.application.configuration_manager import ConfigurationManager
+from amsha.configuration.domain.models.amsha_app_config import AmshaAppConfig
+from amsha.configuration.domain.models.amsha_job_config import AmshaJobConfig
+from amsha.configuration.domain.models.amsha_llm_config import AmshaLLMConfig
 
 
 class AmshaCrewDBApplication:
@@ -25,7 +29,20 @@ class AmshaCrewDBApplication:
         """
         self.llm_type = llm_type
         self.config_paths = config_paths
-        self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
+        
+        # Load and Strictly Validate Configurations
+        # These will raise AmshaConfigurationException and immediately terminate if invalid
+        print("⚙️  Loading and Validating Configurations...")
+        self.app_config_data = ConfigurationManager.load_from_yaml(
+            AmshaAppConfig, config_paths["app"], "Application Profile Config"
+        ).model_dump()
+        self.job_config = ConfigurationManager.load_from_yaml(
+            AmshaJobConfig, config_paths["job"], "Job Orchestration Config"
+        ).model_dump()
+        self.llm_config_data = ConfigurationManager.load_from_yaml(
+            AmshaLLMConfig, config_paths["llm"], "LLM Model Configuration"
+        ).model_dump()
+        print("✅  Configurations Validated Successfully.")
         self.model_name:Optional[str] = None
         llm = self._initialize_llm()
         manager = AtomicCrewDBManager(

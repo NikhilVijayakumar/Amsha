@@ -58,9 +58,9 @@ class CopyApplication(AmshaCrewFileApplication):
 if __name__ == "__main__":
     # Configuration is now neatly defined in one place.
     configs = {
-        "llm": "config/llm_config.yaml",
-        "app": "config/app_config.yaml",
-        "job": "config/job_config.yaml"
+        "llm": "example/crew_forge/config/llm_config.yaml",
+        "app": "example/crew_forge/example_config/app_config.yaml",
+        "job": "example/crew_forge/example_config/job_config.yaml"
     }
 
     # The main script is now incredibly simple and clean.

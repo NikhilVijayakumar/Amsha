@@ -1,0 +1,7 @@
+backend: "mongo"
+domain_root_path: "example/crew_forge/example_config/crew_configs"
+output_dir_path: "output/intermediate"
+
+mongo:
+  uri: "mongodb://user:pass@localhost:27017"
+  db_name: "crew_forge_example_db"
