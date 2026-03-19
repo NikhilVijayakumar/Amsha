@@ -34,7 +34,9 @@ Log Rotation (New in Nibandha v1.0.1):
     if config and config.enabled:
         print(f"Rotation enabled: max {config.max_size_mb}MB, {config.rotation_interval_hours}h")
 """
-from nibandha.core import Nibandha, AppConfig, LogRotationConfig
+from nibandha.core.nibandha_app import Nibandha
+from nibandha.configuration.domain.models.app_config import AppConfig
+from nibandha.configuration.domain.models.rotation_config import LogRotationConfig
 from typing import Optional, Dict, Any, Callable
 import logging
 import os

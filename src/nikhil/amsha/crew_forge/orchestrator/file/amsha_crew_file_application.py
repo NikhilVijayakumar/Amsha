@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional
 from amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from amsha.crew_forge.orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
 from amsha.llm_factory.dependency.llm_container import LLMContainer
-from amsha.llm_factory.domain.llm_type import LLMType
+from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from amsha.utils.yaml_utils import YamlUtils
 from amsha.configuration.application.configuration_manager import ConfigurationManager
@@ -67,7 +67,8 @@ class AmshaCrewFileApplication:
         else:
             build_llm = llm_builder.build_evaluation()
         self.model_name = build_llm.model_name
-        return build_llm.llm
+        return build_llm.provider.get_raw_llm()
+
 
 
     def _prepare_multiple_inputs_for(self, crew_name: str) -> dict:

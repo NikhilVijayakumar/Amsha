@@ -5,5 +5,13 @@ from amsha.llm_factory.domain.provider_protocol import ILLMProvider
 
 
 class LLMBuildResult(NamedTuple):
+    """
+    Result of building an LLM instance via LLMBuilder.
+    
+    Attributes:
+        provider: ILLMProvider adapter wrapping the raw LLM instance
+        model_name: Clean model name string for file naming and display
+    """
+    provider: ILLMProvider
+    model_name: str
 
-    provider: ILLMProvider 

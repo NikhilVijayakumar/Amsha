@@ -4,8 +4,9 @@ from crewai import LLM
 import litellm
 import types
 
-from amsha.llm_factory.domain.llm_type import LLMType
-from amsha.llm_factory.domain.state import LLMBuildResult
+from amsha.llm_factory.domain.model.llm_type import LLMType
+from amsha.llm_factory.domain.model.llm_build_result import LLMBuildResult
+from amsha.llm_factory.adapters.crewai_adapter import CrewAIProviderAdapter
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.utils.llm_utils import LLMUtils
 
@@ -56,7 +57,9 @@ class LLMBuilder:
             # Also patch the kwargs of the llm_instance itself just in case
             llm_instance.stop = None
 
-        return LLMBuildResult(llm=llm_instance, model_name=clean_model_name)
+        # Wrap raw LLM in the provider adapter to fulfill ILLMProvider protocol
+        provider = CrewAIProviderAdapter(crewai_llm=llm_instance, model_name=clean_model_name)
+        return LLMBuildResult(provider=provider, model_name=clean_model_name)
 
     def build_creative(self, model_key: str = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()

@@ -31,7 +31,8 @@ class AtomicCrewFileManager:
 
 
 
-    def build_atomic_crew(self, crew_name: str,filename_suffix:Optional[str]=None):
+    def build_atomic_crew(self, crew_name: str, filename_suffix:Optional[str]=None,
+                          output_json: Any = None):
         """Builds a single, atomic crew from a subset of the master blueprint."""
         print(f"[Manager] Building atomic crew: '{crew_name}'...")
         crew_def = self.job_config["crews"].get(crew_name)
@@ -82,12 +83,14 @@ class AtomicCrewFileManager:
             if filename_suffix:
                 crew_builder.add_task(
                     agent=crew_builder.get_last_agent(),
-                    output_filename=f"{safe_model_name}_{filename_suffix}"
+                    output_filename=f"{safe_model_name}_{filename_suffix}",
+                    output_json=output_json
                 )
             else:
                 crew_builder.add_task(
                     agent=crew_builder.get_last_agent(),
-                    output_filename=f"{safe_model_name}"
+                    output_filename=f"{safe_model_name}",
+                    output_json=output_json
                 )
 
         self.output_file = crew_builder.get_last_file()
