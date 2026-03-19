@@ -1,97 +1,67 @@
 # src/nikhil/amsha/llm_factory/service/llm_builder.py
-from typing import Optional, TYPE_CHECKING
 
-from amsha.llm_factory.domain.model.llm_type import LLMType
-from amsha.llm_factory.domain.model.llm_build_result import LLMBuildResult
+from crewai import LLM
+import litellm
+import types
+
+from amsha.llm_factory.domain.llm_type import LLMType
+from amsha.llm_factory.domain.state import LLMBuildResult
 from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.utils.llm_utils import LLMUtils
-from amsha.llm_factory.utils.deprecated_compat import apply_drop_params_workaround
-from crewai import LLM
-
-if TYPE_CHECKING:
-    from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
-    from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
-
-from amsha.llm_factory.adapters.crewai_adapter import CrewAIProviderAdapter
 
 
 class LLMBuilder:
     def __init__(self, settings: LLMSettings):
         self.settings: LLMSettings = settings
 
-    def build(self, llm_type: LLMType, model_key: str = None, 
-              model_config_override: "LLMModelConfig" = None, 
-              params_override: "LLMParameters" = None) -> LLMBuildResult:
-        
-        if model_config_override and params_override:
-            model_config = model_config_override
-            params = params_override
-        else:
-            model_config = self.settings.get_model_config(llm_type.value, model_key)
-            params = self.settings.get_parameters(llm_type.value)
+    def build(self, llm_type: LLMType, model_key: str = None) -> LLMBuildResult:
+        model_config = self.settings.get_model_config(llm_type.value, model_key)
+        params = self.settings.get_parameters(llm_type.value)
 
         clean_model_name = LLMUtils.extract_model_name(model_config.model)
-        if model_config.base_url is None:
-            # Build base kwargs for LLM
-            llm_kwargs = {
-                'api_key': model_config.api_key,
-                'api_version': model_config.api_version,
-                'model': model_config.model,
-                'temperature': params.temperature,
-                'top_p': params.top_p,
-                'max_completion_tokens': params.max_completion_tokens,
-                'presence_penalty': params.presence_penalty,
-                'frequency_penalty': params.frequency_penalty,
-                'stream': True
-            }
-            
-            # Apply deprecated compatibility workaround
-            llm_kwargs = apply_drop_params_workaround(llm_kwargs)
-            
-            llm_instance = LLM(**llm_kwargs)
-        else:
-            # CrewAI 1.8.0: Azure models require 'endpoint' parameter instead of 'base_url'
-            # Detect Azure models and map base_url to endpoint
-            is_azure = model_config.model.startswith('azure/')
-            llm_kwargs = {
-                'api_key': model_config.api_key,
-                'api_version': model_config.api_version,
-                'model': model_config.model,
-                'temperature': params.temperature,
-                'top_p': params.top_p,
-                'max_completion_tokens': params.max_completion_tokens,
-                'presence_penalty': params.presence_penalty,
-                'frequency_penalty': params.frequency_penalty,
-                'stream': True
-            }
-            
-            # Use 'endpoint' for Azure, 'base_url' for others
-            if is_azure:
-                llm_kwargs['endpoint'] = model_config.base_url
-            else:
-                llm_kwargs['base_url'] = model_config.base_url
-            
-            # Apply deprecated compatibility workaround
-            llm_kwargs = apply_drop_params_workaround(llm_kwargs)
-            
-            llm_instance = LLM(**llm_kwargs)
-
-
-        provider = CrewAIProviderAdapter(crewai_llm=llm_instance, model_name=clean_model_name)
         
-        # Return result with backward compatible llm and new provider
-        return LLMBuildResult(provider=provider)
+        kwargs = {
+            "api_key": model_config.api_key,
+            "api_version": model_config.api_version,
+            "model": model_config.model,
+            "stream": True
+        }
+        
+        if model_config.base_url is not None:
+            kwargs["base_url"] = model_config.base_url
+            
+        # Selectively pass parameters, as Azure OpenAI reasoning models might reject them entirely
+        if "azure" not in model_config.model.lower():
+            kwargs["max_completion_tokens"] = params.max_completion_tokens
+            kwargs["temperature"] = params.temperature
+            kwargs["top_p"] = params.top_p
+            kwargs["presence_penalty"] = params.presence_penalty
+            kwargs["frequency_penalty"] = params.frequency_penalty
+            if params.stop:
+                kwargs["stop"] = params.stop
+            
+        llm_instance = LLM(**kwargs)
 
-    def build_creative(self, model_key: str = None, 
-                       model_config_override: "LLMModelConfig" = None, 
-                       params_override: "LLMParameters" = None) -> LLMBuildResult:
+        # Monkeypatch litellm.completion because CrewAI passes 'stop' dynamically
+        if "azure" in model_config.model.lower():
+            original_completion = getattr(litellm, "completion", None)
+            if original_completion and not hasattr(original_completion, "_patched_for_azure"):
+                def patched_completion(*args, **ckwargs):
+                    if "stop" in ckwargs:
+                        ckwargs.pop("stop", None)
+                    return original_completion(*args, **ckwargs)
+                patched_completion._patched_for_azure = True
+                litellm.completion = patched_completion
+
+            # Also patch the kwargs of the llm_instance itself just in case
+            llm_instance.stop = None
+
+        return LLMBuildResult(llm=llm_instance, model_name=clean_model_name)
+
+    def build_creative(self, model_key: str = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()
-        return self.build(LLMType.CREATIVE, model_key, model_config_override, params_override)
+        return self.build(LLMType.CREATIVE, model_key)
 
-    def build_evaluation(self, model_key: str = None, 
-                         model_config_override: "LLMModelConfig" = None, 
-                         params_override: "LLMParameters" = None) -> LLMBuildResult:
+    def build_evaluation(self, model_key: str = None) -> LLMBuildResult:
         LLMUtils.disable_telemetry()
-        return self.build(LLMType.EVALUATION, model_key, model_config_override, params_override)
-
-
+        return self.build(LLMType.EVALUATION, model_key)

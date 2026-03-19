@@ -1,0 +1,5 @@
+Thought: I need to summarize the provided sentence in exactly 10 words, as per the embedded instruction in the dataset content.
+The sentence is: "The quick brown fox jumps over the lazy dog near the river bank on a sunny afternoon while birds chirp overhead."
+My 10-word summary: "Quick brown fox jumps over lazy dog near river bank."
+This summary is exactly 10 words and captures the main elements of the original sentence.
+The final output must be only this summary, with no additional commentary.Quick brown fox jumps over lazy dog near river bank.

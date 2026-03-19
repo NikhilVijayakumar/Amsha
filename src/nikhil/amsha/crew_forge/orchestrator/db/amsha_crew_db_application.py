@@ -4,54 +4,47 @@ from typing import Dict, Any, Optional
 
 from amsha.crew_forge.orchestrator.db.atomic_crew_db_manager import AtomicCrewDBManager
 from amsha.crew_forge.orchestrator.db.db_crew_orchestrator import DbCrewOrchestrator
-from amsha.crew_forge.protocols.crew_application import CrewApplication
-from amsha.crew_forge.service.shared_llm_initialization_service import SharedLLMInitializationService
-from amsha.llm_factory.domain.model.llm_type import LLMType
-from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
-from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
+from amsha.llm_factory.dependency.llm_container import LLMContainer
+from amsha.llm_factory.domain.llm_type import LLMType
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 from amsha.utils.yaml_utils import YamlUtils
+from amsha.configuration.application.configuration_manager import ConfigurationManager
+from amsha.configuration.domain.models.amsha_app_config import AmshaAppConfig
+from amsha.configuration.domain.models.amsha_job_config import AmshaJobConfig
+from amsha.configuration.domain.models.amsha_llm_config import AmshaLLMConfig
 
 
-class AmshaCrewDBApplication(CrewApplication):
+class AmshaCrewDBApplication:
     """
     A reusable base class that handles all the boilerplate setup for running a crew.
 
     """
 
-    def __init__(self, config_paths: Dict[str, str], llm_type: LLMType, llm_config_override: Optional[Dict] = None):
+    def __init__(self, config_paths: Dict[str, str],llm_type:LLMType):
         """
         Initializes the application with necessary configuration paths.
 
         Args:
             config_paths: A dictionary containing paths to config files.
-            llm_type: Type of LLM to initialize (CREATIVE or EVALUATION)
-            llm_config_override: Optional dictionary containing LLM configuration overrides
         """
         self.llm_type = llm_type
         self.config_paths = config_paths
-        self.job_config = YamlUtils.yaml_safe_load(config_paths["job"])
         
-        # Prepare overrides if provided
-        model_config = None
-        llm_params = None
-        
-        if llm_config_override:
-            print("  -> Using LLM configuration overrides")
-            if 'model_config' in llm_config_override:
-                model_config = LLMModelConfig(**llm_config_override['model_config'])
-            if 'llm_parameters' in llm_config_override:
-                llm_params = LLMParameters(**llm_config_override['llm_parameters'])
-
-        # Initialize LLM using shared service
-        llm, model_name = SharedLLMInitializationService.initialize_llm(
-            config_paths["llm"], 
-            llm_type,
-            model_config=model_config,
-            llm_params=llm_params
-        )
-        self.model_name = model_name
-        
+        # Load and Strictly Validate Configurations
+        # These will raise AmshaConfigurationException and immediately terminate if invalid
+        print("⚙️  Loading and Validating Configurations...")
+        self.app_config_data = ConfigurationManager.load_from_yaml(
+            AmshaAppConfig, config_paths["app"], "Application Profile Config"
+        ).model_dump()
+        self.job_config = ConfigurationManager.load_from_yaml(
+            AmshaJobConfig, config_paths["job"], "Job Orchestration Config"
+        ).model_dump()
+        self.llm_config_data = ConfigurationManager.load_from_yaml(
+            AmshaLLMConfig, config_paths["llm"], "LLM Model Configuration"
+        ).model_dump()
+        print("✅  Configurations Validated Successfully.")
+        self.model_name:Optional[str] = None
+        llm = self._initialize_llm()
         manager = AtomicCrewDBManager(
             llm=llm,
             model_name = self.model_name,
@@ -59,6 +52,22 @@ class AmshaCrewDBApplication(CrewApplication):
             job_config=self.job_config
         )
         self.orchestrator = DbCrewOrchestrator(manager)
+
+
+    def _initialize_llm(self) -> Any:
+        """Sets up the DI container for the LLM and builds the instance."""
+        print("⚙️  Setting up LLM...")
+        llm_container = LLMContainer()
+        llm_container.config.llm.yaml_path.from_value(
+            str(Path(self.config_paths["llm"]))
+        )
+        llm_builder = llm_container.llm_builder()
+        if self.llm_type == LLMType.CREATIVE:
+            build_llm = llm_builder.build_creative()
+        else:
+            build_llm = llm_builder.build_evaluation()
+        self.model_name = build_llm.model_name
+        return build_llm.llm
 
 
     def _prepare_multiple_inputs_for(self, crew_name: str) -> dict:
@@ -138,7 +147,7 @@ class AmshaCrewDBApplication(CrewApplication):
 
 
 
-    def clean_json(self, output_filename: str, max_llm_retries: int = 2,output_folder: Optional[str] = None) -> bool:
+    def clean_json(self, output_filename: str, max_llm_retries: int = 2) -> bool:
         """
         Cleans and validates a JSON file, using an LLM for fixes with a retry limit.
 
@@ -151,7 +160,7 @@ class AmshaCrewDBApplication(CrewApplication):
         """
         print(f"AmshaCrewForgeApplication:{output_filename}")
         current_file = Path(output_filename)
-        cleaner = JsonCleanerUtils(output_filename,output_folder)
+        cleaner = JsonCleanerUtils(output_filename)
         if cleaner.process_file():
             print(f"✅ JSON validated successfully. Clean file at: {cleaner.output_file_path}")
             return True

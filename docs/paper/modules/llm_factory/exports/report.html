@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Report</title>
+    <style>
+        /* Modern Dashboard Layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --accent: #667eea;
+    --accent-dark: #5568d3;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --sidebar-width: 260px;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-tertiary: #4a5568;
+    --text-primary: #f7fafc;
+    --text-secondary: #cbd5e0;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-primary);
+    border-right: 1px solid var(--bg-tertiary);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: var(--bg-secondary);
+}
+
+.grade-badge.grade-a { background: var(--success); color: white; }
+.grade-badge.grade-b { background: var(--info); color: white; }
+.grade-badge.grade-c { background: var(--warning); color: white; }
+.grade-badge.grade-d,
+.grade-badge.grade-f { background: var(--danger); color: white; }
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.nav-link.active {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    border-right: 3px solid var(--accent);
+}
+
+.nav-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.theme-toggle {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    background: var(--bg-primary);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.status-complete { background: #d1fae5; color: #065f46; }
+.status-badge.status-in-progress { background: #fef3c7; color: #92400e; }
+.status-badge.status-critical { background: #fee2e2; color: #991b1b; }
+
+.topbar-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Content */
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1400px;
+}
+
+.content-section {
+    margin-bottom: 3rem;
+}
+
+/* Metric Cards Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.card-green .card-icon { background: #d1fae5; }
+.card-red .card-icon { background: #fee2e2; }
+.card-yellow .card-icon { background: #fef3c7; }
+.card-blue .card-icon { background: #dbeafe; }
+
+.card-content {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Section Content Styling */
+.section-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.section-content h2 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.section-content h3 {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.section-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-content th {
+    background: var(--accent);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.section-content td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.section-content tr:last-child td {
+    border-bottom: none;
+}
+
+.section-content tr:hover {
+    background: var(--bg-secondary);
+}
+
+.section-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-md);
+}
+
+.section-content pre {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.section-content code {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.section-content ul,
+.section-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.section-content li {
+    margin: 0.5rem 0;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar,
+    .topbar {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metric-card {
+        break-inside: avoid;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for diagram rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <!-- MathJax for LaTeX mathematical equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">Nibandha</h1>
+                <div class="grade-badge grade-n/a">
+                    N/A
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#architecture" class="nav-link" data-section="architecture">
+                    <span class="nav-icon">🏗️</span>
+                    <span class="nav-text">Architecture</span>
+                </a>
+                <a href="#gaps" class="nav-link" data-section="gaps">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Gaps</span>
+                </a>
+                <a href="#mathematics" class="nav-link" data-section="mathematics">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Mathematics</span>
+                </a>
+                <a href="#novelty" class="nav-link" data-section="novelty">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Novelty</span>
+                </a>
+                <a href="#summary" class="nav-link" data-section="summary">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Summary</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="icon">🌙</span>
+                    <span class="text">Dark Mode</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <span class="status-badge status-complete">
+                        Complete
+                    </span>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <span>📄 Print</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportPDF()">
+                        <span>📥 Export PDF</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <section id="architecture" class="content-section">
+                    <div class="section-content">
+                        <h2 id="1-architectural-overview">1. Architectural Overview</h2>
+
+<p>The <code>llm_factory</code> module implements a <strong>Configuration-Driven Conditional Factory</strong> pattern for LLM provisioning. It abstracts multi-provider complexity (Cloud SaaS, Local Inference, Azure) behind a unified builder interface, enforces runtime privacy through reflection-based telemetry interception, and provides a declarative DI container with pre-wired convenience providers.</p>
+
+<h3 id="layered-architecture-diagram">Layered Architecture Diagram</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef app fill:#ffd700,stroke:#333,stroke-width:2px;
+    classDef service fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef domain fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef infra fill:#bfb,stroke:#333,stroke-width:2px;
+    classDef ext fill:#ddd,stroke:#666,stroke-width:1px;
+
+    subgraph "Consumer Modules"
+        CF["crew_forge (AmshaCrewDBApplication)"]:::app
+        CG["crew_gen (CrewGenApp)"]:::app
+        EX["llm_example.py"]:::app
+    end
+
+    subgraph "Dependency Layer"
+        DI["LLMContainer (DI)"]:::infra
+    end
+
+    subgraph "Service Layer"
+        Builder["LLMBuilder"]:::service
+        Utils["LLMUtils"]:::service
+    end
+
+    subgraph "Settings Layer"
+        Settings["LLMSettings"]:::domain
+        YAML["llm_config.yaml"]:::infra
+    end
+
+    subgraph "Domain Layer"
+        Type["LLMType (Enum)"]:::domain
+        Params["LLMParameters"]:::domain
+        ModelCfg["LLMModelConfig"]:::domain
+        UseCfg["LLMUseCaseConfig"]:::domain
+        Result["LLMBuildResult"]:::domain
+    end
+
+    subgraph "External"
+        CrewLLM["crewai.LLM"]:::ext
+        Telemetry["crewai.telemetry.Telemetry"]:::ext
+    end
+
+    CF --> DI
+    CG --> DI
+    EX --> DI
+    DI --> Builder
+    DI --> Settings
+    Builder --> Settings
+    Builder --> Utils
+    Settings --> YAML
+    Settings --> Params
+    Settings --> ModelCfg
+    Settings --> UseCfg
+    Builder --> Type
+    Builder --> CrewLLM
+    Builder --> Result
+    Utils --> Telemetry
+</div>
+
+<hr />
+
+<h2 id="2-sub-package-structure">2. Sub-Package Structure</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Sub-Package</th>
+  <th style="text-align:center;">Files</th>
+  <th style="text-align:left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>domain/</code></td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;"><code>LLMType</code> enum and 4 Pydantic state models (<code>LLMParameters</code>, <code>LLMModelConfig</code>, <code>LLMUseCaseConfig</code>, <code>LLMBuildResult</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>settings/</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;"><code>LLMSettings</code> — Hierarchical config resolution from YAML</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>service/</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;"><code>LLMBuilder</code> — Conditional factory with cloud/local branching</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>utils/</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;"><code>LLMUtils</code> — Telemetry disabling + model name extraction</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>dependency/</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;"><code>LLMContainer</code> — Declarative DI with Singleton/Factory/Pre-wired providers</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>example/</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;">Full usage example demonstrating DI-based LLM provisioning</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Total:</strong> 14 Python files, 6 sub-packages</p>
+
+<hr />
+
+<h2 id="3-class-design">3. Class Design</h2>
+
+<h3 id="class-diagram">Class Diagram</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+classDiagram
+    note "Configuration-driven factory with privacy enforcement"
+
+    class LLMBuilder {
+        -settings: LLMSettings
+        +build(LLMType, model_key) LLMBuildResult
+        +build_creative(model_key) LLMBuildResult
+        +build_evaluation(model_key) LLMBuildResult
+    }
+
+    class LLMSettings {
+        +llm: Dict~str, LLMUseCaseConfig~
+        +llm_parameters: Dict~str, LLMParameters~
+        +get_model_config(use_case, key) LLMModelConfig
+        +get_parameters(use_case) LLMParameters
+    }
+
+    class LLMUseCaseConfig {
+        +default: str
+        +models: Dict~str, LLMModelConfig~
+    }
+
+    class LLMModelConfig {
+        +model: str
+        +base_url: Optional~str~
+        +api_key: Optional~str~
+        +api_version: Optional~str~
+    }
+
+    class LLMParameters {
+        +temperature: float = 0.0
+        +top_p: float = 1.0
+        +max_completion_tokens: int = 4096
+        +presence_penalty: float = 0.0
+        +frequency_penalty: float = 0.0
+        +stop: Optional~List~
+    }
+
+    class LLMBuildResult {
+        <<NamedTuple>>
+        +llm: LLM
+        +model_name: str
+    }
+
+    class LLMUtils {
+        +noop()$
+        +disable_telemetry()$
+        +extract_model_name(str)$ str
+    }
+
+    class LLMType {
+        <<enumeration>>
+        CREATIVE
+        EVALUATION
+    }
+
+    class LLMContainer {
+        +config: Configuration
+        +yaml_data: Singleton
+        +llm_settings: Singleton
+        +llm_builder: Factory
+        +creative_llm: PreWired
+        +evaluation_llm: PreWired
+    }
+
+    LLMBuilder --> LLMSettings : resolves config
+    LLMBuilder --> LLMUtils : privacy guard
+    LLMBuilder --> LLMType : selects use case
+    LLMBuilder --> LLMBuildResult : returns
+    LLMSettings --> LLMUseCaseConfig : contains
+    LLMSettings --> LLMParameters : contains
+    LLMUseCaseConfig --> LLMModelConfig : contains
+    LLMContainer --> LLMBuilder : creates
+    LLMContainer --> LLMSettings : caches
+</div>
+
+<hr />
+
+<h2 id="4-instantiation-flow">4. Instantiation Flow</h2>
+
+<h3 id="sequence-diagram-full-llm-provisioning-lifecycle">Sequence Diagram: Full LLM Provisioning Lifecycle</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    autonumber
+    actor Client as Consumer Module
+    participant Container as LLMContainer
+    participant YAML as llm_config.yaml
+    participant Settings as LLMSettings
+    participant Builder as LLMBuilder
+    participant Utils as LLMUtils
+    participant Telemetry as CrewAI.Telemetry
+    participant CrewLLM as CrewAI.LLM
+
+    Client->>Container: config.llm.yaml_path.from_value(path)
+    Client->>Container: llm_builder() / creative_llm()
+
+    rect rgb(245, 245, 220)
+        note over Container,Settings: Singleton Resolution (once)
+        Container->>YAML: YamlUtils.yaml_safe_load(path)
+        YAML-->>Container: raw dict
+        Container->>Settings: LLMSettings(**data)
+    end
+
+    Container->>Builder: LLMBuilder(settings)
+
+    Client->>Builder: build_creative(model_key)
+
+    rect rgb(255, 230, 230)
+        note over Builder,Telemetry: Privacy Guard (before any LLM call)
+        Builder->>Utils: disable_telemetry()
+        Utils->>Utils: os.environ["OTEL_SDK_DISABLED"] = "true"
+        loop For each callable attr in Telemetry
+            Utils->>Telemetry: setattr(attr, noop)
+        end
+    end
+
+    Builder->>Settings: get_model_config("creative", key)
+    Settings-->>Builder: LLMModelConfig
+
+    Builder->>Settings: get_parameters("creative")
+    Settings-->>Builder: LLMParameters(τ=1.0, p=0.9, T=4096...)
+
+    alt base_url is None (Cloud Provider)
+        Builder->>CrewLLM: LLM(api_key, model, temperature, ...)
+    else base_url present (Local / Azure)
+        Builder->>CrewLLM: LLM(base_url, api_key, model, temperature, ...)
+    end
+
+    Builder->>Utils: extract_model_name(model_string)
+    Utils-->>Builder: clean_name
+
+    Builder-->>Client: LLMBuildResult(llm, model_name)
+</div>
+
+<hr />
+
+<h2 id="5-provider-classification-matrix">5. Provider Classification Matrix</h2>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    classDef cloud fill:#e3f2fd,stroke:#333;
+    classDef local fill:#e8f5e9,stroke:#333;
+    classDef azure fill:#fff3e0,stroke:#333;
+
+    subgraph "Provider Types"
+        direction TB
+        Cloud["☁️ Cloud SaaS"]:::cloud
+        Local["🖥️ Local Inference"]:::local
+        Azure["🔷 Azure OpenAI"]:::azure
+    end
+
+    subgraph "Cloud Providers"
+        Gemini["Gemini<br/>gemini-1.5-flash<br/>base_url: None"]:::cloud
+    end
+
+    subgraph "Local Providers"
+        Phi["LM Studio / Phi-4<br/>localhost:1234/v1"]:::local
+        Llama["LM Studio / Llama-3.1<br/>localhost:1234/v1"]:::local
+        Gemma["LM Studio / Gemma-3<br/>localhost:1234/v1"]:::local
+        GPT_OSS["LM Studio / GPT-OSS-20B<br/>localhost:1234/v1"]:::local
+    end
+
+    subgraph "Azure Providers"
+        GPT4o["Azure / GPT-4o<br/>*.openai.azure.com"]:::azure
+    end
+
+    Cloud --> Gemini
+    Local --> Phi
+    Local --> Llama
+    Local --> Gemma
+    Local --> GPT_OSS
+    Azure --> GPT4o
+</div>
+
+<hr />
+
+<h2 id="6-di-container-resolution-graph">6. DI Container Resolution Graph</h2>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    classDef singleton fill:#e1bee7,stroke:#333;
+    classDef factory fill:#b2dfdb,stroke:#333;
+    classDef prewired fill:#ffccbc,stroke:#333;
+    classDef config fill:#ffeb3b,stroke:#333;
+
+    Config["config.llm.yaml_path"]:::config
+    YamlData["yaml_data<br/>(Singleton)"]:::singleton
+    Settings["llm_settings<br/>(Singleton)"]:::singleton
+    Builder["llm_builder<br/>(Factory)"]:::factory
+    Creative["creative_llm<br/>(Pre-wired)"]:::prewired
+    Evaluation["evaluation_llm<br/>(Pre-wired)"]:::prewired
+
+    Config --> YamlData
+    YamlData --> Settings
+    Settings --> Builder
+    Builder --> Creative
+    Builder --> Evaluation
+</div>
+
+<h3 id="provider-strategy-table">Provider Strategy Table</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Provider</th>
+  <th style="text-align:left;">Strategy</th>
+  <th style="text-align:left;">Lifecycle</th>
+  <th style="text-align:left;">Code Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>yaml_data</code></td>
+  <td style="text-align:left;">Singleton</td>
+  <td style="text-align:left;">Parse once, share forever</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py#L15-L18">llm_container.py:L15–L18</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>llm_settings</code></td>
+  <td style="text-align:left;">Singleton</td>
+  <td style="text-align:left;">Constructed once from YAML data</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py#L20-L23">llm_container.py:L20–L23</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>llm_builder</code></td>
+  <td style="text-align:left;">Factory</td>
+  <td style="text-align:left;">New instance per request</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py#L26-L29">llm_container.py:L26–L29</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>creative_llm</code></td>
+  <td style="text-align:left;">Pre-wired</td>
+  <td style="text-align:left;">Calls <code>build_creative()</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py#L31">llm_container.py:L31</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>evaluation_llm</code></td>
+  <td style="text-align:left;">Pre-wired</td>
+  <td style="text-align:left;">Calls <code>build_evaluation()</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py#L33">llm_container.py:L33</a></td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="7-cross-module-integration-map">7. Cross-Module Integration Map</h2>
+
+<p>The <code>llm_factory</code> is consumed by multiple modules as the <strong>shared LLM provisioning service</strong>:</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Consumer</th>
+  <th style="text-align:left;">Import</th>
+  <th style="text-align:left;">Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>crew_forge</code> (DB)</td>
+  <td style="text-align:left;"><code>LLMContainer</code>, <code>LLMType</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/db/amsha_crew_db_application.py#L7-L8">amsha<em>crew</em>db_application.py:L7–L8</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>crew_forge</code> (File)</td>
+  <td style="text-align:left;"><code>LLMContainer</code>, <code>LLMType</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/file/amsha_crew_file_application.py#L7-L8">amsha<em>crew</em>file_application.py:L7–L8</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>crew_gen</code></td>
+  <td style="text-align:left;"><code>LLMType</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_gen/application/crew_gen_app.py#L4">crew<em>gen</em>app.py:L4</a></td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="8-design-patterns-catalog">8. Design Patterns Catalog</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">Pattern</th>
+  <th style="text-align:left;">Implementation</th>
+  <th style="text-align:left;">File</th>
+  <th style="text-align:left;">Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;"><strong>Conditional Factory</strong></td>
+  <td style="text-align:left;"><code>LLMBuilder.build()</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/service/llm_builder.py">llm_builder.py</a></td>
+  <td style="text-align:left;">Single method produces cloud or local LLM based on <code>base_url</code> presence</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;"><strong>Configuration Object</strong></td>
+  <td style="text-align:left;"><code>LLMSettings</code> + Pydantic models</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/settings/llm_settings.py">llm_settings.py</a></td>
+  <td style="text-align:left;">Type-safe hierarchical config with defaults</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;"><strong>Strategy</strong></td>
+  <td style="text-align:left;">Use-case-based parameter selection</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/domain/state.py">state.py</a></td>
+  <td style="text-align:left;">Different parameters per use case (creative vs. evaluation)</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;"><strong>Monkey Patching</strong></td>
+  <td style="text-align:left;"><code>LLMUtils.disable_telemetry()</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py">llm_utils.py</a></td>
+  <td style="text-align:left;">Runtime privacy enforcement without library modification</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td style="text-align:left;"><strong>Dependency Injection</strong></td>
+  <td style="text-align:left;"><code>LLMContainer</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py">llm_container.py</a></td>
+  <td style="text-align:left;">Declarative container with Singleton, Factory, and Pre-wired providers</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td style="text-align:left;"><strong>Immutable Result</strong></td>
+  <td style="text-align:left;"><code>LLMBuildResult</code> (NamedTuple)</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/domain/state.py">state.py</a></td>
+  <td style="text-align:left;">Thread-safe, hashable build result</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="9-module-metrics">9. Module Metrics</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Total Python Files</td>
+  <td style="text-align:left;">14</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sub-Packages</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Domain Models (Pydantic)</td>
+  <td style="text-align:left;">4</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Design Patterns</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Diagrams in this Document</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Supported Providers</td>
+  <td style="text-align:left;">6 (Gemini, LM Studio/Phi, LM Studio/Llama, LM Studio/Gemma, LM Studio/GPT-OSS, Azure GPT-4o)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Consumer Modules</td>
+  <td style="text-align:left;">3 (crew<em>forge DB, crew</em>forge File, crew_gen)</td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="gaps" class="content-section">
+                    <div class="section-content">
+                        <p>This document identifies gaps against Scopus-indexed publication standards, categorized by severity and effort.</p>
+
+<hr />
+
+<h2 id="1-quality-assurance-gaps">1. Quality Assurance Gaps</h2>
+
+<h3 id="gap-qa-001-missing-unit-tests-critical">GAP QA-001: Missing Unit Tests (CRITICAL)</h3>
+
+<p>The <code>tests/unit/llm_factory/</code> directory structure exists with compiled <code>.pyc</code> caches (suggesting tests were previously written and ran), but <strong>no active <code>.py</code> test files</strong> are present. The configuration resolution, factory logic, and telemetry disabling are all unverified.</p>
+
+<ul>
+<li><strong>Severity:</strong> Critical ⛔</li>
+<li><strong>Impact:</strong> Cannot validate provider switching, parameter defaults, or privacy enforcement.</li>
+<li><strong>Source:</strong> <code>tests/unit/llm_factory/</code> — Contains <code>.pyc</code> files but no <code>.py</code> sources.</li>
+<li><strong>Historical Note:</strong> Compiled caches suggest tests were deleted or moved. Recovery of test intent is possible from cache analysis.</li>
+<li><strong>Recommendation:</strong> Regenerate test suites covering:
+<ol>
+<li><code>LLMBuilder.build()</code> — Cloud vs. Local branching</li>
+<li><code>LLMSettings.get_model_config()</code> — Default resolution, missing use case, missing model</li>
+<li><code>LLMUtils.disable_telemetry()</code> — Verify all Telemetry methods are replaced</li>
+<li><code>LLMUtils.extract_model_name()</code> — All prefix variations</li>
+</ol></li>
+<li><strong>Estimated Effort:</strong> 2 days</li>
+</ul>
+
+<hr />
+
+<h2 id="2-experimental-gaps">2. Experimental Gaps</h2>
+
+<h3 id="gap-perf-001-no-provider-latency-benchmarks-critical">GAP PERF-001: No Provider Latency Benchmarks (CRITICAL)</h3>
+
+<p>No empirical data exists on the latency differences between supported providers (Cloud Gemini vs. Local LM Studio models).</p>
+
+<ul>
+<li><strong>Severity:</strong> Critical ⛔</li>
+<li><strong>Description:</strong> The module's primary claim — unified multi-provider access — cannot be validated without latency comparison data.</li>
+<li><strong>Impact:</strong> Cannot defend provider selection recommendations in the paper.</li>
+<li><strong>Source:</strong> No timing instrumentation in <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/service/llm_builder.py">llm_builder.py</a>.</li>
+<li><strong>Recommendation:</strong> Benchmark suite measuring:
+<ol>
+<li>Time to First Token (TTFT) per provider</li>
+<li>Total Completion Time for standardized prompts</li>
+<li>Init time for local vs. cloud instantiation</li>
+</ol></li>
+<li><strong>Estimated Effort:</strong> 2 days</li>
+</ul>
+
+<h3 id="gap-perf-002-no-parameter-sensitivity-analysis-moderate">GAP PERF-002: No Parameter Sensitivity Analysis (MODERATE)</h3>
+
+<p>The creative (τ=1.0, p=0.9) and evaluation (τ=0.3, p=0.5) parameter presets are not empirically justified.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Description:</strong> Temperature and top_p values are configured without documented rationale or A/B testing results.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/config/llm_config.yaml.template#L65-L81">llm_config.yaml.template:L65–L81</a></li>
+<li><strong>Recommendation:</strong> Run standardized benchmarks varying τ and p, measuring output quality metrics.</li>
+<li><strong>Estimated Effort:</strong> 3 days</li>
+</ul>
+
+<h3 id="gap-perf-003-no-cost-analysis-moderate">GAP PERF-003: No Cost Analysis (MODERATE)</h3>
+
+<p>No cost-per-token comparison across providers is documented.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Description:</strong> Production deployment decisions require cost data alongside latency data.</li>
+<li><strong>Recommendation:</strong> Document cost per 1k input/output tokens for each provider.</li>
+<li><strong>Estimated Effort:</strong> 1 day</li>
+</ul>
+
+<hr />
+
+<h2 id="3-implementation-gaps">3. Implementation Gaps</h2>
+
+<h3 id="gap-impl-001-hardcoded-model-prefixes-moderate">GAP IMPL-001: Hardcoded Model Prefixes (MODERATE)</h3>
+
+<p>The <code>extract_model_name()</code> method uses a hardcoded prefix list <code>["lm_studio/", "gemini/", "open_ai/", "azure"]</code>.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Description:</strong> Adding new providers (e.g., Anthropic/Claude, Mistral, Cohere) requires code changes.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py#L28">llm_utils.py:L28</a></li>
+<li><strong>Recommendation:</strong> Move prefix list to YAML config or derive from model string structure (split on <code>/</code>).</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<h3 id="gap-impl-002-inconsistent-azure-prefix-minor">GAP IMPL-002: Inconsistent Azure Prefix (MINOR)</h3>
+
+<p>The prefix <code>"azure"</code> (without trailing <code>/</code>) causes incorrect extraction: <code>"azure/gpt-4o"</code> → <code>"/gpt-4o"</code> (note leading slash).</p>
+
+<ul>
+<li><strong>Severity:</strong> Minor (Bug)</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py#L28">llm_utils.py:L28</a></li>
+<li><strong>Recommendation:</strong> Change <code>"azure"</code> to <code>"azure/"</code> in the prefix list.</li>
+<li><strong>Estimated Effort:</strong> 5 minutes</li>
+</ul>
+
+<h3 id="gap-impl-003-no-provider-health-check-moderate">GAP IMPL-003: No Provider Health Check (MODERATE)</h3>
+
+<p>No pre-flight validation checks whether a provider is reachable before attempting LLM construction.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Description:</strong> Local LM Studio may not be running; cloud APIs may have expired keys.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/service/llm_builder.py#L15-L48">llm_builder.py:L15–L48</a> — No connectivity check.</li>
+<li><strong>Recommendation:</strong> Add optional <code>health_check()</code> that pings <code>base_url</code> or validates API key.</li>
+<li><strong>Estimated Effort:</strong> 1 day</li>
+</ul>
+
+<h3 id="gap-impl-004-streaming-always-enabled-minor">GAP IMPL-004: Streaming Always Enabled (MINOR)</h3>
+
+<p><code>stream=True</code> is hardcoded in both instantiation paths.</p>
+
+<ul>
+<li><strong>Severity:</strong> Minor</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/service/llm_builder.py#L31">llm_builder.py:L31, L45</a></li>
+<li><strong>Recommendation:</strong> Make configurable via <code>LLMParameters</code> or use-case config.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<h3 id="gap-impl-005-no-fallbackretry-logic-moderate">GAP IMPL-005: No Fallback/Retry Logic (MODERATE)</h3>
+
+<p>If the primary provider fails, there is no automatic fallback to an alternative provider.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Description:</strong> Multi-provider systems benefit from automatic failover (e.g., if Gemini rate-limits, fall back to LM Studio).</li>
+<li><strong>Source:</strong> <code>LLMBuilder</code> has no retry or fallback mechanism.</li>
+<li><strong>Recommendation:</strong> Implement provider chain with ordered fallback list.</li>
+<li><strong>Estimated Effort:</strong> 2 days</li>
+</ul>
+
+<hr />
+
+<h2 id="4-validation-gaps">4. Validation Gaps</h2>
+
+<h3 id="gap-val-001-no-telemetry-disabling-verification-high">GAP VAL-001: No Telemetry Disabling Verification (HIGH)</h3>
+
+<p>The reflection-based telemetry patch is applied but never verified — no test confirms all Telemetry methods are actually replaced.</p>
+
+<ul>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Description:</strong> If CrewAI updates its <code>Telemetry</code> class, the patch may silently fail.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py#L16-L24">llm_utils.py:L16–L24</a></li>
+<li><strong>Recommendation:</strong> Add assertion test: <code>assert all(getattr(Telemetry, a) == noop for a in callables)</code>.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<h3 id="gap-val-002-no-yaml-schema-validation-moderate">GAP VAL-002: No YAML Schema Validation (MODERATE)</h3>
+
+<p>The YAML config file is loaded without schema validation — malformed configs produce cryptic Pydantic errors.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py#L15-L18">llm_container.py:L15–L18</a> — Raw <code>yaml_safe_load</code> with no validation.</li>
+<li><strong>Recommendation:</strong> Add YAML schema validation or improve error messages in <code>LLMSettings</code>.</li>
+<li><strong>Estimated Effort:</strong> 1 day</li>
+</ul>
+
+<hr />
+
+<h2 id="5-gap-summary-matrix">5. Gap Summary Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Gap ID</th>
+  <th>Category</th>
+  <th>Severity</th>
+  <th>Effort</th>
+  <th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>QA-001</td>
+  <td>Testing</td>
+  <td>Critical ⛔</td>
+  <td>2 days</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>PERF-001</td>
+  <td>Benchmark</td>
+  <td>Critical ⛔</td>
+  <td>2 days</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>PERF-002</td>
+  <td>Benchmark</td>
+  <td>Moderate</td>
+  <td>3 days</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>PERF-003</td>
+  <td>Benchmark</td>
+  <td>Moderate</td>
+  <td>1 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>IMPL-001</td>
+  <td>Extensibility</td>
+  <td>Moderate</td>
+  <td>0.5 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>IMPL-002</td>
+  <td>Bug</td>
+  <td>Minor</td>
+  <td>5 min</td>
+  <td>P1</td>
+</tr>
+<tr>
+  <td>IMPL-003</td>
+  <td>Resiliency</td>
+  <td>Moderate</td>
+  <td>1 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>IMPL-004</td>
+  <td>Config</td>
+  <td>Minor</td>
+  <td>0.5 day</td>
+  <td>P3</td>
+</tr>
+<tr>
+  <td>IMPL-005</td>
+  <td>Resiliency</td>
+  <td>Moderate</td>
+  <td>2 days</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>VAL-001</td>
+  <td>Validation</td>
+  <td>High</td>
+  <td>0.5 day</td>
+  <td>P1</td>
+</tr>
+<tr>
+  <td>VAL-002</td>
+  <td>Validation</td>
+  <td>Moderate</td>
+  <td>1 day</td>
+  <td>P2</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Total Critical Gaps:</strong> 2 | <strong>Total Gaps:</strong> 11 | <strong>Estimated Total Effort:</strong> ~14 days</p>
+
+                    </div>
+                </section>
+                <section id="mathematics" class="content-section">
+                    <div class="section-content">
+                        <p>This document formalizes the algorithms within the <code>llm_factory</code> module, covering hierarchical configuration resolution, conditional provider instantiation, reflective telemetry interception, model name normalization, and the DI container's provider resolution graph.</p>
+
+<hr />
+
+<h2 id="1-hierarchical-configuration-resolution">1. Hierarchical Configuration Resolution</h2>
+
+<p>The <code>LLMSettings</code> class implements a two-level hierarchical lookup algorithm to resolve LLM configurations based on an abstract "Use Case" category and an optional model key override.</p>
+
+<h3 id="code-verification">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/settings/llm_settings.py">llm_settings.py</a></li>
+<li><strong>Lines:</strong> L14–L28</li>
+</ul>
+
+<h3 id="formalization">Formalization</h3>
+
+<p>Let <span class="math inline">\(U = \{\texttt{creative}, \texttt{evaluation}\}\)</span> be the set of use cases, and <span class="math inline">\(M_u\)</span> be the set of available model keys for each <span class="math inline">\(u \in U\)</span>.</p>
+
+<p>The complete configuration space is a nested dictionary:</p>
+
+<p><span class="math display">\[\mathcal{S} = \{ u \mapsto (\delta_u, \{ k \mapsto (m_k, b_k, a_k, v_k) \mid k \in M_u \}) \mid u \in U \}\]</span></p>
+
+<p>Where:<br />
+- <span class="math inline">\(\delta_u\)</span> = default model key for use case <span class="math inline">\(u\)</span><br />
+- <span class="math inline">\(m_k\)</span> = model identifier string (e.g., <code>"gemini/gemini-1.5-flash"</code>)<br />
+- <span class="math inline">\(b_k\)</span> = optional base URL (<span class="math inline">\(\bot\)</span> for cloud, URL for local)<br />
+- <span class="math inline">\(a_k\)</span> = API key<br />
+- <span class="math inline">\(v_k\)</span> = optional API version</p>
+
+<p>The <strong>resolution function</strong> <span class="math inline">\(\mathcal{R}: U \times M^? \to \texttt{LLMModelConfig}\)</span>:</p>
+
+<p><span class="math display">\[\mathcal{R}(u, k_{opt}) = \begin{cases}
+\mathcal{S}[u].models[k_{opt}] & \text{if } k_{opt} \neq \bot \land k_{opt} \in M_u \\
+\mathcal{S}[u].models[\delta_u] & \text{if } k_{opt} = \bot \\
+\text{raise ValueError} & \text{if } u \notin U \lor k_{opt} \notin M_u
+\end{cases}\]</span></p>
+
+<h3 id="parameter-resolution">Parameter Resolution</h3>
+
+<p>Independently, parameters are resolved per use case:</p>
+
+<p><span class="math display">\[\mathcal{P}(u) = \begin{cases}
+\texttt{llm\_parameters}[u] & \text{if } u \in \texttt{llm\_parameters} \\
+\texttt{LLMParameters}() & \text{otherwise (defaults)}
+\end{cases}\]</span></p>
+
+<p>Default parameter values form the tuple:</p>
+
+<p><span class="math display">\[P_{default} = (\tau = 0.0,\; p_{top} = 1.0,\; T_{max} = 4096,\; \rho_{pres} = 0.0,\; \rho_{freq} = 0.0,\; \sigma = \bot)\]</span></p>
+
+<h3 id="variable-mapping">Variable Mapping</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">LaTeX Symbol</th>
+  <th style="text-align:left;">Code Variable</th>
+  <th style="text-align:left;">File</th>
+  <th style="text-align:left;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(U\)</span></td>
+  <td style="text-align:left;"><code>self.llm</code> keys</td>
+  <td style="text-align:left;"><code>llm_settings.py</code></td>
+  <td style="text-align:left;">L11</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(M_u\)</span></td>
+  <td style="text-align:left;"><code>use_case_config.models</code></td>
+  <td style="text-align:left;"><code>llm_settings.py</code></td>
+  <td style="text-align:left;">L20</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(\delta_u\)</span></td>
+  <td style="text-align:left;"><code>use_case_config.default</code></td>
+  <td style="text-align:left;"><code>llm_settings.py</code></td>
+  <td style="text-align:left;">L19</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(\mathcal{R}\)</span></td>
+  <td style="text-align:left;"><code>get_model_config()</code></td>
+  <td style="text-align:left;"><code>llm_settings.py</code></td>
+  <td style="text-align:left;">L14</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(\mathcal{P}\)</span></td>
+  <td style="text-align:left;"><code>get_parameters()</code></td>
+  <td style="text-align:left;"><code>llm_settings.py</code></td>
+  <td style="text-align:left;">L27</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(\tau\)</span></td>
+  <td style="text-align:left;"><code>temperature</code></td>
+  <td style="text-align:left;"><code>state.py</code></td>
+  <td style="text-align:left;">L11</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(p_{top}\)</span></td>
+  <td style="text-align:left;"><code>top_p</code></td>
+  <td style="text-align:left;"><code>state.py</code></td>
+  <td style="text-align:left;">L12</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(T_{max}\)</span></td>
+  <td style="text-align:left;"><code>max_completion_tokens</code></td>
+  <td style="text-align:left;"><code>state.py</code></td>
+  <td style="text-align:left;">L13</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(\rho_{pres}\)</span></td>
+  <td style="text-align:left;"><code>presence_penalty</code></td>
+  <td style="text-align:left;"><code>state.py</code></td>
+  <td style="text-align:left;">L14</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(\rho_{freq}\)</span></td>
+  <td style="text-align:left;"><code>frequency_penalty</code></td>
+  <td style="text-align:left;"><code>state.py</code></td>
+  <td style="text-align:left;">L15</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="complexity">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(1)\)</span> — Two hash-map lookups.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(|U| \times |M_{max}|)\)</span> for configuration storage.</li>
+</ul>
+
+<hr />
+
+<h2 id="2-conditional-provider-instantiation-factory-method">2. Conditional Provider Instantiation (Factory Method)</h2>
+
+<p>The <code>LLMBuilder.build()</code> method implements a conditional factory that produces LLM instances for either cloud-hosted or locally-served models based on the presence of a <code>base_url</code>.</p>
+
+<h3 id="code-verification-2">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/service/llm_builder.py">llm_builder.py</a></li>
+<li><strong>Lines:</strong> L15–L48</li>
+</ul>
+
+<h3 id="formalization-2">Formalization</h3>
+
+<p>The factory function <span class="math inline">\(\mathcal{F}: \texttt{LLMType} \times M^? \to \texttt{LLMBuildResult}\)</span>:</p>
+
+<p><span class="math display">\[\mathcal{F}(u, k_{opt}) = \left( \mathcal{I}(\mathcal{R}(u, k_{opt}), \mathcal{P}(u)),\; \eta(\mathcal{R}(u, k_{opt}).model) \right)\]</span></p>
+
+<p>Where the instantiation function <span class="math inline">\(\mathcal{I}\)</span> branches on the base URL:</p>
+
+<p><span class="math display">\[\mathcal{I}(c, p) = \begin{cases}
+\texttt{LLM}(api\_key=c.a,\; model=c.m,\; \tau=p.\tau,\; \dots) & \text{if } c.b = \bot \text{ (Cloud)} \\
+\texttt{LLM}(base\_url=c.b,\; api\_key=c.a,\; model=c.m,\; \tau=p.\tau,\; \dots) & \text{if } c.b \neq \bot \text{ (Local)}
+\end{cases}\]</span></p>
+
+<p>And <span class="math inline">\(\eta\)</span> is the model name extraction function (see §4).</p>
+
+<h3 id="provider-classification">Provider Classification</h3>
+
+<p>The conditional logic implicitly classifies providers:</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Provider</th>
+  <th style="text-align:left;"><code>base_url</code></th>
+  <th style="text-align:left;">Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">LM Studio (phi, llama)</td>
+  <td style="text-align:left;"><code>http://localhost:1234/v1</code></td>
+  <td style="text-align:left;">Local</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Azure OpenAI</td>
+  <td style="text-align:left;"><code>https://*.openai.azure.com/</code></td>
+  <td style="text-align:left;">Cloud (with base URL)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Google Gemini</td>
+  <td style="text-align:left;"><span class="math inline">\(\bot\)</span></td>
+  <td style="text-align:left;">Cloud (API-only)</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="pre-factory-privacy-guard">Pre-Factory Privacy Guard</h3>
+
+<p>Both convenience methods <code>build_creative()</code> and <code>build_evaluation()</code> invoke telemetry disabling <strong>before</strong> instantiation:</p>
+
+<p><span class="math display">\[\texttt{build\_creative}(k) = \texttt{disable\_telemetry}() \circ \mathcal{F}(\texttt{CREATIVE}, k)\]</span></p>
+
+<p>This ensures privacy protection is applied even if the caller forgets.</p>
+
+<h3 id="complexity-2">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(1)\)</span> for configuration + <span class="math inline">\(O(T_{LLM})\)</span> for provider initialization (network-bound).</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(1)\)</span> — Single <code>LLM</code> instance.</li>
+</ul>
+
+<hr />
+
+<h2 id="3-reflective-telemetry-interception">3. Reflective Telemetry Interception</h2>
+
+<p>The <code>LLMUtils.disable_telemetry()</code> method employs runtime reflection to dynamically neutralize all callable methods on the external CrewAI <code>Telemetry</code> class, combined with environment variable override.</p>
+
+<h3 id="code-verification-3">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py">llm_utils.py</a></li>
+<li><strong>Lines:</strong> L10–L24</li>
+</ul>
+
+<h3 id="formalization-3">Formalization</h3>
+
+<p>Let <span class="math inline">\(T\)</span> be the <code>Telemetry</code> class object and <span class="math inline">\(\texttt{Attr}(T)\)</span> the set of all its attributes.</p>
+
+<p><strong>Step 1 — Environment Override:</strong></p>
+
+<p><span class="math display">\[\texttt{env}[\texttt{OTEL\_SDK\_DISABLED}] \leftarrow \texttt{"true"}\]</span></p>
+
+<p><strong>Step 2 — Method Replacement:</strong> For each attribute <span class="math inline">\(a \in \texttt{Attr}(T)\)</span>:</p>
+
+<p><span class="math display">\[T'.a = \begin{cases}
+\lambda \texttt{*args, **kwargs}: \bot & \text{if } \texttt{callable}(a) \land \neg\texttt{startswith}(a, \texttt{"\_\_"}) \\
+T.a & \text{otherwise}
+\end{cases}\]</span></p>
+
+<h3 id="properties">Properties</h3>
+
+<ul>
+<li><strong>Completeness:</strong> All non-dunder callable attributes are neutralized — no telemetry method can execute.</li>
+<li><strong>Idempotent:</strong> <span class="math inline">\(\texttt{disable}^n(T) = \texttt{disable}^1(T)\)</span> since replacing a noop with noop is identity.</li>
+<li><strong>Non-Invasive:</strong> No source code modification of CrewAI library required.</li>
+<li><strong>Dual Layer:</strong> Both OTEL environment variable AND method patching provide defense-in-depth.</li>
+</ul>
+
+<h3 id="complexity-3">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(|\texttt{Attr}(T)|)\)</span> — Linear scan of class attributes.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(1)\)</span> — In-place replacement.</li>
+</ul>
+
+<hr />
+
+<h2 id="4-model-name-extraction-prefix-normalization">4. Model Name Extraction (Prefix Normalization)</h2>
+
+<p>The <code>LLMUtils.extract_model_name()</code> method implements a prefix-stripping algorithm to convert provider-qualified model strings into clean display names.</p>
+
+<h3 id="code-verification-4">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py">llm_utils.py</a></li>
+<li><strong>Lines:</strong> L26–L32</li>
+</ul>
+
+<h3 id="formalization-4">Formalization</h3>
+
+<p>Let <span class="math inline">\(\Pi = \{\texttt{"lm\_studio/"}, \texttt{"gemini/"}, \texttt{"open\_ai/"}, \texttt{"azure"}\}\)</span> be the set of known prefixes.</p>
+
+<p>The extraction function <span class="math inline">\(\eta: \Sigma^* \to \Sigma^*\)</span>:</p>
+
+<p><span class="math display">\[\eta(s) = \begin{cases}
+s[|\pi|:] & \text{if } \exists \pi \in \Pi : s.\texttt{startswith}(\pi) \\
+s & \text{otherwise}
+\end{cases}\]</span></p>
+
+<h3 id="examples">Examples</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Input</th>
+  <th style="text-align:left;">Output</th>
+  <th style="text-align:left;">Matched Prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>"lm_studio/phi-4-reasoning"</code></td>
+  <td style="text-align:left;"><code>"phi-4-reasoning"</code></td>
+  <td style="text-align:left;"><code>"lm_studio/"</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>"gemini/gemini-1.5-flash"</code></td>
+  <td style="text-align:left;"><code>"gemini-1.5-flash"</code></td>
+  <td style="text-align:left;"><code>"gemini/"</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>"azure/gpt-4o"</code></td>
+  <td style="text-align:left;"><code>"/gpt-4o"</code></td>
+  <td style="text-align:left;"><code>"azure"</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>"custom-model"</code></td>
+  <td style="text-align:left;"><code>"custom-model"</code></td>
+  <td style="text-align:left;">(none)</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="complexity-4">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(|\Pi|)\)</span> — Linear scan of prefix list (constant, <span class="math inline">\(|\Pi| = 4\)</span>).</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(1)\)</span>.</li>
+</ul>
+
+<hr />
+
+<h2 id="5-pydantic-domain-model-validation">5. Pydantic Domain Model Validation</h2>
+
+<p>The module defines a 4-model Pydantic schema hierarchy that enforces type safety and provides sensible defaults for all configuration values.</p>
+
+<h3 id="code-verification-5">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/domain/state.py">state.py</a> (L10–L34)</li>
+</ul>
+
+<h3 id="formalization-5">Formalization</h3>
+
+<p>The model hierarchy forms a compositional type system:</p>
+
+<p><span class="math display">\[\texttt{LLMSettings} : \{ u \mapsto \texttt{LLMUseCaseConfig} \mid u \in U \} \times \{ u \mapsto \texttt{LLMParameters} \mid u \in U \}\]</span></p>
+
+<p><span class="math display">\[\texttt{LLMUseCaseConfig} : (\delta : str, \; models : \{ k \mapsto \texttt{LLMModelConfig} \})\]</span></p>
+
+<p><span class="math display">\[\texttt{LLMModelConfig} : (model : str, \; base\_url : str^?, \; api\_key : str^?, \; api\_version : str^?)\]</span></p>
+
+<p><span class="math display">\[\texttt{LLMParameters} : (\tau : \mathbb{R}_{[0,2]}, \; p : \mathbb{R}_{[0,1]}, \; T : \mathbb{Z}^+, \; \rho_p : \mathbb{R}, \; \rho_f : \mathbb{R}, \; \sigma : [str]^?)\]</span></p>
+
+<p>The <code>LLMBuildResult</code> is a <code>NamedTuple</code> — an immutable product type:</p>
+
+<p><span class="math display">\[\texttt{LLMBuildResult} = \texttt{LLM} \times \texttt{str}\]</span></p>
+
+<h3 id="validation-guarantees">Validation Guarantees</h3>
+
+<ul>
+<li><strong>Type safety:</strong> Pydantic enforces field types at construction time.</li>
+<li><strong>Default propagation:</strong> Missing <code>LLMParameters</code> fields use sensible defaults (<span class="math inline">\(\tau=0, p=1, T=4096\)</span>).</li>
+<li><strong>Immutability:</strong> <code>LLMBuildResult</code> (NamedTuple) is immutable after construction.</li>
+</ul>
+
+<hr />
+
+<h2 id="6-di-container-provider-graph">6. DI Container Provider Graph</h2>
+
+<p>The <code>LLMContainer</code> implements a declarative DI container with three provider strategies and <strong>pre-wired convenience providers</strong>.</p>
+
+<h3 id="code-verification-6">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py">llm_container.py</a> (L10–L33)</li>
+</ul>
+
+<h3 id="formalization-6">Formalization</h3>
+
+<p>The container's resolution graph <span class="math inline">\(G = (V, E)\)</span>:</p>
+
+<p><span class="math display">\[V = \{\texttt{Config}, \texttt{YamlData}, \texttt{Settings}, \texttt{Builder}, \texttt{Creative}, \texttt{Evaluation}\}\]</span></p>
+
+<p><span class="math display">\[E = \{(\texttt{Config} \to \texttt{YamlData}), (\texttt{YamlData} \to \texttt{Settings}), (\texttt{Settings} \to \texttt{Builder}), (\texttt{Builder} \to \texttt{Creative}), (\texttt{Builder} \to \texttt{Evaluation})\}\]</span></p>
+
+<p>Provider strategies:<br />
+- <strong>Singleton:</strong> <code>yaml_data</code>, <code>llm_settings</code> — Parsed once, shared across all requests.<br />
+- <strong>Factory:</strong> <code>llm_builder</code> — New instance per request.<br />
+- <strong>Pre-wired:</strong> <code>creative_llm</code>, <code>evaluation_llm</code> — Façade providers calling <code>builder.build_creative()</code> / <code>builder.build_evaluation()</code> directly.</p>
+
+<h3 id="resolution-sequence">Resolution Sequence</h3>
+
+<p><span class="math display">\[\texttt{Config.path} \xrightarrow{\text{Singleton}} \texttt{YamlData} \xrightarrow{\text{Singleton}} \texttt{Settings} \xrightarrow{\text{Factory}} \texttt{Builder} \xrightarrow{\text{call}} \texttt{LLMBuildResult}\]</span></p>
+
+<h3 id="complexity-5">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(1)\)</span> for provider resolution (first call includes YAML parse: <span class="math inline">\(O(|F|)\)</span>).</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(|config|)\)</span> for cached settings.</li>
+</ul>
+
+<hr />
+
+<h2 id="algorithm-index">Algorithm Index</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Algorithm</th>
+  <th>Source File</th>
+  <th>Lines</th>
+  <th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td>Hierarchical Config Resolution</td>
+  <td><code>llm_settings.py</code></td>
+  <td>L14–L28</td>
+  <td><span class="math inline">\(O(1)\)</span></td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>Conditional Provider Instantiation</td>
+  <td><code>llm_builder.py</code></td>
+  <td>L15–L48</td>
+  <td><span class="math inline">\(O(1) + O(T_{LLM})\)</span></td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>Reflective Telemetry Interception</td>
+  <td><code>llm_utils.py</code></td>
+  <td>L10–L24</td>
+  <td><span class="math inline">\(O(|\texttt{Attr}(T)|)\)</span></td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>Model Name Prefix Extraction</td>
+  <td><code>llm_utils.py</code></td>
+  <td>L26–L32</td>
+  <td><span class="math inline">\(O(|\Pi|)\)</span></td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>Pydantic Schema Validation</td>
+  <td><code>state.py</code></td>
+  <td>L10–L34</td>
+  <td><span class="math inline">\(O(|fields|)\)</span></td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>DI Container Resolution</td>
+  <td><code>llm_container.py</code></td>
+  <td>L10–L33</td>
+  <td><span class="math inline">\(O(1)\)</span></td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="novelty" class="content-section">
+                    <div class="section-content">
+                        <h2 id="novelty-classification">Novelty Classification</h2>
+
+<p><strong>Status:</strong> MODERATE<br />
+<strong>Confidence:</strong> HIGH</p>
+
+<p>The <code>llm_factory</code> module contributes a <strong>configuration-driven conditional factory</strong> for multi-provider LLM provisioning, a <strong>dual-layer privacy enforcement</strong> mechanism via reflection, and a <strong>use-case-parameterized generation strategy</strong> that tailors LLM behavior to task profiles. While individual patterns are established, their <strong>domain-specific composition</strong> for AI agent systems represents meaningful engineering research.</p>
+
+<hr />
+
+<h2 id="contribution-1-unified-multi-provider-llm-factory-with-conditional-branching">Contribution 1: Unified Multi-Provider LLM Factory with Conditional Branching</h2>
+
+<ul>
+<li><strong>Type:</strong> Architectural Innovation</li>
+<li><strong>Novelty Level:</strong> ⭐⭐⭐ (Moderate-High)</li>
+<li><strong>Claim:</strong> A single configuration-driven factory creates LLM instances for cloud SaaS providers (Gemini, Azure OpenAI) and local inference servers (LM Studio with Phi-4, Llama-3, Gemma, GPT-OSS) <strong>without any client code modification</strong>. The <code>base_url</code> presence/absence drives the branching logic.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/service/llm_builder.py#L15-L48">LLMBuilder.build()</a> — Conditional cloud/local instantiation</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/config/llm_config.yaml.template">llm_config.yaml.template</a> — Configuration for 6 providers</li>
+<li>Conditional Factory formalized in Mathematics §2</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>LangChain:</strong> Requires different class usage (<code>ChatOpenAI</code> vs. <code>ChatOllama</code> vs. <code>ChatGoogleGenerativeAI</code>).</li>
+<li><strong>AutoGen:</strong> Requires per-model configuration blocks with different client classes.</li>
+<li><strong>Amsha:</strong> Uses <strong>one generic <code>LLM</code> class</strong> with <code>base_url</code> injection — zero client code changes.</li>
+</ul></li>
+<li><strong>Quantifiable:</strong> 6 supported model configurations via YAML; 0 lines of client code change to switch providers.</li>
+<li><strong>Publication Angle:</strong> <em>"Zero-Code Provider Switching in Multi-Agent LLM Systems"</em></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-2-dual-layer-runtime-privacy-enforcement">Contribution 2: Dual-Layer Runtime Privacy Enforcement</h2>
+
+<ul>
+<li><strong>Type:</strong> Security / Methodological Innovation</li>
+<li><strong>Novelty Level:</strong> ⭐⭐⭐ (Moderate-High)</li>
+<li><strong>Claim:</strong> A two-layer defense-in-depth strategy for neutralizing third-party telemetry: (1) environment variable override (<code>OTEL_SDK_DISABLED=true</code>) and (2) reflection-based method replacement (monkey patching all callable Telemetry attributes to no-ops).</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py#L16-L24">LLMUtils.disable_telemetry()</a></li>
+<li>Completeness proof in Mathematics §3</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>Standard approach:</strong> Set environment variable only (single layer, can be bypassed).</li>
+<li><strong>Amsha:</strong> Both environment AND reflection patching — comprehensive, non-invasive, idempotent.</li>
+</ul></li>
+<li><strong>Impact:</strong> Enables using closed-source AI libraries (CrewAI) in privacy-sensitive research environments (university, healthcare, government) by ensuring <strong>zero telemetry data leaves the system</strong>.</li>
+<li><strong>Publication Angle:</strong> <em>"Privacy-First LLM Orchestration: Runtime Interception Patterns for Secure AI Research"</em></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-3-use-case-parameterized-generation-strategy">Contribution 3: Use-Case-Parameterized Generation Strategy</h2>
+
+<ul>
+<li><strong>Type:</strong> Methodological</li>
+<li><strong>Novelty Level:</strong> ⭐⭐ (Moderate)</li>
+<li><strong>Claim:</strong> LLM parameters (temperature, top_p, penalties, token limits) are <strong>pre-configured per use case</strong> rather than per model, enabling the same model to exhibit different behavioral profiles for creative generation vs. evaluation tasks.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/domain/state.py#L10-L16">LLMParameters</a> — Typed parameter model</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/config/llm_config.yaml.template#L65-L81">llm_config.yaml.template:L65–L81</a> — Creative (τ=1.0, p=0.9) vs. Evaluation (τ=0.3, p=0.5)</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/domain/llm_type.py">LLMType enum</a> — Type-safe use case selection</li>
+</ul></li>
+<li><strong>Differentiation:</strong> Most frameworks configure parameters per model. Amsha's approach decouples behavioral intent (creative vs. analytical) from model selection, allowing the same model to serve both roles with different parameter profiles.</li>
+<li><p><strong>Pre-configured Profiles:</strong></p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Use Case</th>
+  <th style="text-align:center;">Temperature</th>
+  <th style="text-align:center;">Top-p</th>
+  <th style="text-align:center;">Max Tokens</th>
+  <th style="text-align:center;">Presence Penalty</th>
+  <th style="text-align:center;">Frequency Penalty</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Creative</td>
+  <td style="text-align:center;">1.0</td>
+  <td style="text-align:center;">0.9</td>
+  <td style="text-align:center;">4096</td>
+  <td style="text-align:center;">0.6</td>
+  <td style="text-align:center;">0.4</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Evaluation</td>
+  <td style="text-align:center;">0.3</td>
+  <td style="text-align:center;">0.5</td>
+  <td style="text-align:center;">1000</td>
+  <td style="text-align:center;">0.0</td>
+  <td style="text-align:center;">0.0</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong>Publication Angle:</strong> <em>"Task-Aware LLM Parameter Profiles for Multi-Agent Workflows"</em></p></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-4-declarative-di-with-pre-wired-provider-shortcuts">Contribution 4: Declarative DI with Pre-Wired Provider Shortcuts</h2>
+
+<ul>
+<li><strong>Type:</strong> Architectural</li>
+<li><strong>Novelty Level:</strong> ⭐⭐ (Moderate)</li>
+<li><strong>Claim:</strong> The <code>LLMContainer</code> provides <strong>pre-wired convenience providers</strong> (<code>creative_llm</code>, <code>evaluation_llm</code>) that resolve the entire dependency chain (YAML → Settings → Builder → Build → Result) in a single call, while maintaining full customizability via the <code>llm_builder</code> Factory provider.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/dependency/llm_container.py#L10-L33">LLMContainer</a></li>
+<li>Container resolution graph in Mathematics §6</li>
+</ul></li>
+<li><strong>Differentiation:</strong> Combines three DI strategies (Singleton, Factory, Pre-wired) in a single container with lazy resolution — unusual for AI/ML codebases which typically use global singletons.</li>
+</ul>
+
+<hr />
+
+<h2 id="suggested-empirical-studies">Suggested Empirical Studies</h2>
+
+<h3 id="study-1-provider-latency-comparison">Study 1: Provider Latency Comparison</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Measure TTFT and Total Completion Time across all 6 configured providers</li>
+<li><strong>Method:</strong> 100 standardized prompts per provider, measure p50/p95/p99 latencies</li>
+<li><strong>Hypothesis:</strong> Local LM Studio models have lower TTFT but higher total time than cloud Gemini</li>
+<li><strong>Validates:</strong> Contribution 1</li>
+</ul>
+
+<h3 id="study-2-privacy-enforcement-completeness">Study 2: Privacy Enforcement Completeness</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Capture network traffic with/without telemetry disabling</li>
+<li><strong>Method:</strong> Use Wireshark/tcpdump to verify zero outbound telemetry packets</li>
+<li><strong>Hypothesis:</strong> Dual-layer approach achieves 100% telemetry suppression</li>
+<li><strong>Validates:</strong> Contribution 2</li>
+</ul>
+
+<h3 id="study-3-parameter-profile-impact-on-agent-quality">Study 3: Parameter Profile Impact on Agent Quality</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Run identical agent tasks with creative vs. evaluation parameters</li>
+<li><strong>Method:</strong> Measure output quality (coherence, accuracy) via automated metrics</li>
+<li><strong>Hypothesis:</strong> Creative profile produces more diverse outputs; evaluation produces more consistent ones</li>
+<li><strong>Validates:</strong> Contribution 3</li>
+</ul>
+
+<h3 id="study-4-multi-provider-cost-quality-frontier">Study 4: Multi-Provider Cost-Quality Frontier</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Plot cost per 1k tokens vs. output quality score for each provider</li>
+<li><strong>Method:</strong> Use standardized eval benchmark + provider pricing data</li>
+<li><strong>Validates:</strong> Contributions 1 &amp; 3</li>
+</ul>
+
+<hr />
+
+<h2 id="publication-strategy">Publication Strategy</h2>
+
+<h3 id="recommended-paper-titles">Recommended Paper Titles</h3>
+
+<ol>
+<li><em>"LLM Factory: A Configuration-Driven Framework for Privacy-First Multi-Provider AI Agent Systems"</em></li>
+<li><em>"Zero-Code Provider Switching: Design Patterns for Portable LLM Orchestration"</em></li>
+<li><em>"Privacy-First LLM Orchestration: Runtime Interception Patterns for Secure AI Research"</em></li>
+</ol>
+
+<h3 id="target-venues">Target Venues</h3>
+
+<ul>
+<li><strong>Journal:</strong> Software: Practice and Experience (SPE) — Engineering patterns focus</li>
+<li><strong>Conference:</strong> AAAI (Safety &amp; Privacy track) — Privacy enforcement contribution</li>
+<li><strong>Workshop:</strong> Foundation Model Systems @ MLSys — Practical systems track</li>
+</ul>
+
+<hr />
+
+<h2 id="novelty-summary-matrix">Novelty Summary Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">Contribution</th>
+  <th style="text-align:center;">Novelty</th>
+  <th style="text-align:left;">Type</th>
+  <th style="text-align:center;">Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;">Unified Multi-Provider Factory</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+  <td style="text-align:left;">Architectural</td>
+  <td style="text-align:center;">Mathematics §2</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;">Dual-Layer Privacy Enforcement</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+  <td style="text-align:left;">Security/Methodological</td>
+  <td style="text-align:center;">Mathematics §3</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;">Use-Case Parameter Profiles</td>
+  <td style="text-align:center;">⭐⭐</td>
+  <td style="text-align:left;">Methodological</td>
+  <td style="text-align:center;">Config YAML</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;">Pre-Wired DI Shortcuts</td>
+  <td style="text-align:center;">⭐⭐</td>
+  <td style="text-align:left;">Architectural</td>
+  <td style="text-align:center;">Mathematics §6</td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="summary" class="content-section">
+                    <div class="section-content">
+                        <h2 id="overview">Overview</h2>
+
+<p>The <code>llm_factory</code> module is the <strong>shared LLM provisioning service</strong> of the Amsha framework. With <strong>14 Python files</strong> across <strong>6 sub-packages</strong>, it implements a configuration-driven conditional factory that abstracts multi-provider complexity (6 providers: Cloud SaaS, Local Inference, Azure) behind a unified builder interface, enforces runtime privacy through dual-layer telemetry interception, and provides pre-wired DI convenience providers.</p>
+
+<hr />
+
+<h2 id="key-findings">Key Findings</h2>
+
+<h3 id="1-mathematical-foundation-6-algorithms-formalized">1. Mathematical Foundation (6 Algorithms Formalized)</h3>
+
+<ul>
+<li><strong>Hierarchical Config Resolution:</strong> Two-level lookup <span class="math inline">\(\mathcal{R}(u, k_{opt})\)</span> with default propagation.</li>
+<li><strong>Conditional Provider Instantiation:</strong> Cloud/Local branching based on <code>base_url</code> presence.</li>
+<li><strong>Reflective Telemetry Interception:</strong> Dual-layer defense — environment variable + method replacement.</li>
+<li><strong>Model Name Extraction:</strong> Prefix-stripping <span class="math inline">\(\eta(s)\)</span> across 4 provider prefixes.</li>
+<li><strong>Pydantic Schema Validation:</strong> 4-model type hierarchy with typed defaults.</li>
+<li><strong>DI Container Resolution:</strong> Singleton → Factory → Pre-wired provider chain.</li>
+</ul>
+
+<h3 id="2-architecture-design-6-patterns-6-diagrams">2. Architecture &amp; Design (6 Patterns, 6 Diagrams)</h3>
+
+<ul>
+<li><strong>Patterns:</strong> Conditional Factory, Configuration Object, Strategy, Monkey Patching, DI, Immutable Result.</li>
+<li><strong>Structure:</strong> Settings → Service → DI → Consumer integration.</li>
+<li><strong>Diagrams:</strong> 6 Mermaid diagrams: Layered Architecture, Class, Full Lifecycle Sequence, Provider Classification, DI Resolution Graph, Cross-Module Integration.</li>
+<li><strong>Cross-Module:</strong> Consumed by <code>crew_forge</code> (DB + File backends) and <code>crew_gen</code>.</li>
+</ul>
+
+<h3 id="3-research-gaps-11-identified">3. Research Gaps (11 Identified)</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Severity</th>
+  <th style="text-align:center;">Count</th>
+  <th style="text-align:left;">Key Items</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Critical ⛔</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;">Missing unit tests (<code>.pyc</code> caches suggest deleted tests), no latency benchmarks</td>
+</tr>
+<tr>
+  <td style="text-align:left;">High</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;">No telemetry verification test</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Moderate</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:left;">Hardcoded prefixes, no health checks, no fallback logic, no parameter justification, no cost analysis, no YAML schema validation</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Minor</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;">Azure prefix bug (<code>"azure"</code> → <code>"azure/"</code>), streaming always hardcoded</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Notable Bug:</strong> Azure prefix extraction yields incorrect result (<code>"/gpt-4o"</code> instead of <code>"gpt-4o"</code>).<br />
+<strong>Total Estimated Effort:</strong> ~14 days to close all gaps.</p>
+
+<h3 id="4-novelty-assessment">4. Novelty Assessment</h3>
+
+<ul>
+<li><strong>Status:</strong> <strong>MODERATE</strong> (upgraded from INCREMENTAL)</li>
+<li><strong>4 Contributions Identified:</strong>
+<ol>
+<li>⭐⭐⭐ Unified Multi-Provider Factory with Zero-Code Switching</li>
+<li>⭐⭐⭐ Dual-Layer Runtime Privacy Enforcement</li>
+<li>⭐⭐ Use-Case-Parameterized Generation Strategy</li>
+<li>⭐⭐ Declarative DI with Pre-Wired Provider Shortcuts</li>
+</ol></li>
+<li><strong>Publication Angle:</strong> <em>"LLM Factory: Privacy-First Multi-Provider AI Agent Provisioning"</em></li>
+<li><strong>Target Venues:</strong> SPE Journal, AAAI Safety track, MLSys Workshop</li>
+</ul>
+
+<hr />
+
+<h2 id="module-statistics">Module Statistics</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Total Python Files</td>
+  <td style="text-align:left;">14</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sub-Packages</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Domain Models (Pydantic)</td>
+  <td style="text-align:left;">4</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Design Patterns</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Formalized Algorithms</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Architecture Diagrams</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Identified Research Gaps</td>
+  <td style="text-align:left;">11</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Novel Contributions</td>
+  <td style="text-align:left;">4</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Supported Providers</td>
+  <td style="text-align:left;">6</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Consumer Modules</td>
+  <td style="text-align:left;">3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Unit Test Files</td>
+  <td style="text-align:left;">0 ⚠️ (<code>.pyc</code> caches suggest prior tests existed)</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The <code>llm_factory</code> module delivers significant practical value as the centralized LLM provisioning layer consumed across the framework. Its dual-layer privacy enforcement and zero-code provider switching are the strongest contributions for the paper. The missing tests (with evidence of prior test existence via <code>.pyc</code> caches) and the Azure prefix bug are the most urgent fixes. The paper should emphasize <strong>privacy-first design</strong> (Contribution 2) and the <strong>configuration-driven factory</strong> (Contribution 1) as the key technical differentiators from LangChain, AutoGen, and vanilla CrewAI.</p>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Toggle
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    
+    const btn = document.querySelector('.theme-toggle .text');
+    btn.textContent = newTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+    
+    const icon = document.querySelector('.theme-toggle .icon');
+    icon.textContent = newTheme === 'light' ? '🌙' : '☀️';
+    
+    localStorage.setItem('theme', newTheme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if (savedTheme === 'dark') {
+    document.querySelector('.theme-toggle .text').textContent = 'Light Mode';
+    document.querySelector('.theme-toggle .icon').textContent = '☀️';
+}
+
+// Smooth scrolling for navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        // Smooth scroll to section
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+    });
+});
+
+// Set first link as active on load
+document.querySelector('.nav-link')?.classList.add('active');
+
+// Export PDF function (placeholder)
+function exportPDF() {
+    window.print();
+}
+
+// Intersection Observer for active nav highlighting
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${id}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.content-section').forEach(section => {
+    observer.observe(section);
+});
+
+
+        // Initialize Mermaid
+        document.addEventListener('DOMContentLoaded', () => {
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+        mermaid.initialize({ startOnLoad: true, theme: theme });
+        });
+    </script>
+</body>
+
+</html>

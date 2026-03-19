@@ -1,0 +1,1327 @@
+{
+    "privacy_verification": {
+        "openai/gpt-oss-120b:free": {
+            "complex_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "simple_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "medium_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            }
+        },
+        "azure/gpt-5-mini": {
+            "simple_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "complex_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "medium_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            }
+        },
+        "gemini-2.5-flash": {
+            "complex_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "medium_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "simple_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            }
+        },
+        "azure/gpt-4o-mini": {
+            "simple_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "medium_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            },
+            "complex_task": {
+                "telemetry": {
+                    "otel_disabled": true
+                },
+                "privacy": {
+                    "tier": "unknown",
+                    "air_gapped": false
+                }
+            }
+        }
+    },
+    "evaluation_pipeline": {
+        "azure/gpt-5-mini": {
+            "simple_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "medium_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "complex_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            }
+        },
+        "gemini-2.5-flash": {
+            "simple_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "medium_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "complex_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            }
+        },
+        "azure/gpt-4o-mini": {
+            "complex_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "medium_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "simple_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            }
+        },
+        "openai/gpt-oss-120b:free": {
+            "simple_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "complex_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            },
+            "medium_task": {
+                "sanitization": {
+                    "total_cases": 5,
+                    "standard_loads_success_rate": 0.2,
+                    "amsha_cleaner_recovery_rate": 1.0,
+                    "cases": {
+                        "valid": {
+                            "std_loads_success": true,
+                            "amsha_cleaner_success": true
+                        },
+                        "markdown_fences": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_text": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "concatenated": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        },
+                        "stray_quotes": {
+                            "std_loads_success": false,
+                            "amsha_cleaner_success": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "end_to_end": {
+        "openai/gpt-oss-120b:free": {
+            "simple_task": {
+                "pipeline_timing": {
+                    "total_time_s": 0.14,
+                    "init_time_s": 0.0,
+                    "initialized_successfully": true,
+                    "execution_failed": true,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "complex_task": {
+                "pipeline_timing": {
+                    "total_time_s": 0.13,
+                    "init_time_s": 0.0,
+                    "initialized_successfully": true,
+                    "execution_failed": true,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "medium_task": {
+                "pipeline_timing": {
+                    "total_time_s": 0.14,
+                    "init_time_s": 0.0,
+                    "initialized_successfully": true,
+                    "execution_failed": true,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            }
+        },
+        "azure/gpt-5-mini": {
+            "complex_task": {
+                "pipeline_timing": {
+                    "total_time_s": 19.84,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 19.84,
+                    "tokens_used": 2080,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "{\"scientificConcept\":\"The Water Cycle\",\"coreConcept\":\"The water cycle is how water moves around Earth, changing between liquid, vapor, and ice and traveling through the sky, land, and oceans. It is powered by the Sun and helps plants grow, fills rivers, and keeps weather and life working together.\","
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "simple_task": {
+                "pipeline_timing": {
+                    "total_time_s": 21.12,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 21.11,
+                    "tokens_used": 1892,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "Quick fox jumps over lazy dog near river; birds chirp."
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "medium_task": {
+                "pipeline_timing": {
+                    "total_time_s": 12.42,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 12.41,
+                    "tokens_used": 1516,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "1. Headline: AquaPure: Clean Water, Confident You\n   Body: Triple-stage filtration with activated carbon, UV-C, and ceramic is lab-tested to remove 99.9% of waterborne pathogens. The 750ml BPA-free Tritan bottle with a 12-hour UV-C battery fits urban professionals on the go.\n   Call-to-action: Stay "
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            }
+        },
+        "azure/gpt-4o-mini": {
+            "medium_task": {
+                "pipeline_timing": {
+                    "total_time_s": 3.5,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 3.49,
+                    "tokens_used": 624,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "1. **Stay Hydrated, Stay Healthy**  \n   Experience the power of AquaPure Filter Bottle, designed for urban professionals who understand the importance of pure water. With lab-tested filtration technology that removes 99.9% of waterborne pathogens, stay refreshed and protected all day long.  \n   **Ge"
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "complex_task": {
+                "pipeline_timing": {
+                    "total_time_s": 8.36,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 8.36,
+                    "tokens_used": 1249,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The water cycle is the continuous movement of water on, above, and below the surface of the Earth. It involves processes like evaporation, condensation, and precipitation, helping to circulate water throughout the environment.\",\n    \""
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "simple_task": {
+                "pipeline_timing": {
+                    "total_time_s": 0.72,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 0.71,
+                    "tokens_used": 280,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "Quick fox jumps over lazy dog by the sunny river."
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            }
+        },
+        "gemini-2.5-flash": {
+            "simple_task": {
+                "pipeline_timing": {
+                    "total_time_s": 3.35,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 3.34,
+                    "tokens_used": 844,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "Quick brown fox jumps over lazy dog near river bank."
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "medium_task": {
+                "pipeline_timing": {
+                    "total_time_s": 5.01,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 5.0,
+                    "tokens_used": 1424,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "1. **Headline**: Pure Water On-The-Go for Urban Professionals.\n**Body Text**: Stay hydrated and healthy with the AquaPure Filter Bottle, featuring triple-stage filtration for 99.9% pathogen removal. Its durable, BPA-free Tritan body and 750ml capacity are perfect for your busy day.\n**Call-to-Action*"
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            },
+            "complex_task": {
+                "pipeline_timing": {
+                    "total_time_s": 12.5,
+                    "init_time_s": 0.0,
+                    "exec_time_s": 12.49,
+                    "tokens_used": 3251,
+                    "initialized_successfully": true,
+                    "crew_output_preview": "Thought: I have carefully reviewed the instructions and the provided dataset content. I need to generate a JSON object representing a knowledge base about \"The Water Cycle\" for children aged 8-12. I will ensure all schema requirements and constraints, such as the exact number of actors, steps, and p"
+                },
+                "comparative": {
+                    "amsha_loc": 1500,
+                    "crewai_loc": 2200
+                }
+            }
+        }
+    },
+    "crew_construction": {
+        "openai/gpt-oss-120b:free": {
+            "simple_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0052
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0028,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "medium_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0047
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0027,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "complex_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0042
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0027,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            }
+        },
+        "gemini-2.5-flash": {
+            "simple_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0051
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0028,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "medium_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0047
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0024,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "complex_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0036
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0022,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            }
+        },
+        "azure/gpt-5-mini": {
+            "medium_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0041
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0023,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "complex_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0039
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0023,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "simple_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0052
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0026,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            }
+        },
+        "azure/gpt-4o-mini": {
+            "simple_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0052
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0109,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "complex_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0069
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0033,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            },
+            "medium_task": {
+                "initialization": {
+                    "success": true,
+                    "init_time_s": 0.0076
+                },
+                "assembly": {
+                    "success": true,
+                    "assembly_time_s": 0.0039,
+                    "agents_built": 1,
+                    "tasks_built": 1
+                }
+            }
+        }
+    },
+    "llm_performance": {
+        "openai/gpt-oss-120b:free": {
+            "simple_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 0.85,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'message': 'No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy', 'code': 404}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 0.13,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy",
+                    "output_preview": ""
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 0.13,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy",
+                    "output_preview": ""
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": -0.72,
+                    "amsha_crew_overhead_s": 0.0
+                }
+            },
+            "complex_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 0.37,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'message': 'No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy', 'code': 404}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 0.05,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy",
+                    "output_preview": ""
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 0.13,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy",
+                    "output_preview": ""
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": -0.32,
+                    "amsha_crew_overhead_s": 0.08
+                }
+            },
+            "medium_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 0.08,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'message': 'No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy', 'code': 404}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 0.04,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy",
+                    "output_preview": ""
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 0.13,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy",
+                    "output_preview": ""
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": -0.04,
+                    "amsha_crew_overhead_s": 0.09
+                }
+            }
+        },
+        "azure/gpt-5-mini": {
+            "simple_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 1.56,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 4.1,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "Fox leaps over lazy dog by river during sunny afternoon."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 11.52,
+                    "tokens_in": 0,
+                    "tokens_out": 995,
+                    "error": null,
+                    "output_preview": "Quick fox jumps over dog near river as birds chirp."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 2.54,
+                    "amsha_crew_overhead_s": 7.42
+                }
+            },
+            "complex_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 1.16,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 14.11,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "{\n  \"scientificConcept\": \"The Water Cycle\",\n  \"coreConcept\": \"The water cycle is how water moves around Earth in a continuous loop. Water changes between liquid, gas, and sometimes ice, traveling thro..."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 17.95,
+                    "tokens_in": 0,
+                    "tokens_out": 2154,
+                    "error": null,
+                    "output_preview": "{\"scientificConcept\":\"The Water Cycle\",\"coreConcept\":\"The water cycle is how water moves around Earth in a repeating loop: it heats up, rises, cools, and falls. This cycle keeps water moving through t..."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 12.95,
+                    "amsha_crew_overhead_s": 3.84
+                }
+            },
+            "medium_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 1.16,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 11.77,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "1.\nPure Water, Confident Commute\nAquaPure Filter Bottle combines triple-stage filtration\u2014activated carbon, UV-C and ceramic\u2014with a BPA-free Tritan body and a 750ml capacity for everyday use. Lab-teste..."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 18.27,
+                    "tokens_in": 0,
+                    "tokens_out": 1851,
+                    "error": null,
+                    "output_preview": "1. Headline: AquaPure Clean Water, Anywhere\n   Body: Designed for busy urban professionals, the AquaPure Filter Bottle combines triple-stage filtration\u2014activated carbon, UV-C, and ceramic\u2014with a BPA-f..."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 10.61,
+                    "amsha_crew_overhead_s": 6.5
+                }
+            }
+        },
+        "gemini-2.5-flash": {
+            "medium_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 6.17,
+                    "tokens_in": 216,
+                    "tokens_out": 280,
+                    "error": null,
+                    "output_preview": "Here are 3 variations of ad copy for the AquaPure Filter Bottle:\n\n1.  **Headline:** Pure Water, Anywhere. Your Daily Essential.\n    **Body Text:** Stay hydrated and healthy with the AquaPure Filter Bo..."
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 6.93,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "Here are 3 variations of ad copy for the AquaPure Filter Bottle:\n\n1.  **Headline:** Pure Hydration On-The-Go. Stay Healthy.\n    **Body:** Elevate your daily hydration with the AquaPure Filter Bottle, ..."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 5.63,
+                    "tokens_in": 0,
+                    "tokens_out": 1521,
+                    "error": null,
+                    "output_preview": "1. **Headline:** Pure Water, Anywhere. Your Urban Essential.\n**Body:** Stay hydrated and healthy with the AquaPure Filter Bottle, featuring lab-tested triple-stage filtration that eliminates 99.9% of ..."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 0.76,
+                    "amsha_crew_overhead_s": -1.3
+                }
+            },
+            "complex_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 11.23,
+                    "tokens_in": 380,
+                    "tokens_out": 823,
+                    "error": null,
+                    "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The Water Cycle is like Earth's giant recycling system for water! It's how water moves all around our planet, from the ground to the s..."
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 12.67,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The Water Cycle is like Earth's giant recycling system for water! It's how water moves all around our planet, from oceans to the sky a..."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 13.09,
+                    "tokens_in": 0,
+                    "tokens_out": 3623,
+                    "error": null,
+                    "output_preview": "{\"scientificConcept\": \"The Water Cycle\", \"coreConcept\": \"The Water Cycle is like Earth's big recycling system for water! Water is always moving all around our planet, changing from liquid to gas and b..."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 1.44,
+                    "amsha_crew_overhead_s": 0.42
+                }
+            },
+            "simple_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 5.13,
+                    "tokens_in": 38,
+                    "tokens_out": 11,
+                    "error": null,
+                    "output_preview": "Quick brown fox jumps over lazy dog near river bank."
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 2.24,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "Quick brown fox jumps over lazy dog near river bank."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 8.05,
+                    "tokens_in": 0,
+                    "tokens_out": 1860,
+                    "error": null,
+                    "output_preview": "Quick brown fox jumps over lazy dog near river bank."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": -2.89,
+                    "amsha_crew_overhead_s": 5.81
+                }
+            }
+        },
+        "azure/gpt-4o-mini": {
+            "medium_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 1.0,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 3.28,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "1. **Stay Hydrated, Stay Healthy**\n   Eliminate the worry of waterborne pathogens with the AquaPure Filter Bottle, featuring triple-stage filtration tested to remove 99.9% of contaminants. Crafted fro..."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 2.67,
+                    "tokens_in": 0,
+                    "tokens_out": 627,
+                    "error": null,
+                    "output_preview": "1. **Headline**: Pure Hydration Anywhere You Go  \n   **Body text**: Discover the AquaPure Filter Bottle, designed for urban professionals who prioritize health. With triple-stage filtration, it guaran..."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 2.28,
+                    "amsha_crew_overhead_s": -0.61
+                }
+            },
+            "simple_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 1.22,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 1.6,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "Fox jumps over lazy dog by river on sunny afternoon."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 1.12,
+                    "tokens_in": 0,
+                    "tokens_out": 279,
+                    "error": null,
+                    "output_preview": "The quick brown fox jumps over the lazy dog."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 0.38,
+                    "amsha_crew_overhead_s": -0.48
+                }
+            },
+            "complex_task": {
+                "tier1_native": {
+                    "success": true,
+                    "latency_s": 1.09,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+                    "output_preview": ""
+                },
+                "tier2_amsha_llm": {
+                    "success": true,
+                    "latency_s": 8.09,
+                    "tokens_in": 0,
+                    "tokens_out": 0,
+                    "error": null,
+                    "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The water cycle is the journey water takes as it moves from the ground to the sky and back again. It includes processes like evaporati..."
+                },
+                "tier3_amsha_crew": {
+                    "success": true,
+                    "latency_s": 8.38,
+                    "tokens_in": 0,
+                    "tokens_out": 1259,
+                    "error": null,
+                    "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The water cycle is the continuous movement of water on, above, and below the surface of the Earth. It includes processes like evaporat..."
+                },
+                "analysis": {
+                    "amsha_llm_overhead_s": 7.0,
+                    "amsha_crew_overhead_s": 0.29
+                }
+            }
+        }
+    },
+    "monitoring_observability": {
+        "azure/gpt-5-mini": {
+            "medium_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 20.49
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 17.62
+                },
+                "system_ram_delta_mb": 5.29,
+                "monitor_overhead_s": 2.87
+            },
+            "simple_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 17.34
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 28.1
+                },
+                "system_ram_delta_mb": 9.6,
+                "monitor_overhead_s": -10.76
+            },
+            "complex_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 16.66
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 21.57
+                },
+                "system_ram_delta_mb": 6.1,
+                "monitor_overhead_s": -4.91
+            }
+        },
+        "gemini-2.5-flash": {
+            "complex_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 10.33
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 11.39
+                },
+                "system_ram_delta_mb": 0.29,
+                "monitor_overhead_s": -1.06
+            },
+            "simple_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 1.71
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 7.25
+                },
+                "system_ram_delta_mb": 0.12,
+                "monitor_overhead_s": -5.54
+            },
+            "medium_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 5.45
+                },
+                "unmonitored_execution": {
+                    "success": false,
+                    "error": "Failed to get streaming response: litellm.RateLimitError: litellm.RateLimitError: VertexAIException - b'{\\n  \"error\": {\\n    \"code\": 429,\\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\\\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\\\\nPlease retry in 39.745412819s.\",\\n    \"status\": \"RESOURCE_EXHAUSTED\",\\n    \"details\": [\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\\n        \"links\": [\\n          {\\n            \"description\": \"Learn more about Gemini API quotas\",\\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\\n          }\\n        ]\\n      },\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\\n        \"violations\": [\\n          {\\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\\n            \"quotaDimensions\": {\\n              \"location\": \"global\",\\n              \"model\": \"gemini-2.5-flash\"\\n            },\\n            \"quotaValue\": \"5\"\\n          }\\n        ]\\n      },\\n      {\\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\\n        \"retryDelay\": \"39s\"\\n      }\\n    ]\\n  }\\n}\\n'"
+                },
+                "system_ram_delta_mb": 1.36
+            }
+        },
+        "azure/gpt-4o-mini": {
+            "simple_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 0.68
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 0.69
+                },
+                "system_ram_delta_mb": 0.51,
+                "monitor_overhead_s": -0.01
+            },
+            "medium_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 2.89
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 2.77
+                },
+                "system_ram_delta_mb": 1.41,
+                "monitor_overhead_s": 0.12
+            },
+            "complex_task": {
+                "monitored_execution": {
+                    "success": true,
+                    "execution_time_s": 8.4
+                },
+                "unmonitored_execution": {
+                    "success": true,
+                    "execution_time_s": 9.39
+                },
+                "system_ram_delta_mb": 6.81,
+                "monitor_overhead_s": -0.99
+            }
+        },
+        "openai/gpt-oss-120b:free": {
+            "simple_task": {
+                "monitored_execution": {
+                    "success": false,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "unmonitored_execution": {
+                    "success": false,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "system_ram_delta_mb": 0.41
+            },
+            "complex_task": {
+                "monitored_execution": {
+                    "success": false,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "unmonitored_execution": {
+                    "success": false,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "system_ram_delta_mb": 0.07
+            },
+            "medium_task": {
+                "monitored_execution": {
+                    "success": false,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "unmonitored_execution": {
+                    "success": false,
+                    "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+                },
+                "system_ram_delta_mb": 0.32
+            }
+        }
+    }
+}

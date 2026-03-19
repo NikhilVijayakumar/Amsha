@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Report</title>
+    <style>
+        /* Modern Dashboard Layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --accent: #667eea;
+    --accent-dark: #5568d3;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --sidebar-width: 260px;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-tertiary: #4a5568;
+    --text-primary: #f7fafc;
+    --text-secondary: #cbd5e0;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-primary);
+    border-right: 1px solid var(--bg-tertiary);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: var(--bg-secondary);
+}
+
+.grade-badge.grade-a { background: var(--success); color: white; }
+.grade-badge.grade-b { background: var(--info); color: white; }
+.grade-badge.grade-c { background: var(--warning); color: white; }
+.grade-badge.grade-d,
+.grade-badge.grade-f { background: var(--danger); color: white; }
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.nav-link.active {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    border-right: 3px solid var(--accent);
+}
+
+.nav-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.theme-toggle {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    background: var(--bg-primary);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.status-complete { background: #d1fae5; color: #065f46; }
+.status-badge.status-in-progress { background: #fef3c7; color: #92400e; }
+.status-badge.status-critical { background: #fee2e2; color: #991b1b; }
+
+.topbar-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Content */
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1400px;
+}
+
+.content-section {
+    margin-bottom: 3rem;
+}
+
+/* Metric Cards Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.card-green .card-icon { background: #d1fae5; }
+.card-red .card-icon { background: #fee2e2; }
+.card-yellow .card-icon { background: #fef3c7; }
+.card-blue .card-icon { background: #dbeafe; }
+
+.card-content {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Section Content Styling */
+.section-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.section-content h2 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.section-content h3 {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.section-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-content th {
+    background: var(--accent);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.section-content td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.section-content tr:last-child td {
+    border-bottom: none;
+}
+
+.section-content tr:hover {
+    background: var(--bg-secondary);
+}
+
+.section-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-md);
+}
+
+.section-content pre {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.section-content code {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.section-content ul,
+.section-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.section-content li {
+    margin: 0.5rem 0;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar,
+    .topbar {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metric-card {
+        break-inside: avoid;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for diagram rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <!-- MathJax for LaTeX mathematical equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">Nibandha</h1>
+                <div class="grade-badge grade-n/a">
+                    N/A
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dependencies" class="nav-link" data-section="dependencies">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Dependencies</span>
+                </a>
+                <a href="#interactions" class="nav-link" data-section="interactions">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Interactions</span>
+                </a>
+                <a href="#novelty" class="nav-link" data-section="novelty">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Novelty</span>
+                </a>
+                <a href="#patterns" class="nav-link" data-section="patterns">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Patterns</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="icon">🌙</span>
+                    <span class="text">Dark Mode</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <span class="status-badge status-complete">
+                        Complete
+                    </span>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <span>📄 Print</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportPDF()">
+                        <span>📥 Export PDF</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <section id="dependencies" class="content-section">
+                    <div class="section-content">
+                        <h1 id="system-dependency-analysis">System Dependency Analysis</h1>
+
+<h2 id="1-dependency-graph-code-verified">1. Dependency Graph (Code-Verified)</h2>
+
+<p>Every edge verified against actual Python imports. The system has <strong>5 modules</strong> (4 analyzed + <code>crew_gen</code>) plus a <strong>shared utility layer</strong>.</p>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef core fill:#ff9999,stroke:#333,stroke-width:2px;
+    classDef support fill:#99ccff,stroke:#333,stroke-width:2px;
+    classDef shared fill:#ffffcc,stroke:#333,stroke-width:2px;
+    classDef external fill:#ddd,stroke:#666,stroke-width:1px;
+
+    subgraph "Core Layer (High Efferent Coupling)"
+        CF["crew_forge<br/>56 files | Ce=3"]:::core
+    end
+
+    subgraph "Support Layer (Low/Zero Efferent Coupling)"
+        LLM["llm_factory<br/>14 files | Ce=0 | Ca=2"]:::support
+        MON["crew_monitor<br/>7 files | Ce=0 | Ca=1"]:::support
+        OUT["output_process<br/>10 files | Ce=1 ⚠️ | Ca=0"]:::support
+    end
+
+    subgraph "Consumer Layer"
+        GEN["crew_gen<br/>Ce=1"]:::support
+    end
+
+    subgraph "Shared Foundation Layer"
+        Utils["amsha.utils<br/>(YamlUtils, JsonUtils, Utf8Utils)<br/>Ca=4"]:::shared
+    end
+
+    subgraph "External Dependencies"
+        CrewAI["crewai"]:::external
+        PSUtil["psutil"]:::external
+        PyNVML["pynvml"]:::external
+        Pandas["pandas"]:::external
+        NumPy["numpy"]:::external
+        Pydantic["pydantic"]:::external
+        DI["dependency-injector"]:::external
+        MongoDB["pymongo"]:::external
+        Docling["docling"]:::external
+    end
+
+    CF -->|"LLMContainer, LLMType<br/>(4 imports)"| LLM
+    CF -->|"CrewPerformanceMonitor<br/>(2 imports)"| MON
+    GEN -->|"LLMType<br/>(2 imports)"| LLM
+    OUT -.->|"CrewParser ⚠️<br/>(1 import, CIRCULAR)"| CF
+
+    CF --> Utils
+    LLM --> Utils
+    MON --> Utils
+    OUT --> Utils
+
+    CF --> CrewAI
+    CF --> MongoDB
+    CF --> Docling
+    CF --> Pydantic
+    CF --> DI
+    LLM --> CrewAI
+    LLM --> Pydantic
+    LLM --> DI
+    MON --> PSUtil
+    MON --> PyNVML
+    MON --> Pandas
+    OUT --> NumPy
+    OUT --> Pandas
+</div>
+
+<hr />
+
+<h2 id="2-coupling-metrics">2. Coupling Metrics</h2>
+
+<h3 id="21-instability-analysis">2.1 Instability Analysis</h3>
+
+<p>Using Robert Martin's Instability metric: <span class="math inline">\(I = \frac{C_e}{C_a + C_e}\)</span> where:<br />
+- <span class="math inline">\(C_e\)</span> = Efferent coupling (outgoing dependencies)<br />
+- <span class="math inline">\(C_a\)</span> = Afferent coupling (incoming dependencies)<br />
+- <span class="math inline">\(I = 0\)</span> = maximally stable (depended upon); <span class="math inline">\(I = 1\)</span> = maximally unstable (depends on others)</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:center;"><span class="math inline">\(C_e\)</span></th>
+  <th style="text-align:center;"><span class="math inline">\(C_a\)</span></th>
+  <th style="text-align:center;"><span class="math inline">\(I\)</span></th>
+  <th style="text-align:left;">Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>crew_forge</code></td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:center;">0.75</td>
+  <td style="text-align:left;"><strong>Unstable</strong> — Main consumer, changes propagate</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>llm_factory</code></td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:center;">0.00</td>
+  <td style="text-align:left;"><strong>Maximally Stable</strong> — Pure provider</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>crew_monitor</code></td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:center;">0.00</td>
+  <td style="text-align:left;"><strong>Maximally Stable</strong> — Pure provider</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>output_process</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">1.00</td>
+  <td style="text-align:left;"><strong>Maximally Unstable</strong> — Consumer only</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>amsha.utils</code></td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">0.00</td>
+  <td style="text-align:left;"><strong>Maximally Stable</strong> — Foundation</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="22-dependency-direction-analysis">2.2 Dependency Direction Analysis</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+quadrantChart
+    title Module Stability vs Abstractness
+    x-axis "Concrete" --> "Abstract"
+    y-axis "Unstable" --> "Stable"
+    quadrant-1 Zone of Uselessness
+    quadrant-2 Zone of Stability
+    quadrant-3 Zone of Pain
+    quadrant-4 Main Sequence
+    amsha.utils: [0.8, 0.95]
+    llm_factory: [0.4, 0.95]
+    crew_monitor: [0.3, 0.95]
+    crew_forge: [0.2, 0.25]
+    output_process: [0.1, 0.05]
+</div>
+
+<hr />
+
+<h2 id="3-circular-dependency-analysis">3. Circular Dependency Analysis</h2>
+
+<h3 id="the-output_process-crew_forge-cycle">The output<em>process → crew</em>forge Cycle</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    classDef problem fill:#ffcccc,stroke:#f00;
+
+    CF_Orch["crew_forge<br/>Orchestrator Layer"]
+    CF_Parser["crew_forge<br/>CrewParser"]:::problem
+    OUT_Val["output_process<br/>CrewConfigValidator"]:::problem
+
+    CF_Orch -->|"uses for validation"| OUT_Val
+    OUT_Val -->|"imports CrewParser ⚠️"| CF_Parser
+</div>
+
+<p><strong>Violation:</strong> <code>output_process</code> (support layer) imports from <code>crew_forge</code> (core layer), creating a <strong>bidirectional dependency</strong>. Support modules should never depend upward on the core.</p>
+
+<p><strong>Evidence:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/crew_validator.py#L7">crew_validator.py:L7</a>:</p>
+
+<div class="codehilite">
+<pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">amsha.crew_forge.seeding.parser.crew_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrewParser</span>
+</code></pre>
+</div>
+
+<p><strong>Impact:</strong><br />
+- Cannot deploy <code>output_process</code> independently without <code>crew_forge</code><br />
+- Testing <code>CrewConfigValidator</code> requires the entire <code>crew_forge</code> module on the import path<br />
+- Violates the Dependency Inversion Principle</p>
+
+<p><strong>Recommended Fix:</strong> Extract <code>CrewParser</code> to <code>amsha.utils.crew_parser</code> or create a <code>amsha.common.parsing</code> module that both can import from.</p>
+
+<hr />
+
+<h2 id="4-architectural-validation-matrix">4. Architectural Validation Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Relationship</th>
+  <th style="text-align:left;">Expected</th>
+  <th style="text-align:left;">Actual</th>
+  <th style="text-align:left;">Status</th>
+  <th style="text-align:left;">Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew<em>forge → llm</em>factory</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">✅ Valid</td>
+  <td style="text-align:left;">4 imports in orchestrator layer</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew<em>forge → crew</em>monitor</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">✅ Valid</td>
+  <td style="text-align:left;">2 imports in orchestrator layer</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_forge → amsha.utils</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">✅ Valid</td>
+  <td style="text-align:left;">6 import sites</td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory → amsha.utils</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">✅ Valid</td>
+  <td style="text-align:left;">1 import site</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor → amsha.utils</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">✅ Valid</td>
+  <td style="text-align:left;">2 import sites</td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process → amsha.utils</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">✅ Valid</td>
+  <td style="text-align:left;">3 import sites</td>
+</tr>
+<tr>
+  <td style="text-align:left;">output<em>process → crew</em>forge</td>
+  <td style="text-align:left;">✗ Forbidden</td>
+  <td style="text-align:left;">↑ <strong>Upward</strong></td>
+  <td style="text-align:left;">❌ <strong>Violation</strong></td>
+  <td style="text-align:left;">1 import (CrewParser)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew<em>gen → llm</em>factory</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">↓ Downward</td>
+  <td style="text-align:left;">✅ Valid</td>
+  <td style="text-align:left;">2 imports (LLMType enum only)</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Result:</strong> 7/8 relationships are architecturally valid. <strong>1 violation</strong> detected.</p>
+
+<hr />
+
+<h2 id="5-external-dependency-inventory">5. External Dependency Inventory</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">External Library</th>
+  <th style="text-align:left;">Used By</th>
+  <th style="text-align:left;">Purpose</th>
+  <th style="text-align:left;">Version Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>crewai</code></td>
+  <td style="text-align:left;">crew<em>forge, llm</em>factory</td>
+  <td style="text-align:left;">Core AI agent framework</td>
+  <td style="text-align:left;">High (API changes)</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>pymongo</code></td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">MongoDB repository backend</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>pydantic</code></td>
+  <td style="text-align:left;">crew<em>forge, llm</em>factory</td>
+  <td style="text-align:left;">Data validation &amp; modeling</td>
+  <td style="text-align:left;">Medium</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>dependency-injector</code></td>
+  <td style="text-align:left;">crew<em>forge, llm</em>factory</td>
+  <td style="text-align:left;">DI container framework</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>docling</code></td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">Document processing (knowledge)</td>
+  <td style="text-align:left;">Medium</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>psutil</code></td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">CPU/RAM profiling</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>pynvml</code></td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">NVIDIA GPU profiling</td>
+  <td style="text-align:left;">Low (optional)</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>pandas</code></td>
+  <td style="text-align:left;">crew<em>monitor, output</em>process</td>
+  <td style="text-align:left;">Data manipulation &amp; Excel</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>numpy</code></td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Statistical calculations</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>openpyxl</code></td>
+  <td style="text-align:left;">crew<em>monitor, output</em>process</td>
+  <td style="text-align:left;">Excel file generation</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>External Dependency Count:</strong> 10 unique libraries across 4 modules.</p>
+
+<hr />
+
+<h2 id="6-recommendations">6. Recommendations</h2>
+
+<ol>
+<li><strong>Break Circular Dependency (P0):</strong> Move <code>CrewParser</code> to <code>amsha.utils.parsing</code> or <code>amsha.common.parser</code>.</li>
+<li><strong>Formalize amsha.utils as Foundation Layer:</strong> Document it as the explicit shared dependency layer.</li>
+<li><strong>Consider Protocol-Based Decoupling:</strong> Use Python Protocols for <code>crew_forge</code> → <code>crew_monitor</code> to enable mock-based testing.</li>
+<li><strong>Pin External Versions:</strong> <code>crewai</code> is highest-risk external dependency (API surface changes frequently).</li>
+</ol>
+
+                    </div>
+                </section>
+                <section id="interactions" class="content-section">
+                    <div class="section-content">
+                        <h1 id="cross-module-interactions-analysis">Cross-Module Interactions Analysis</h1>
+
+<h2 id="1-overview">1. Overview</h2>
+
+<p>The Amsha framework follows a <strong>hub-and-spoke</strong> interaction model with <code>crew_forge</code> as the central orchestrator. This document traces every cross-module import at code level, mapping exact files, lines, and data flows across the 4 analyzed modules plus shared utilities.</p>
+
+<hr />
+
+<h2 id="2-complete-import-dependency-graph">2. Complete Import Dependency Graph</h2>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef core fill:#ff9999,stroke:#333,stroke-width:2px;
+    classDef support fill:#99ccff,stroke:#333,stroke-width:2px;
+    classDef shared fill:#ffffcc,stroke:#333,stroke-width:2px;
+    classDef circular fill:#ffcccc,stroke:#f00,stroke-width:2px;
+
+    subgraph "Shared Foundation"
+        Utils["amsha.utils<br/>(YamlUtils, JsonUtils, Utf8Utils)"]:::shared
+    end
+
+    subgraph "Core Orchestrator"
+        CF["crew_forge<br/>(56 files, 12 sub-packages)"]:::core
+    end
+
+    subgraph "Support Modules"
+        LLM["llm_factory<br/>(14 files, 6 sub-packages)"]:::support
+        MON["crew_monitor<br/>(7 files, 3 sub-packages)"]:::support
+        OUT["output_process<br/>(10 files, 3 sub-packages)"]:::support
+    end
+
+    subgraph "Consumer"
+        GEN["crew_gen"]:::support
+    end
+
+    CF -->|"LLMContainer, LLMType"| LLM
+    CF -->|"CrewPerformanceMonitor"| MON
+    OUT -.->|"CrewParser ⚠️ CIRCULAR"| CF
+    GEN -->|"LLMType"| LLM
+
+    CF -->|"YamlUtils (6 files)"| Utils
+    LLM -->|"YamlUtils (1 file)"| Utils
+    MON -->|"JsonUtils, YamlUtils (2 files)"| Utils
+    OUT -->|"JsonUtils, YamlUtils (3 files)"| Utils
+</div>
+
+<hr />
+
+<h2 id="3-code-verified-import-registry">3. Code-Verified Import Registry</h2>
+
+<p>Every cross-module import traced to exact file and line:</p>
+
+<h3 id="31-crew_forge-llm_factory">3.1 crew<em>forge → llm</em>factory</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Source File</th>
+  <th style="text-align:left;">Import</th>
+  <th style="text-align:center;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/db/amsha_crew_db_application.py">amsha<em>crew</em>db_application.py</a></td>
+  <td style="text-align:left;"><code>LLMContainer</code></td>
+  <td style="text-align:center;">L7</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/db/amsha_crew_db_application.py">amsha<em>crew</em>db_application.py</a></td>
+  <td style="text-align:left;"><code>LLMType</code></td>
+  <td style="text-align:center;">L8</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/file/amsha_crew_file_application.py">amsha<em>crew</em>file_application.py</a></td>
+  <td style="text-align:left;"><code>LLMContainer</code></td>
+  <td style="text-align:center;">L7</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/file/amsha_crew_file_application.py">amsha<em>crew</em>file_application.py</a></td>
+  <td style="text-align:left;"><code>LLMType</code></td>
+  <td style="text-align:center;">L8</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="32-crew_forge-crew_monitor">3.2 crew<em>forge → crew</em>monitor</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Source File</th>
+  <th style="text-align:left;">Import</th>
+  <th style="text-align:center;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/db/db_crew_orchestrator.py">db<em>crew</em>orchestrator.py</a></td>
+  <td style="text-align:left;"><code>CrewPerformanceMonitor</code></td>
+  <td style="text-align:center;">L5</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/file/file_crew_orchestrator.py">file<em>crew</em>orchestrator.py</a></td>
+  <td style="text-align:left;"><code>CrewPerformanceMonitor</code></td>
+  <td style="text-align:center;">L5</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="33-output_process-crew_forge-circular">3.3 output<em>process → crew</em>forge ⚠️ CIRCULAR</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Source File</th>
+  <th style="text-align:left;">Import</th>
+  <th style="text-align:center;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/validation/crew_validator.py">crew_validator.py</a></td>
+  <td style="text-align:left;"><code>CrewParser</code></td>
+  <td style="text-align:center;">L7</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="34-crew_gen-llm_factory">3.4 crew<em>gen → llm</em>factory</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Source File</th>
+  <th style="text-align:left;">Import</th>
+  <th style="text-align:center;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_gen/application/crew_gen_app.py">crew<em>gen</em>app.py</a></td>
+  <td style="text-align:left;"><code>LLMType</code></td>
+  <td style="text-align:center;">L4</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_gen/units/designer/designer_crew_app.py">designer<em>crew</em>app.py</a></td>
+  <td style="text-align:left;"><code>LLMType</code></td>
+  <td style="text-align:center;">L4</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="35-all-modules-amshautils">3.5 All Modules → amsha.utils</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Utility</th>
+  <th style="text-align:left;">Files Using</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;"><code>YamlUtils</code></td>
+  <td style="text-align:left;">6 files (orchestrator apps, parsers, sync manager)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;"><code>YamlUtils</code></td>
+  <td style="text-align:left;">1 file (llm_container.py)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;"><code>JsonUtils</code>, <code>YamlUtils</code></td>
+  <td style="text-align:left;">2 files (contribution<em>analyzer, reporting</em>tool)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><code>JsonUtils</code>, <code>YamlUtils</code></td>
+  <td style="text-align:left;">3 files (all evaluation tools)</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="4-full-execution-lifecycle-sequence">4. Full Execution Lifecycle Sequence</h2>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    autonumber
+    actor Client
+    participant CF as crew_forge<br/>(Orchestrator)
+    participant LLM as llm_factory<br/>(LLM Provider)
+    participant MON as crew_monitor<br/>(Profiler)
+    participant OUT as output_process<br/>(Post-Processor)
+    participant Utils as amsha.utils
+
+    rect rgb(255, 248, 230)
+        note over CF,LLM: Phase 1: LLM Provisioning
+        CF->>LLM: LLMContainer.config.llm.yaml_path(path)
+        LLM->>Utils: YamlUtils.yaml_safe_load(path)
+        Utils-->>LLM: config dict
+        CF->>LLM: container.creative_llm()
+        LLM->>LLM: disable_telemetry() + build_creative()
+        LLM-->>CF: LLMBuildResult(llm, model_name)
+    end
+
+    rect rgb(230, 255, 230)
+        note over CF: Phase 2: Crew Assembly
+        CF->>CF: CrewBluePrintService.get_by_name(crew_name)
+        CF->>CF: AtomicDbBuilderService.build_crew()
+        CF->>CF: CrewBuilderService.add_agent() × N
+        CF->>CF: CrewBuilderService.add_task() × M
+        CF->>CF: CrewBuilderService.build() → Crew
+    end
+
+    rect rgb(230, 230, 255)
+        note over CF,MON: Phase 3: Monitored Execution
+        CF->>MON: CrewPerformanceMonitor(model_name)
+        CF->>MON: start_monitoring()
+        MON->>MON: Capture S(t₀): CPU, RAM, GPU
+        CF->>CF: crew.kickoff(inputs)
+        CF->>MON: stop_monitoring()
+        MON->>MON: Capture S(t₁): CPU, RAM, GPU
+        CF->>MON: log_usage(result)
+        MON-->>CF: get_metrics() → {general, gpu}
+    end
+
+    rect rgb(255, 230, 230)
+        note over OUT: Phase 4: Post-Processing (Independent)
+        Client->>OUT: JsonCleanerUtils(raw_output)
+        OUT->>OUT: 4-stage cascade parse
+        Client->>OUT: EvaluationProcessingTool.run()
+        OUT->>OUT: Rubric-weighted scoring
+        Client->>OUT: EvaluationAggregationTool.run()
+        OUT->>OUT: Z-score relative grading
+        Client->>OUT: EvaluationReportTool.run()
+        OUT->>OUT: Multi-model pivot consolidation
+    end
+</div>
+
+<hr />
+
+<h2 id="5-data-flow-matrix-code-verified">5. Data Flow Matrix (Code-Verified)</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Source → Target</th>
+  <th style="text-align:left;">Data Type</th>
+  <th style="text-align:left;">Mechanism</th>
+  <th style="text-align:left;">Code Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>crew_forge</code> → <code>llm_factory</code></td>
+  <td style="text-align:left;">YAML path (str)</td>
+  <td style="text-align:left;">Container config inject</td>
+  <td style="text-align:left;"><code>LLMContainer.config.llm.yaml_path.from_value()</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>llm_factory</code> → <code>crew_forge</code></td>
+  <td style="text-align:left;"><code>LLMBuildResult</code> (LLM + name)</td>
+  <td style="text-align:left;">Return value</td>
+  <td style="text-align:left;"><code>container.creative_llm()</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>crew_forge</code> → <code>crew_monitor</code></td>
+  <td style="text-align:left;">model_name (str)</td>
+  <td style="text-align:left;">Constructor arg</td>
+  <td style="text-align:left;"><code>CrewPerformanceMonitor(model_name)</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>crew_monitor</code> → <code>crew_forge</code></td>
+  <td style="text-align:left;">metrics dict</td>
+  <td style="text-align:left;">Return value</td>
+  <td style="text-align:left;"><code>monitor.get_metrics()</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>output_process</code> → <code>crew_forge</code></td>
+  <td style="text-align:left;">None (imports only)</td>
+  <td style="text-align:left;">Static import</td>
+  <td style="text-align:left;"><code>from crew_forge...CrewParser</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;">All → <code>amsha.utils</code></td>
+  <td style="text-align:left;">file paths, configs</td>
+  <td style="text-align:left;">Static utility calls</td>
+  <td style="text-align:left;"><code>YamlUtils.yaml_safe_load()</code>, <code>JsonUtils.*</code></td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="6-key-findings">6. Key Findings</h2>
+
+<ol>
+<li><strong>Strict Hub-and-Spoke:</strong> <code>crew_forge</code> imports from <code>llm_factory</code> (4 imports) and <code>crew_monitor</code> (2 imports) — never the reverse. Clean unidirectional dependency.</li>
+<li><strong>One Architectural Violation:</strong> <code>output_process</code> → <code>crew_forge</code> creates a <strong>circular dependency</strong> via <code>CrewParser</code> import.</li>
+<li><strong>Shared Foundation:</strong> <code>amsha.utils</code> is the implicit shared layer — used by all 4 modules (12+ import sites).</li>
+<li><strong>Loosely Coupled Post-Processing:</strong> <code>output_process</code> evaluation tools operate <strong>independently</strong> of the execution pipeline — they consume filesystem artifacts, not runtime objects.</li>
+<li><strong>Type-Only Coupling:</strong> <code>crew_gen</code> depends on <code>llm_factory</code> only for the <code>LLMType</code> enum — minimal coupling.</li>
+</ol>
+
+                    </div>
+                </section>
+                <section id="novelty" class="content-section">
+                    <div class="section-content">
+                        <h1 id="cross-module-novelty-analysis">Cross-Module Novelty Analysis</h1>
+
+<h2 id="1-system-level-innovation-assessment">1. System-Level Innovation Assessment</h2>
+
+<p><strong>Overall System Novelty:</strong> <strong>MODERATE-HIGH</strong><br />
+<strong>Confidence:</strong> HIGH</p>
+
+<p>The Amsha framework's novelty emerges from the <strong>composition</strong> of individually moderate contributions into a <strong>cohesive system</strong> that addresses an under-explored niche: <strong>engineering-rigorous Multi-Agent System (MAS) orchestration</strong> with built-in observability, privacy, and evaluation fairness.</p>
+
+<hr />
+
+<h2 id="2-system-level-innovations">2. System-Level Innovations</h2>
+
+<h3 id="21-dual-state-orchestration-engine">2.1 Dual-State Orchestration Engine</h3>
+
+<ul>
+<li><strong>Claim:</strong> A single framework supports both <strong>YAML-file</strong> and <strong>MongoDB-database</strong> backends for crew configuration with zero client code changes.</li>
+<li><strong>Evidence (Code-Verified):</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/file/amsha_crew_file_application.py">AmshaCrewFileApplication</a> — File backend</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/db/amsha_crew_db_application.py">AmshaCrewDBApplication</a> — DB backend</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/seeding/database_seeder.py">DatabaseSeeder</a> — Idempotent YAML→DB sync</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>CrewAI:</strong> YAML-only config, no database backend</li>
+<li><strong>AutoGen:</strong> Code-only config, no file/DB abstraction</li>
+<li><strong>Amsha:</strong> Both backends with idempotent sync between them</li>
+</ul></li>
+<li><strong>Novelty:</strong> ⭐⭐⭐ (Moderate-High)</li>
+</ul>
+
+<h3 id="22-privacy-first-multi-provider-llm-factory">2.2 Privacy-First Multi-Provider LLM Factory</h3>
+
+<ul>
+<li><strong>Claim:</strong> Unified factory creates LLMs for 6+ providers (Cloud + Local) with <strong>dual-layer privacy enforcement</strong> (env variable + reflection-based telemetry neutralization), all via YAML config.</li>
+<li><strong>Evidence (Code-Verified):</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/service/llm_builder.py#L15-L48">LLMBuilder.build()</a> — Conditional cloud/local branching</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/utils/llm_utils.py#L16-L24">LLMUtils.disable_telemetry()</a> — Reflection-based privacy</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>LangChain:</strong> Different client classes per provider</li>
+<li><strong>Standard approach:</strong> Environment variable only (single layer)</li>
+<li><strong>Amsha:</strong> One class, <code>base_url</code> branching + dual-layer privacy</li>
+</ul></li>
+<li><strong>Novelty:</strong> ⭐⭐⭐ (Moderate-High)</li>
+</ul>
+
+<h3 id="23-integrated-physical-logical-observability">2.3 Integrated Physical-Logical Observability</h3>
+
+<ul>
+<li><strong>Claim:</strong> Simultaneous tracking of <strong>physical resources</strong> (CPU%, RAM, GPU VRAM) and <strong>logical units</strong> (tokens, features) in a single monitoring session, enabling cross-dimensional metrics like "VRAM per kToken".</li>
+<li><strong>Evidence (Code-Verified):</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py">CrewPerformanceMonitor</a> — Sandwich profiler</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py">ContributionAnalyzer</a> — Feature consensus <span class="math inline">\(P(F) = |C_F|/N\)</span></li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>MLflow:</strong> Training-time metrics, not inference</li>
+<li><strong>CrewAI:</strong> Token counts only</li>
+<li><strong>Amsha:</strong> Physical + Logical + Consensus in one system</li>
+</ul></li>
+<li><strong>Novelty:</strong> ⭐⭐⭐ (Moderate-High)</li>
+</ul>
+
+<h3 id="24-psychometric-evaluation-pipeline">2.4 Psychometric Evaluation Pipeline</h3>
+
+<ul>
+<li><strong>Claim:</strong> Raw LLM outputs undergo a <strong>4-stage pipeline</strong> — cascading JSON sanitization → rubric-weighted scoring → Z-score relative grading → multi-model consensus consolidation — applying psychometric principles to AI evaluation.</li>
+<li><strong>Evidence (Code-Verified):</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/optimization/json_cleaner_utils.py">JsonCleanerUtils</a> — 4-stage cascade</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_processing_tool.py">EvaluationProcessingTool</a> — Rubric scoring</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_aggregate_tool.py">EvaluationAggregationTool</a> — Z-score grading</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_report_tool.py">EvaluationReportTool</a> — Multi-model pivot</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>LLM benchmarks (MMLU):</strong> Absolute thresholds</li>
+<li><strong>Amsha:</strong> Population-relative Z-score grading — ranking preserved even under biased judges</li>
+</ul></li>
+<li><strong>Novelty:</strong> ⭐⭐⭐ (Moderate-High)</li>
+</ul>
+
+<hr />
+
+<h2 id="3-synergistic-cross-module-contributions">3. Synergistic (Cross-Module) Contributions</h2>
+
+<h3 id="31-privacy-guarded-monitored-execution">3.1 Privacy-Guarded Monitored Execution</h3>
+
+<p>The integration of <code>llm_factory</code> (privacy) → <code>crew_forge</code> (orchestration) → <code>crew_monitor</code> (profiling) creates a unique system property:</p>
+
+<span class="math display">\[\texttt{System} = \texttt{Privacy}(\texttt{Monitor}(\texttt{Execute}(\texttt{Build}(config))))\]</span>
+
+<p><strong>No telemetry leaks</strong> during <strong>fully profiled</strong> execution — a property no individual module provides alone.</p>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    classDef privacy fill:#e8f5e9,stroke:#333;
+    classDef exec fill:#e3f2fd,stroke:#333;
+    classDef monitor fill:#fff3e0,stroke:#333;
+
+    P["🔒 Privacy Guard<br/>(llm_factory)"]:::privacy
+    E["⚙️ Crew Execution<br/>(crew_forge)"]:::exec
+    M["📊 Resource Profiling<br/>(crew_monitor)"]:::monitor
+
+    P --> E --> M
+    M -.->|"Metrics feedback"| E
+</div>
+
+<h3 id="32-end-to-end-evaluation-pipeline">3.2 End-to-End Evaluation Pipeline</h3>
+
+<p>The connection from <code>crew_forge</code> (execution) → raw output → <code>output_process</code> (4-stage pipeline) creates a complete <strong>Build → Execute → Evaluate</strong> lifecycle:</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:center;">Stage</th>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Algorithm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">Blueprint materialization → Crew assembly → Monitored execution</td>
+</tr>
+<tr>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">JSON sanitization (4-stage cascade)</td>
+</tr>
+<tr>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Rubric-weighted scoring (<span class="math inline">\(F\% = \sum S_w / S_{max}\)</span>)</td>
+</tr>
+<tr>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Z-score relative grading (<span class="math inline">\(G = f(\mu, \sigma)\)</span>)</td>
+</tr>
+<tr>
+  <td style="text-align:center;">5</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Multi-model pivot consolidation</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="33-config-as-code-universality">3.3 Config-as-Code Universality</h3>
+
+<p><strong>Every module</strong> uses YAML-driven configuration, creating a consistent developer experience:</p>
+
+<pre><code>llm_config.yaml → LLM provisioning
+crew YAML files → Agent/Task definitions
+analysis config → Contribution analysis jobs
+evaluation config → Scoring/grading jobs
+</code></pre>
+
+<p>This universality means a single <code>srotas.yaml</code> master config can potentially drive the entire framework.</p>
+
+<hr />
+
+<h2 id="4-comparative-advantage">4. Comparative Advantage</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Feature</th>
+  <th style="text-align:left;">Amsha</th>
+  <th style="text-align:left;">CrewAI</th>
+  <th style="text-align:left;">LangChain</th>
+  <th style="text-align:left;">AutoGen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><strong>Backend</strong></td>
+  <td style="text-align:left;">Hybrid File+DB</td>
+  <td style="text-align:left;">File only</td>
+  <td style="text-align:left;">Code only</td>
+  <td style="text-align:left;">Code only</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>LLM Switching</strong></td>
+  <td style="text-align:left;">Zero-code (YAML)</td>
+  <td style="text-align:left;">Partial</td>
+  <td style="text-align:left;">Different classes</td>
+  <td style="text-align:left;">Config dicts</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Privacy</strong></td>
+  <td style="text-align:left;">Dual-layer (env + reflection)</td>
+  <td style="text-align:left;">None built-in</td>
+  <td style="text-align:left;">None</td>
+  <td style="text-align:left;">None</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Monitoring</strong></td>
+  <td style="text-align:left;">Physical+Logical+Consensus</td>
+  <td style="text-align:left;">Token counts</td>
+  <td style="text-align:left;">Callbacks</td>
+  <td style="text-align:left;">Conversation log</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Evaluation</strong></td>
+  <td style="text-align:left;">Z-score relative + multi-judge</td>
+  <td style="text-align:left;">None built-in</td>
+  <td style="text-align:left;">None</td>
+  <td style="text-align:left;">None</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>JSON Recovery</strong></td>
+  <td style="text-align:left;">4-stage cascade</td>
+  <td style="text-align:left;">None</td>
+  <td style="text-align:left;">OutputParser</td>
+  <td style="text-align:left;">None</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Architecture</strong></td>
+  <td style="text-align:left;">Clean Arch + DI</td>
+  <td style="text-align:left;">Monolithic</td>
+  <td style="text-align:left;">Library</td>
+  <td style="text-align:left;">Framework</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Config Sync</strong></td>
+  <td style="text-align:left;">Idempotent YAML↔DB</td>
+  <td style="text-align:left;">N/A</td>
+  <td style="text-align:left;">N/A</td>
+  <td style="text-align:left;">N/A</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="5-aggregate-novelty-metrics">5. Aggregate Novelty Metrics</h2>
+
+<h3 id="per-module-contribution-summary">Per-Module Contribution Summary</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:center;">Contributions</th>
+  <th style="text-align:center;">Top Novelty</th>
+  <th style="text-align:center;">Algorithms</th>
+  <th style="text-align:center;">Patterns</th>
+  <th style="text-align:center;">Gaps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:center;">5</td>
+  <td style="text-align:center;">⭐⭐⭐½ (MOD-HIGH)</td>
+  <td style="text-align:center;">8</td>
+  <td style="text-align:center;">9</td>
+  <td style="text-align:center;">14</td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">⭐⭐⭐ (MODERATE)</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;">11</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">⭐⭐⭐ (MODERATE)</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">10</td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:center;">5</td>
+  <td style="text-align:center;">⭐⭐⭐ (MODERATE)</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">8</td>
+  <td style="text-align:center;">10</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>System Total</strong></td>
+  <td style="text-align:center;"><strong>18</strong></td>
+  <td style="text-align:center;"><strong>⭐⭐⭐½ (MOD-HIGH)</strong></td>
+  <td style="text-align:center;"><strong>28</strong></td>
+  <td style="text-align:center;"><strong>30</strong></td>
+  <td style="text-align:center;"><strong>45</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="system-level-innovation-matrix">System-Level Innovation Matrix</h3>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">System Innovation</th>
+  <th style="text-align:left;">Modules Involved</th>
+  <th style="text-align:center;">Novelty</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;">Dual-State Orchestration</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;">Privacy-First Multi-Provider Factory</td>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;">Physical-Logical Observability</td>
+  <td style="text-align:left;">crew<em>monitor + crew</em>forge</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;">Psychometric Evaluation Pipeline</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td style="text-align:left;">Privacy-Guarded Monitored Execution</td>
+  <td style="text-align:left;">llm<em>factory + crew</em>forge + crew_monitor</td>
+  <td style="text-align:center;">⭐⭐⭐½</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td style="text-align:left;">End-to-End Build-Execute-Evaluate</td>
+  <td style="text-align:left;">crew<em>forge + output</em>process</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td style="text-align:left;">Config-as-Code Universality</td>
+  <td style="text-align:left;">All 4 modules</td>
+  <td style="text-align:center;">⭐⭐</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="6-publication-strategy">6. Publication Strategy</h2>
+
+<h3 id="recommended-system-level-paper-titles">Recommended System-Level Paper Titles</h3>
+
+<ol>
+<li><em>"Amsha: A Privacy-First, Engineering-Rigorous Framework for Multi-Agent LLM Orchestration"</em></li>
+<li><em>"From Prompt Engineering to Agent Systems Engineering: Architectural Patterns for Reliable MAS"</em></li>
+<li><em>"Structure-First GenAI: A Modular Monolith Approach to Multi-Agent System Design"</em></li>
+</ol>
+
+<h3 id="target-venues">Target Venues</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Venue</th>
+  <th style="text-align:left;">Focus Area</th>
+  <th style="text-align:left;">Best Contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">AAAI (Safety/Privacy)</td>
+  <td style="text-align:left;">Privacy-first LLM systems</td>
+  <td style="text-align:left;">Innovations 2, 5</td>
+</tr>
+<tr>
+  <td style="text-align:left;">ACM TIST</td>
+  <td style="text-align:left;">Intelligent systems</td>
+  <td style="text-align:left;">Full system paper</td>
+</tr>
+<tr>
+  <td style="text-align:left;">EMNLP (Eval track)</td>
+  <td style="text-align:left;">LLM evaluation methodology</td>
+  <td style="text-align:left;">Innovation 4</td>
+</tr>
+<tr>
+  <td style="text-align:left;">MLSys</td>
+  <td style="text-align:left;">Systems for ML</td>
+  <td style="text-align:left;">Innovations 1, 3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">SPE Journal</td>
+  <td style="text-align:left;">Software engineering patterns</td>
+  <td style="text-align:left;">Innovation 7</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="7-conclusion">7. Conclusion</h2>
+
+<p>The Amsha framework's novelty is <strong>greater than the sum of its parts</strong>. While individual module contributions are MODERATE, their compositional synergy — privacy-guarded execution with integrated profiling, config-as-code universality, and psychometric evaluation — creates a system-level innovation rated <strong>MODERATE-HIGH</strong>. The framework demonstrates how <strong>Software Engineering rigor</strong> (Clean Architecture, DI, YAML config, Pydantic validation) can be systematically applied to the typically experimental field of GenAI, producing a blueprint for <strong>enterprise-grade, privacy-first, scientifically evaluable</strong> multi-agent systems.</p>
+
+                    </div>
+                </section>
+                <section id="patterns" class="content-section">
+                    <div class="section-content">
+                        <h1 id="cross-module-architectural-patterns-analysis">Cross-Module Architectural Patterns Analysis</h1>
+
+<h2 id="1-overview">1. Overview</h2>
+
+<p>This document synthesizes the design patterns observed across all 4 analyzed modules (<code>crew_forge</code>, <code>llm_factory</code>, <code>crew_monitor</code>, <code>output_process</code>), identifying <strong>system-wide patterns</strong>, <strong>consistency</strong>, <strong>unique per-module patterns</strong>, and <strong>the architectural style</strong> of the Amsha framework.</p>
+
+<hr />
+
+<h2 id="2-system-wide-pattern-catalog">2. System-Wide Pattern Catalog</h2>
+
+<h3 id="pattern-frequency-matrix">Pattern Frequency Matrix</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Pattern</th>
+  <th style="text-align:center;">crew_forge</th>
+  <th style="text-align:center;">llm_factory</th>
+  <th style="text-align:center;">crew_monitor</th>
+  <th style="text-align:center;">output_process</th>
+  <th style="text-align:center;">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Configuration Object (YAML)</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;"><strong>4/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Batch Processor</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;"><strong>3/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Dependency Injection</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;"><strong>2/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Builder/Factory</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;"><strong>2/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Repository</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;"><strong>1/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sandwich Profiler</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;"><strong>1/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Cascading Parser</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;"><strong>1/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Pivot Table</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;"><strong>2/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Statistical Strategy</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;"><strong>1/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Monkey Patching</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;"><strong>1/4</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Graceful Degradation</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;"><strong>1/4</strong></td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="3-universal-patterns-44-modules">3. Universal Patterns (4/4 Modules)</h2>
+
+<h3 id="31-configuration-object-pattern">3.1 Configuration Object Pattern</h3>
+
+<p><strong>Every module</strong> externalizes job parameters to YAML configuration files. Zero code changes are needed to add new jobs, switch providers, or modify parameters.</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Config Source</th>
+  <th style="text-align:left;">Code Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">Agent/Task YAML files + MongoDB</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/seeding/parser/crew_parser.py">crew_parser.py</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;"><code>llm_config.yaml</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/llm_factory/settings/llm_settings.py">llm_settings.py</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">Analysis job YAML</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py#L18">contribution_analyzer.py:L18</a></td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Evaluation job YAML</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/output_process/evaluation/evaluation_processing_tool.py#L14">evaluation<em>processing</em>tool.py:L14</a></td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Consistency:</strong> High — identical pattern (<code>YamlUtils.yaml_safe_load(config_path)</code>) used in all modules.</p>
+
+<hr />
+
+<h2 id="4-majority-patterns-34-modules">4. Majority Patterns (3/4 Modules)</h2>
+
+<h3 id="41-batch-processor-pattern">4.1 Batch Processor Pattern</h3>
+
+<p>Config-driven sequential job execution where each "job" is an independent unit defined in YAML.</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Entry Point</th>
+  <th style="text-align:left;">Job Key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;"><code>DatabaseSeeder.seed_all()</code></td>
+  <td style="text-align:left;"><code>os.walk()</code> directory traversal</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;"><code>ContributionAnalyzer.run()</code></td>
+  <td style="text-align:left;"><code>analyze_contributions</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><code>EvaluationProcessingTool.run_evaluations()</code></td>
+  <td style="text-align:left;"><code>evaluations</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="42-pydantic-domain-modeling">4.2 Pydantic Domain Modeling</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:center;">Models</th>
+  <th style="text-align:left;">Schema Strictness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:left;">Request/Response pairs with validation</td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:left;">Typed config with defaults</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;"><code>GPUMetrics</code>, <code>GeneralMetrics</code>, <code>PerformanceMetrics</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:center;">0 ⚠️</td>
+  <td style="text-align:left;">Uses raw dicts — missing opportunity</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="5-paired-patterns-24-modules">5. Paired Patterns (2/4 Modules)</h2>
+
+<h3 id="51-dependency-injection-container">5.1 Dependency Injection Container</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Container</th>
+  <th style="text-align:left;">Strategy</th>
+  <th style="text-align:center;">Pre-wired?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;"><code>CrewForgeContainer</code> + <code>MongoRepoContainer</code></td>
+  <td style="text-align:left;">Singleton + Factory</td>
+  <td style="text-align:center;">No</td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;"><code>LLMContainer</code></td>
+  <td style="text-align:left;">Singleton + Factory</td>
+  <td style="text-align:center;"><strong>Yes</strong> (<code>creative_llm</code>, <code>evaluation_llm</code>)</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="52-dual-backend-strategy">5.2 Dual-Backend Strategy</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Backend A</th>
+  <th style="text-align:left;">Backend B</th>
+  <th style="text-align:left;">Switch Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">YAML files</td>
+  <td style="text-align:left;">MongoDB</td>
+  <td style="text-align:left;"><code>FileCrewOrchestrator</code> vs <code>DbCrewOrchestrator</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;">Cloud SaaS</td>
+  <td style="text-align:left;">Local LM Studio</td>
+  <td style="text-align:left;"><code>base_url</code> presence/absence</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="53-pivot-table-pattern">5.3 Pivot Table Pattern</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Implementation</th>
+  <th style="text-align:left;">Input → Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;"><code>ReportingTool._combine_reports()</code></td>
+  <td style="text-align:left;">Excel files → cross-report matrix</td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><code>EvaluationReportTool._generate_evaluation_report()</code></td>
+  <td style="text-align:left;">JSON evaluations → gen<em>model × eval</em>model matrix</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="6-unique-per-module-patterns">6. Unique Per-Module Patterns</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Pattern</th>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Significance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Blueprint Materialization</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">Master config defines crew topology → atomic crews</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Idempotent Config Sync</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">YAML-to-DB synchronization with upsert semantics</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Reflective Monkey Patching</td>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;">Runtime telemetry neutralization via reflection</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sandwich Profiler</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">Pre/post execution resource capture</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Graceful Degradation</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">Optional GPU monitoring via conditional import</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Cascading Parser (4-stage)</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Progressive JSON recovery from LLM noise</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Z-Score Grading</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Psychometric relative evaluation</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="7-pattern-consistency-assessment">7. Pattern Consistency Assessment</h2>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+pie
+    title Pattern Consistency Across Modules
+    "Universal (4/4)" : 1
+    "Majority (3/4)" : 2
+    "Paired (2/4)" : 3
+    "Unique (1/4)" : 7
+</div>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Consistency Level</th>
+  <th style="text-align:center;">Count</th>
+  <th style="text-align:left;">Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Universal (4/4)</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;">Configuration Object</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Majority (3/4)</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:left;">Batch Processor, Pydantic Modeling</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Paired (2/4)</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;">DI Container, Dual-Backend, Pivot Table</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Unique (1/4)</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:left;">Sandwich Profiler, Cascading Parser, etc.</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Interpretation:</strong> The system has <strong>strong consistency</strong> in configuration management (universal YAML pattern) with <strong>rich specialization</strong> in domain-specific patterns. Each module contributes unique patterns suited to its domain.</p>
+
+<hr />
+
+<h2 id="8-anti-pattern-detection">8. Anti-Pattern Detection</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Anti-Pattern</th>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Evidence</th>
+  <th style="text-align:left;">Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Circular Dependency</td>
+  <td style="text-align:left;">output<em>process → crew</em>forge</td>
+  <td style="text-align:left;"><code>CrewParser</code> import</td>
+  <td style="text-align:left;">Moderate</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Code Duplication</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><code>_apply_relative_grading()</code> in 2 files</td>
+  <td style="text-align:left;">Minor</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Unused Schema</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;"><code>PerformanceMetrics</code> defined but never used</td>
+  <td style="text-align:left;">Minor</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Missing Import</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><code>JsonUtils</code> used but not imported (2 files)</td>
+  <td style="text-align:left;">High (Bug)</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="9-architectural-style">9. Architectural Style</h2>
+
+<p>The project follows a <strong>Modular Monolith</strong> with <strong>Clean Architecture</strong> tendencies:</p>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TB
+    classDef layer fill:#e3f2fd,stroke:#333;
+
+    subgraph "Clean Architecture Layers (per module)"
+        direction TB
+        D["Domain Layer<br/>(Pydantic models, enums)"]:::layer
+        S["Service Layer<br/>(Business logic)"]:::layer
+        I["Infrastructure Layer<br/>(DI containers, repos, utils)"]:::layer
+        A["Application Layer<br/>(Orchestrators, examples)"]:::layer
+    end
+
+    A --> S
+    S --> D
+    I --> D
+    A --> I
+</div>
+
+<p><strong>Evidence:</strong><br />
+- Domain models are dependency-free (<code>state.py</code>, <code>schemas.py</code>, <code>agent_data.py</code>)<br />
+- Services depend inward on domain, never on infrastructure<br />
+- DI containers wire everything at the application boundary<br />
+- Orchestrators compose services at the highest layer</p>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Toggle
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    
+    const btn = document.querySelector('.theme-toggle .text');
+    btn.textContent = newTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+    
+    const icon = document.querySelector('.theme-toggle .icon');
+    icon.textContent = newTheme === 'light' ? '🌙' : '☀️';
+    
+    localStorage.setItem('theme', newTheme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if (savedTheme === 'dark') {
+    document.querySelector('.theme-toggle .text').textContent = 'Light Mode';
+    document.querySelector('.theme-toggle .icon').textContent = '☀️';
+}
+
+// Smooth scrolling for navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        // Smooth scroll to section
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+    });
+});
+
+// Set first link as active on load
+document.querySelector('.nav-link')?.classList.add('active');
+
+// Export PDF function (placeholder)
+function exportPDF() {
+    window.print();
+}
+
+// Intersection Observer for active nav highlighting
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${id}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.content-section').forEach(section => {
+    observer.observe(section);
+});
+
+
+        // Initialize Mermaid
+        document.addEventListener('DOMContentLoaded', () => {
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+        mermaid.initialize({ startOnLoad: true, theme: theme });
+        });
+    </script>
+</body>
+
+</html>

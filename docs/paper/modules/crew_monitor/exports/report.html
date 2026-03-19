@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Report</title>
+    <style>
+        /* Modern Dashboard Layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --accent: #667eea;
+    --accent-dark: #5568d3;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --sidebar-width: 260px;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-tertiary: #4a5568;
+    --text-primary: #f7fafc;
+    --text-secondary: #cbd5e0;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-primary);
+    border-right: 1px solid var(--bg-tertiary);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: var(--bg-secondary);
+}
+
+.grade-badge.grade-a { background: var(--success); color: white; }
+.grade-badge.grade-b { background: var(--info); color: white; }
+.grade-badge.grade-c { background: var(--warning); color: white; }
+.grade-badge.grade-d,
+.grade-badge.grade-f { background: var(--danger); color: white; }
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.nav-link.active {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    border-right: 3px solid var(--accent);
+}
+
+.nav-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.theme-toggle {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    background: var(--bg-primary);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.status-complete { background: #d1fae5; color: #065f46; }
+.status-badge.status-in-progress { background: #fef3c7; color: #92400e; }
+.status-badge.status-critical { background: #fee2e2; color: #991b1b; }
+
+.topbar-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Content */
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1400px;
+}
+
+.content-section {
+    margin-bottom: 3rem;
+}
+
+/* Metric Cards Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.card-green .card-icon { background: #d1fae5; }
+.card-red .card-icon { background: #fee2e2; }
+.card-yellow .card-icon { background: #fef3c7; }
+.card-blue .card-icon { background: #dbeafe; }
+
+.card-content {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Section Content Styling */
+.section-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.section-content h2 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.section-content h3 {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.section-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-content th {
+    background: var(--accent);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.section-content td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.section-content tr:last-child td {
+    border-bottom: none;
+}
+
+.section-content tr:hover {
+    background: var(--bg-secondary);
+}
+
+.section-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-md);
+}
+
+.section-content pre {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.section-content code {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.section-content ul,
+.section-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.section-content li {
+    margin: 0.5rem 0;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar,
+    .topbar {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metric-card {
+        break-inside: avoid;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for diagram rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <!-- MathJax for LaTeX mathematical equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">Nibandha</h1>
+                <div class="grade-badge grade-n/a">
+                    N/A
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#architecture" class="nav-link" data-section="architecture">
+                    <span class="nav-icon">🏗️</span>
+                    <span class="nav-text">Architecture</span>
+                </a>
+                <a href="#gaps" class="nav-link" data-section="gaps">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Gaps</span>
+                </a>
+                <a href="#mathematics" class="nav-link" data-section="mathematics">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Mathematics</span>
+                </a>
+                <a href="#novelty" class="nav-link" data-section="novelty">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Novelty</span>
+                </a>
+                <a href="#summary" class="nav-link" data-section="summary">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Summary</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="icon">🌙</span>
+                    <span class="text">Dark Mode</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <span class="status-badge status-complete">
+                        Complete
+                    </span>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <span>📄 Print</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportPDF()">
+                        <span>📥 Export PDF</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <section id="architecture" class="content-section">
+                    <div class="section-content">
+                        <h2 id="1-architectural-overview">1. Architectural Overview</h2>
+
+<p>The <code>crew_monitor</code> module implements a <strong>dual-layer observability system</strong> for multi-agent AI workflows: a <strong>Physical Layer</strong> (CPU, RAM, GPU, Token tracking via sandwich profiler) and a <strong>Logical Layer</strong> (feature consensus analysis and report aggregation). With <strong>7 Python files</strong> across <strong>3 sub-packages</strong>, it serves as the "scientific instrument" that produces all experimental data for the research paper.</p>
+
+<h3 id="layered-architecture-diagram">Layered Architecture Diagram</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef consumer fill:#ffd700,stroke:#333,stroke-width:2px;
+    classDef physical fill:#ff9f43,stroke:#333,stroke-width:2px;
+    classDef logical fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef domain fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef ext fill:#bfb,stroke:#333,stroke-width:2px;
+
+    subgraph "Consumer Modules"
+        DbOrch["DbCrewOrchestrator"]:::consumer
+        FileOrch["FileCrewOrchestrator"]:::consumer
+    end
+
+    subgraph "Physical Layer (Real-time)"
+        Monitor["CrewPerformanceMonitor"]:::physical
+    end
+
+    subgraph "Logical Layer (Batch Post-Processing)"
+        Analyzer["ContributionAnalyzer"]:::logical
+        Reporter["ReportingTool"]:::logical
+    end
+
+    subgraph "Domain Layer"
+        Schema["Pydantic Schemas"]:::domain
+        GPUMetrics["GPUMetrics"]:::domain
+        GenMetrics["GeneralMetrics"]:::domain
+        PerfMetrics["PerformanceMetrics"]:::domain
+    end
+
+    subgraph "External Dependencies"
+        PSUtil["psutil"]:::ext
+        PyNVML["pynvml"]:::ext
+        Pandas["pandas"]:::ext
+        OpenPyXL["openpyxl"]:::ext
+    end
+
+    DbOrch --> Monitor
+    FileOrch --> Monitor
+    Monitor --> PSUtil
+    Monitor --> PyNVML
+    Monitor --> Schema
+    Analyzer --> Pandas
+    Reporter --> Pandas
+    Reporter --> OpenPyXL
+    Schema --> GPUMetrics
+    Schema --> GenMetrics
+    GenMetrics --> PerfMetrics
+    GPUMetrics --> PerfMetrics
+</div>
+
+<hr />
+
+<h2 id="2-sub-package-structure">2. Sub-Package Structure</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Sub-Package</th>
+  <th style="text-align:center;">Files</th>
+  <th style="text-align:left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>domain/</code></td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;">Pydantic schemas: <code>GPUMetrics</code>, <code>GeneralMetrics</code>, <code>PerformanceMetrics</code></td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>service/</code></td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;"><code>CrewPerformanceMonitor</code> (real-time profiler), <code>ContributionAnalyzer</code> (consensus), <code>ReportingTool</code> (Excel reporting)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Root</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;"><code>__init__.py</code></td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Total:</strong> 7 Python files, 3 sub-packages</p>
+
+<hr />
+
+<h2 id="3-class-design">3. Class Design</h2>
+
+<h3 id="class-diagram">Class Diagram</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+classDiagram
+    note "Dual-layer observability: Physical + Logical"
+
+    class CrewPerformanceMonitor {
+        -model_name: Optional~str~
+        -total_tokens: int
+        -prompt_tokens: int
+        -completion_tokens: int
+        -start_time: float
+        -end_time: float
+        -start_cpu_percent: float
+        -end_cpu_percent: float
+        -start_memory_usage: int
+        -end_memory_usage: int
+        -gpu_stats: Dict
+        +start_monitoring()
+        +stop_monitoring()
+        +log_usage(result)
+        +get_metrics() Dict
+        +get_summary() str
+    }
+
+    class ContributionAnalyzer {
+        -config: Dict
+        +run()
+        -_process_job(config)
+        -_calculate_feature_contribution(data, total, key)$
+        -_save_summary_to_excel(data, file, key)$
+    }
+
+    class ReportingTool {
+        -config: Dict
+        +run()
+        -_run_generate_jobs()
+        -_run_combine_jobs()
+        -_generate_single_report(config)
+        -_combine_reports(config)
+    }
+
+    class GPUMetrics {
+        +utilization_percent: float
+        +memory_change_mb: float
+        +memory_start_mb: float
+        +memory_end_mb: float
+    }
+
+    class GeneralMetrics {
+        +model_name: Optional~str~
+        +total_tokens: int
+        +prompt_tokens: int
+        +completion_tokens: int
+        +duration_seconds: float
+        +cpu_usage_end_percent: float
+        +memory_usage_change_mb: float
+    }
+
+    class PerformanceMetrics {
+        +general: GeneralMetrics
+        +gpu: Dict~str, GPUMetrics~
+    }
+
+    CrewPerformanceMonitor ..> PerformanceMetrics : produces
+    PerformanceMetrics --> GeneralMetrics : contains
+    PerformanceMetrics --> GPUMetrics : contains
+</div>
+
+<hr />
+
+<h2 id="4-monitoring-lifecycle-sandwich-pattern">4. Monitoring Lifecycle: Sandwich Pattern</h2>
+
+<p>The real-time profiler wraps crew execution in a resource-capture sandwich.</p>
+
+<h3 id="sequence-diagram-full-monitoring-lifecycle">Sequence Diagram: Full Monitoring Lifecycle</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    autonumber
+    participant Orch as DbCrewOrchestrator
+    participant Monitor as CrewPerformanceMonitor
+    participant PSUtil as psutil
+    participant NVML as pynvml
+    participant Crew as CrewAI Crew
+
+    Orch->>Monitor: __init__(model_name)
+
+    rect rgb(230, 255, 230)
+        note over Monitor,PSUtil: Phase 1: Pre-Execution Snapshot
+        Orch->>Monitor: start_monitoring()
+        Monitor->>PSUtil: cpu_percent(interval=None)
+        PSUtil-->>Monitor: CPU₀%
+        Monitor->>PSUtil: virtual_memory().used
+        PSUtil-->>Monitor: Mem₀ bytes
+
+        alt GPU_AVAILABLE
+            Monitor->>NVML: nvmlInit()
+            loop For each GPU i
+                Monitor->>NVML: nvmlDeviceGetMemoryInfo(i)
+                NVML-->>Monitor: VRAM₀(i)
+            end
+        end
+    end
+
+    rect rgb(255, 248, 230)
+        note over Orch,Crew: Phase 2: Agent Execution
+        Orch->>Crew: kickoff(inputs)
+        Crew-->>Orch: CrewOutput result
+    end
+
+    rect rgb(230, 230, 255)
+        note over Monitor,NVML: Phase 3: Post-Execution Snapshot
+        Orch->>Monitor: stop_monitoring()
+        Monitor->>PSUtil: cpu_percent(interval=None)
+        PSUtil-->>Monitor: CPU₁%
+        Monitor->>PSUtil: virtual_memory().used
+        PSUtil-->>Monitor: Mem₁ bytes
+
+        alt GPU_AVAILABLE
+            loop For each GPU i
+                Monitor->>NVML: nvmlDeviceGetMemoryInfo(i)
+                NVML-->>Monitor: VRAM₁(i)
+                Monitor->>NVML: nvmlDeviceGetUtilizationRates(i)
+                NVML-->>Monitor: Util(i)%
+            end
+            Monitor->>NVML: nvmlShutdown()
+        end
+    end
+
+    rect rgb(255, 230, 230)
+        note over Monitor: Phase 4: Token Extraction
+        Orch->>Monitor: log_usage(result)
+        Monitor->>Monitor: Parse token_usage (dict or obj)
+    end
+
+    Orch->>Monitor: get_metrics()
+    Monitor-->>Orch: {general: {...}, gpu: {...}}
+    Orch->>Monitor: get_summary()
+    Monitor-->>Orch: formatted_string
+</div>
+
+<hr />
+
+<h2 id="5-contribution-analysis-pipeline">5. Contribution Analysis Pipeline</h2>
+
+<h3 id="sequence-diagram-batch-consensus-analysis">Sequence Diagram: Batch Consensus Analysis</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    autonumber
+    actor Admin as Researcher
+    participant Analyzer as ContributionAnalyzer
+    participant YAML as Config YAML
+    participant JSON as JSON Utils
+    participant PD as pandas
+
+    Admin->>Analyzer: __init__(config_path)
+    Analyzer->>YAML: yaml_safe_load(path)
+    YAML-->>Analyzer: config dict
+
+    Admin->>Analyzer: run()
+
+    loop For each job in analyze_contributions
+        Analyzer->>JSON: load_json_from_file(input)
+        JSON-->>Analyzer: source_data
+
+        loop For each feature F
+            Analyzer->>Analyzer: P(F) = |C_F| / N_total × 100
+        end
+
+        alt output_json_file defined
+            Analyzer->>JSON: save_json_to_file(data)
+        end
+
+        alt output_excel_file defined
+            Analyzer->>PD: DataFrame(feature_rows)
+            PD->>PD: to_excel(filename)
+        end
+    end
+</div>
+
+<hr />
+
+<h2 id="6-report-generation-combination-pipeline">6. Report Generation &amp; Combination Pipeline</h2>
+
+<h3 id="activity-diagram-reportingtool-dual-pipeline">Activity Diagram: ReportingTool Dual Pipeline</h3>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef gen fill:#e3f2fd,stroke:#333;
+    classDef combine fill:#fff3e0,stroke:#333;
+    classDef output fill:#e8f5e9,stroke:#333;
+
+    Start[/"run()"/] --> Check1{generate_reports?}
+    Check1 -->|Yes| GenLoop["For each generate job"]:::gen
+    Check1 -->|No| Check2
+
+    GenLoop --> LoadDir["Load JSON from directory"]:::gen
+    LoadDir --> Extract["Extract features + metrics"]:::gen
+    Extract --> Reorder["Reorder columns"]:::gen
+    Reorder --> CalcMean["Calculate Mean row"]:::gen
+    CalcMean --> SaveExcel1["Save to Excel"]:::output
+    SaveExcel1 --> Check2
+
+    Check2{combine_reports?}
+    Check2 -->|Yes| CombLoop["For each combine job"]:::combine
+    Check2 -->|No| Finish
+
+    CombLoop --> ReadFiles["Read source Excel files"]:::combine
+    ReadFiles --> CopySheets["Copy each as sheet"]:::combine
+    CopySheets --> Melt["Melt: wide → long format"]:::combine
+    Melt --> Pivot["Pivot: Feature × Source × Metric"]:::combine
+    Pivot --> SaveExcel2["Save combined workbook"]:::output
+    SaveExcel2 --> Finish[/"Complete"/]
+</div>
+
+<hr />
+
+<h2 id="7-cross-module-integration">7. Cross-Module Integration</h2>
+
+<p>The <code>CrewPerformanceMonitor</code> is the <strong>only service consumed by other modules</strong> — specifically both <code>crew_forge</code> orchestrators:</p>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart LR
+    classDef monitor fill:#ff9f43,stroke:#333;
+    classDef consumer fill:#bbf,stroke:#333;
+
+    Monitor["CrewPerformanceMonitor"]:::monitor
+
+    DbOrch["DbCrewOrchestrator<br/>(crew_forge)"]:::consumer
+    FileOrch["FileCrewOrchestrator<br/>(crew_forge)"]:::consumer
+
+    DbOrch --> Monitor
+    FileOrch --> Monitor
+</div>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Consumer</th>
+  <th style="text-align:left;">Import</th>
+  <th style="text-align:left;">Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><code>DbCrewOrchestrator</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/db/db_crew_orchestrator.py#L5">db<em>crew</em>orchestrator.py:L5</a></td>
+  <td style="text-align:left;">Wraps crew execution with resource profiling</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><code>FileCrewOrchestrator</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_forge/orchestrator/file/file_crew_orchestrator.py#L5">file<em>crew</em>orchestrator.py:L5</a></td>
+  <td style="text-align:left;">Wraps crew execution with resource profiling</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="8-design-patterns-catalog">8. Design Patterns Catalog</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">Pattern</th>
+  <th style="text-align:left;">Implementation</th>
+  <th style="text-align:left;">File</th>
+  <th style="text-align:left;">Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;"><strong>Sandwich Profiler</strong></td>
+  <td style="text-align:left;"><code>start/stop_monitoring()</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py">crew<em>performance</em>monitor.py</a></td>
+  <td style="text-align:left;">Non-intrusive resource measurement</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;"><strong>Graceful Degradation</strong></td>
+  <td style="text-align:left;">Conditional <code>pynvml</code> import</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L5-L9">crew<em>performance</em>monitor.py:L5–L9</a></td>
+  <td style="text-align:left;">Works on CPU-only machines</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;"><strong>Polymorphic Extraction</strong></td>
+  <td style="text-align:left;"><code>log_usage()</code> dict/obj handling</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L64-L82">crew<em>performance</em>monitor.py:L64–L82</a></td>
+  <td style="text-align:left;">Handles varying CrewAI result types</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;"><strong>Batch Processor</strong></td>
+  <td style="text-align:left;"><code>ContributionAnalyzer.run()</code></td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py">contribution_analyzer.py</a></td>
+  <td style="text-align:left;">Config-driven multi-job execution</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td style="text-align:left;"><strong>Configuration Object</strong></td>
+  <td style="text-align:left;">YAML-loaded job configs</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py#L18-L21">contribution_analyzer.py:L18–L21</a></td>
+  <td style="text-align:left;">Externalizes all job parameters</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td style="text-align:left;"><strong>ETL Pipeline</strong></td>
+  <td style="text-align:left;"><code>ReportingTool</code> generate + combine</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py">reporting_tool.py</a></td>
+  <td style="text-align:left;">JSON → DataFrame → Excel transformation</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td style="text-align:left;"><strong>Pivot Table</strong></td>
+  <td style="text-align:left;">Melt + pivot for cross-report</td>
+  <td style="text-align:left;"><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py#L130-L142">reporting_tool.py:L130–L142</a></td>
+  <td style="text-align:left;">Multi-dimensional comparison</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="9-module-metrics">9. Module Metrics</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Total Python Files</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sub-Packages</td>
+  <td style="text-align:left;">3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Pydantic Models</td>
+  <td style="text-align:left;">3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Design Patterns</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Diagrams in this Document</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">External Dependencies</td>
+  <td style="text-align:left;">4 (psutil, pynvml, pandas, openpyxl)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Consumer Modules</td>
+  <td style="text-align:left;">2 (crew_forge DB + File orchestrators)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Total Source Lines</td>
+  <td style="text-align:left;">~330</td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="gaps" class="content-section">
+                    <div class="section-content">
+                        <p>This document identifies gaps against Scopus-indexed publication standards, categorized by severity and effort.</p>
+
+<hr />
+
+<h2 id="1-quality-assurance-gaps">1. Quality Assurance Gaps</h2>
+
+<h3 id="gap-qa-001-zero-unit-tests-for-all-services-critical">GAP QA-001: Zero Unit Tests for All Services (CRITICAL)</h3>
+
+<p>The <code>tests/unit/crew_monitor/</code> directory contains <strong>zero test files</strong>. All three services (<code>CrewPerformanceMonitor</code>, <code>ContributionAnalyzer</code>, <code>ReportingTool</code>) are completely unverified.</p>
+
+<ul>
+<li><strong>Severity:</strong> Critical ⛔</li>
+<li><strong>Impact:</strong> This module IS the scientific instrument — if metrics are wrong, <strong>all experimental data in the paper is invalid</strong>. This is a double risk: module reliability AND paper credibility.</li>
+<li><strong>Source:</strong> No test files in <code>tests/unit/crew_monitor/</code>.</li>
+<li><strong>Recommendation:</strong> Priority test targets:
+<ol>
+<li><code>CrewPerformanceMonitor.get_metrics()</code> — Mock <code>psutil</code> and <code>pynvml</code>, verify delta calculations</li>
+<li><code>ContributionAnalyzer._calculate_feature_contribution()</code> — Test with known contributor counts</li>
+<li><code>ReportingTool._generate_single_report()</code> — Verify Mean row calculation</li>
+<li><code>ReportingTool._combine_reports()</code> — Verify melt-pivot output shape</li>
+</ol></li>
+<li><strong>Estimated Effort:</strong> 3 days</li>
+</ul>
+
+<h3 id="gap-qa-002-no-schema-validation-in-monitor-moderate">GAP QA-002: No Schema Validation in Monitor (MODERATE)</h3>
+
+<p>The <code>CrewPerformanceMonitor.get_metrics()</code> returns a raw dict. The Pydantic <code>PerformanceMetrics</code> schema in <code>domain/schemas.py</code> is <strong>defined but never used</strong> in the monitor itself.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Impact:</strong> No guarantee that returned metrics conform to the schema.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/domain/schemas.py">schemas.py</a> defined but not imported in <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py">crew<em>performance</em>monitor.py</a>.</li>
+<li><strong>Recommendation:</strong> Have <code>get_metrics()</code> return <code>PerformanceMetrics</code> instead of raw dict.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<hr />
+
+<h2 id="2-experimental-gaps">2. Experimental Gaps</h2>
+
+<h3 id="gap-exp-001-no-observer-effect-analysis-critical">GAP EXP-001: No Observer Effect Analysis (CRITICAL)</h3>
+
+<p>No data exists on how much the monitor itself affects the measured system — the classic "Observer Effect" in instrumentation.</p>
+
+<ul>
+<li><strong>Severity:</strong> Critical ⛔</li>
+<li><strong>Description:</strong> <code>psutil.cpu_percent()</code> and <code>pynvml</code> calls consume CPU/memory themselves. Without quantifying this overhead, all measurements have an unknown systematic error.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L27-L62">crew<em>performance</em>monitor.py:L27–L62</a></li>
+<li><strong>Recommendation:</strong> Run identical crews with and without monitoring, compare execution times.</li>
+<li><strong>Estimated Effort:</strong> 1 day</li>
+</ul>
+
+<h3 id="gap-exp-002-no-consensus-accuracy-validation-critical">GAP EXP-002: No Consensus Accuracy Validation (CRITICAL)</h3>
+
+<p>The consensus metric <span class="math inline">\(P(F)\)</span> is never validated against ground truth. There is no evidence that higher consensus correlates with higher accuracy.</p>
+
+<ul>
+<li><strong>Severity:</strong> Critical ⛔</li>
+<li><strong>Description:</strong> The claim that "100% consensus = high confidence feature" is assumed but untested. All LLMs could unanimously hallucinate.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py#L65-L79">contribution_analyzer.py:L65–L79</a></li>
+<li><strong>Recommendation:</strong> Create labeled ground truth dataset, compute correlation between <span class="math inline">\(P(F)\)</span> and accuracy.</li>
+<li><strong>Estimated Effort:</strong> 3 days</li>
+</ul>
+
+<h3 id="gap-exp-003-no-statistical-significance-moderate">GAP EXP-003: No Statistical Significance (MODERATE)</h3>
+
+<p>The Mean row in <code>ReportingTool</code> reports arithmetic mean without confidence intervals or standard deviation.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py#L79-L81">reporting_tool.py:L79–L81</a> — Only computes <code>mean()</code>.</li>
+<li><strong>Recommendation:</strong> Add std, median, and 95% confidence interval rows.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<hr />
+
+<h2 id="3-implementation-gaps">3. Implementation Gaps</h2>
+
+<h3 id="gap-hw-001-nvidia-only-gpu-support-moderate">GAP HW-001: NVIDIA-Only GPU Support (MODERATE)</h3>
+
+<p>GPU monitoring depends on <code>pynvml</code> which only supports NVIDIA GPUs.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Description:</strong> AMD (ROCm), Apple Silicon (MPS), and Intel ARC GPUs are unsupported.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L6">crew<em>performance</em>monitor.py:L6</a> — <code>import pynvml</code></li>
+<li><strong>Recommendation:</strong> Abstract GPU interface behind a Protocol, implement per-vendor adapters.</li>
+<li><strong>Estimated Effort:</strong> 2 days</li>
+</ul>
+
+<h3 id="gap-impl-001-synchronous-blocking-calls-moderate">GAP IMPL-001: Synchronous Blocking Calls (MODERATE)</h3>
+
+<p>All <code>psutil</code> and <code>pynvml</code> calls block the main thread synchronously.</p>
+
+<ul>
+<li><strong>Severity:</strong> Moderate</li>
+<li><strong>Description:</strong> The monitoring overhead is injected into the critical path. In performance-sensitive scenarios, this adds latency to the measured execution.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L31-L32">crew<em>performance</em>monitor.py:L31–L32, L48–L49</a></li>
+<li><strong>Recommendation:</strong> Offload snapshots to a background thread.</li>
+<li><strong>Estimated Effort:</strong> 1 day</li>
+</ul>
+
+<h3 id="gap-impl-002-gpu-memory-leak-risk-minor">GAP IMPL-002: GPU Memory Leak Risk (MINOR)</h3>
+
+<p>If <code>stop_monitoring()</code> is never called (e.g., exception during crew execution), <code>pynvml.nvmlShutdown()</code> is never invoked.</p>
+
+<ul>
+<li><strong>Severity:</strong> Minor</li>
+<li><strong>Description:</strong> NVML resource handle may leak if the lifecycle is interrupted.</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L60">crew<em>performance</em>monitor.py:L60</a> — <code>nvmlShutdown()</code> only in <code>stop_monitoring()</code></li>
+<li><strong>Recommendation:</strong> Use context manager (<code>__enter__</code> / <code>__exit__</code>) pattern for automatic cleanup.</li>
+<li><strong>Estimated Effort:</strong> 0.5 days</li>
+</ul>
+
+<h3 id="gap-impl-003-cpu-snapshot-vs-average-minor">GAP IMPL-003: CPU Snapshot vs Average (MINOR)</h3>
+
+<p><code>cpu_percent(interval=None)</code> returns an instantaneous snapshot, not an average over the execution window.</p>
+
+<ul>
+<li><strong>Severity:</strong> Minor</li>
+<li><strong>Description:</strong> A single-point CPU reading is unreliable (could be 5% or 95% depending on the instant).</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py#L31">crew<em>performance</em>monitor.py:L31</a> — <code>interval=None</code></li>
+<li><strong>Recommendation:</strong> Sample CPU at intervals during execution and compute average.</li>
+<li><strong>Estimated Effort:</strong> 1 day</li>
+</ul>
+
+<h3 id="gap-impl-004-private-method-used-as-public-api-minor">GAP IMPL-004: Private Method Used as Public API (MINOR)</h3>
+
+<p><code>JsonUtils._load_json_from_directory()</code> is called directly in <code>ReportingTool</code> despite the leading underscore indicating it's private.</p>
+
+<ul>
+<li><strong>Severity:</strong> Minor</li>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py#L51">reporting_tool.py:L51</a></li>
+<li><strong>Recommendation:</strong> Either make it public (<code>load_json_from_directory</code>) or add a proper public method.</li>
+<li><strong>Estimated Effort:</strong> 5 minutes</li>
+</ul>
+
+<hr />
+
+<h2 id="4-gap-summary-matrix">4. Gap Summary Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>Gap ID</th>
+  <th>Category</th>
+  <th>Severity</th>
+  <th>Effort</th>
+  <th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>QA-001</td>
+  <td>Testing</td>
+  <td>Critical ⛔</td>
+  <td>3 days</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>QA-002</td>
+  <td>Schema</td>
+  <td>Moderate</td>
+  <td>0.5 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>EXP-001</td>
+  <td>Benchmark</td>
+  <td>Critical ⛔</td>
+  <td>1 day</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>EXP-002</td>
+  <td>Validation</td>
+  <td>Critical ⛔</td>
+  <td>3 days</td>
+  <td>P0</td>
+</tr>
+<tr>
+  <td>EXP-003</td>
+  <td>Statistics</td>
+  <td>Moderate</td>
+  <td>0.5 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>HW-001</td>
+  <td>Hardware</td>
+  <td>Moderate</td>
+  <td>2 days</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>IMPL-001</td>
+  <td>Performance</td>
+  <td>Moderate</td>
+  <td>1 day</td>
+  <td>P2</td>
+</tr>
+<tr>
+  <td>IMPL-002</td>
+  <td>Resource</td>
+  <td>Minor</td>
+  <td>0.5 day</td>
+  <td>P3</td>
+</tr>
+<tr>
+  <td>IMPL-003</td>
+  <td>Accuracy</td>
+  <td>Minor</td>
+  <td>1 day</td>
+  <td>P3</td>
+</tr>
+<tr>
+  <td>IMPL-004</td>
+  <td>API</td>
+  <td>Minor</td>
+  <td>5 min</td>
+  <td>P3</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Total Critical Gaps:</strong> 3 | <strong>Total Gaps:</strong> 10 | <strong>Estimated Total Effort:</strong> ~13 days</p>
+
+                    </div>
+                </section>
+                <section id="mathematics" class="content-section">
+                    <div class="section-content">
+                        <p>This document formalizes the algorithms within the <code>crew_monitor</code> module, covering resource delta calculation, token usage parsing, feature consensus quantification, report aggregation with statistical summation, and Excel pivot-table generation.</p>
+
+<hr />
+
+<h2 id="1-resource-usage-delta-calculation-sandwich-profiler">1. Resource Usage Delta Calculation (Sandwich Profiler)</h2>
+
+<p>The <code>CrewPerformanceMonitor</code> captures the computational cost of an agent execution window by measuring the state change of system resources between two temporal checkpoints using a "sandwich" pattern.</p>
+
+<h3 id="code-verification">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py">crew<em>performance</em>monitor.py</a></li>
+<li><strong>Lines:</strong> L27–L62 (<code>start_monitoring</code>, <code>stop_monitoring</code>), L84–L123 (<code>get_metrics</code>)</li>
+</ul>
+
+<h3 id="formalization">Formalization</h3>
+
+<p>Let <span class="math inline">\(S(t)\)</span> be the system state vector at time <span class="math inline">\(t\)</span>:</p>
+
+<p><span class="math display">\[S(t) = \langle \texttt{Mem}(t),\; \texttt{CPU}(t),\; \{G_i(t)\}_{i=0}^{N_{gpu}-1} \rangle\]</span></p>
+
+<p>Where each GPU state <span class="math inline">\(G_i(t) = (\texttt{VRAM}_i(t),\; \texttt{Util}_i(t))\)</span>.</p>
+
+<p>The monitoring sandwich captures two states <span class="math inline">\(S(t_0)\)</span> and <span class="math inline">\(S(t_1)\)</span> around the execution:</p>
+
+<p><span class="math display">\[\texttt{Profile}(execution) = \left( S(t_0),\; execution(),\; S(t_1) \right)\]</span></p>
+
+<p><strong>Derived Metrics:</strong></p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:left;">Formula</th>
+  <th style="text-align:left;">Code</th>
+  <th style="text-align:left;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Duration</td>
+  <td style="text-align:left;"><span class="math inline">\(\Delta_t = t_1 - t_0\)</span></td>
+  <td style="text-align:left;"><code>end_time - start_time</code></td>
+  <td style="text-align:left;">L89</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Memory Delta</td>
+  <td style="text-align:left;"><span class="math inline">\(\Delta_{mem} = \frac{\texttt{Mem}(t_1) - \texttt{Mem}(t_0)}{1024^2}\)</span> (MB)</td>
+  <td style="text-align:left;"><code>memory_diff_mb</code></td>
+  <td style="text-align:left;">L90</td>
+</tr>
+<tr>
+  <td style="text-align:left;">GPU VRAM Delta</td>
+  <td style="text-align:left;"><span class="math inline">\(\Delta_{vram_i} = \frac{\texttt{VRAM}_i(t_1) - \texttt{VRAM}_i(t_0)}{1024^2}\)</span> (MB)</td>
+  <td style="text-align:left;"><code>end_mem - start_mem</code></td>
+  <td style="text-align:left;">L118</td>
+</tr>
+<tr>
+  <td style="text-align:left;">CPU Usage</td>
+  <td style="text-align:left;"><span class="math inline">\(\texttt{CPU}_{end} = \texttt{psutil.cpu\_percent}(t_1)\)</span></td>
+  <td style="text-align:left;"><code>end_cpu_percent</code></td>
+  <td style="text-align:left;">L48</td>
+</tr>
+<tr>
+  <td style="text-align:left;">GPU Utilization</td>
+  <td style="text-align:left;"><span class="math inline">\(\texttt{Util}_i(t_1)\)</span></td>
+  <td style="text-align:left;"><code>utilization.gpu</code></td>
+  <td style="text-align:left;">L59</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="gpu-graceful-degradation">GPU Graceful Degradation</h3>
+
+<p>The module uses <strong>conditional import</strong> for GPU monitoring:</p>
+
+<p><span class="math display">\[\texttt{GPU\_AVAILABLE} = \begin{cases}
+\texttt{True} & \text{if } \texttt{import pynvml} \text{ succeeds} \\
+\texttt{False} & \text{otherwise (skip GPU metrics)}
+\end{cases}\]</span></p>
+
+<p>This allows operation on CPU-only machines without errors (L5–L9).</p>
+
+<h3 id="complexity">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(N_{gpu})\)</span> per snapshot — Linear in number of GPUs.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(N_{gpu})\)</span> for storing per-GPU start/end memory values.</li>
+</ul>
+
+<hr />
+
+<h2 id="2-token-usage-parsing-polymorphic-extraction">2. Token Usage Parsing (Polymorphic Extraction)</h2>
+
+<p>The <code>log_usage()</code> method extracts token consumption from CrewAI results using a polymorphic extraction pattern that handles both dictionary and object-style responses.</p>
+
+<h3 id="code-verification-2">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py">crew<em>performance</em>monitor.py</a></li>
+<li><strong>Lines:</strong> L64–L82</li>
+</ul>
+
+<h3 id="formalization-2">Formalization</h3>
+
+<p>Let <span class="math inline">\(R\)</span> be the CrewAI result object. The extraction function <span class="math inline">\(\mathcal{E}: R \to \mathbb{Z}^3\)</span>:</p>
+
+<p><span class="math display">\[\mathcal{E}(R) = \begin{cases}
+(R.\texttt{token\_usage}[T_p],\; R.\texttt{token\_usage}[T_c],\; R.\texttt{token\_usage}[T_t]) & \text{if } \texttt{isinstance}(usage, dict) \\
+(\texttt{getattr}(usage, T_p, 0),\; \texttt{getattr}(usage, T_c, 0),\; \texttt{getattr}(usage, T_t, 0)) & \text{if } \texttt{hasattr}(usage, T_t) \\
+(0,\; 0,\; 0) & \text{otherwise (warning logged)}
+\end{cases}\]</span></p>
+
+<p>Where <span class="math inline">\(T_p = \texttt{prompt\_tokens}\)</span>, <span class="math inline">\(T_c = \texttt{completion\_tokens}\)</span>, <span class="math inline">\(T_t = \texttt{total\_tokens}\)</span>.</p>
+
+<h3 id="complexity-2">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(1)\)</span> — Constant-time attribute access.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(1)\)</span> — Three integer fields.</li>
+</ul>
+
+<hr />
+
+<h2 id="3-feature-consensus-quantification">3. Feature Consensus Quantification</h2>
+
+<p>The <code>ContributionAnalyzer</code> quantifies the reliability of agent-generated features by computing a <strong>consensus percentage</strong> across a population of <span class="math inline">\(N\)</span> LLMs.</p>
+
+<h3 id="code-verification-3">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py">contribution_analyzer.py</a></li>
+<li><strong>Lines:</strong> L65–L79 (<code>_calculate_feature_contribution</code>)</li>
+</ul>
+
+<h3 id="formalization-3">Formalization</h3>
+
+<p>Let <span class="math inline">\(\mathcal{L}\)</span> be the set of all participating LLMs, <span class="math inline">\(|\mathcal{L}| = N_{total}\)</span>.<br />
+Let <span class="math inline">\(\mathcal{F} = \{F_1, F_2, \dots, F_M\}\)</span> be the set of extracted features.<br />
+Let <span class="math inline">\(C_k \subseteq \mathcal{L}\)</span> be the subset of LLMs that contributed to feature <span class="math inline">\(F_k\)</span>.</p>
+
+<p>The <strong>Contribution Percentage</strong> <span class="math inline">\(P: \mathcal{F} \to [0, 100]\)</span>:</p>
+
+<p><span class="math display">\[P(F_k) = \left( \frac{|C_k|}{N_{total}} \right) \times 100\]</span></p>
+
+<h3 id="confidence-interpretation">Confidence Interpretation</h3>
+
+<p><span class="math display">\[\texttt{Confidence}(F_k) = \begin{cases}
+\texttt{UNANIMOUS} & \text{if } P(F_k) = 100\% \\
+\texttt{MAJORITY} & \text{if } 50\% < P(F_k) < 100\% \\
+\texttt{MINORITY} & \text{if } P(F_k) \leq 50\% \\
+\texttt{SINGULARITY} & \text{if } |C_k| = 1
+\end{cases}\]</span></p>
+
+<h3 id="guard-clause">Guard Clause</h3>
+
+<p><span class="math display">\[\texttt{Valid}(N_{total}) \iff N_{total} > 0 \quad \text{(prevents division by zero, L70–L72)}\]</span></p>
+
+<h3 id="complexity-3">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(M \times \bar{K})\)</span> where <span class="math inline">\(M\)</span> = features, <span class="math inline">\(\bar{K}\)</span> = avg contributors per feature.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(1)\)</span> — In-place modification of existing feature dictionary.</li>
+</ul>
+
+<h3 id="variable-mapping">Variable Mapping</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">LaTeX Symbol</th>
+  <th style="text-align:left;">Code Variable</th>
+  <th style="text-align:left;">File</th>
+  <th style="text-align:left;">Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(N_{total}\)</span></td>
+  <td style="text-align:left;"><code>total_llms</code></td>
+  <td style="text-align:left;"><code>contribution_analyzer.py</code></td>
+  <td style="text-align:left;">L46</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(|C_k|\)</span></td>
+  <td style="text-align:left;"><code>num_contributors</code></td>
+  <td style="text-align:left;"><code>contribution_analyzer.py</code></td>
+  <td style="text-align:left;">L76</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(P(F_k)\)</span></td>
+  <td style="text-align:left;"><code>percentage</code></td>
+  <td style="text-align:left;"><code>contribution_analyzer.py</code></td>
+  <td style="text-align:left;">L77</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><span class="math inline">\(\mathcal{F}\)</span></td>
+  <td style="text-align:left;"><code>feature_list</code></td>
+  <td style="text-align:left;"><code>contribution_analyzer.py</code></td>
+  <td style="text-align:left;">L74</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="4-batch-job-orchestration-pipeline">4. Batch Job Orchestration Pipeline</h2>
+
+<p>The <code>ContributionAnalyzer</code> processes multiple analysis jobs sequentially from a YAML configuration, implementing a batch processing pipeline.</p>
+
+<h3 id="code-verification-4">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py">contribution_analyzer.py</a></li>
+<li><strong>Lines:</strong> L25–L61 (<code>run</code>, <code>_process_job</code>)</li>
+</ul>
+
+<h3 id="formalization-4">Formalization</h3>
+
+<p>Let <span class="math inline">\(\mathcal{J} = \{J_1, J_2, \dots, J_P\}\)</span> be the set of analysis jobs defined in the YAML config.</p>
+
+<p>Each job <span class="math inline">\(J_i\)</span> is a 5-tuple:</p>
+
+<p><span class="math display">\[J_i = (\texttt{name}_i,\; \texttt{input}_i,\; N_i,\; \texttt{out\_json}_i,\; \texttt{out\_excel}_i)\]</span></p>
+
+<p>The batch pipeline:</p>
+
+<p><span class="math display">\[\texttt{run}() = \bigcirc_{i=1}^{P} \texttt{process}(J_i) = \bigcirc_{i=1}^{P} \left[ \texttt{Load}(J_i) \to \texttt{Analyze}(J_i) \to \texttt{Export}(J_i) \right]\]</span></p>
+
+<p>Export fan-out:</p>
+
+<p><span class="math display">\[\texttt{Export}(J_i) = \begin{cases}
+\texttt{SaveJSON}(J_i) & \text{if } \texttt{out\_json}_i \neq \bot \\
+\texttt{SaveExcel}(J_i) & \text{if } \texttt{out\_excel}_i \neq \bot \\
+\texttt{SaveJSON}(J_i) \land \texttt{SaveExcel}(J_i) & \text{if both defined}
+\end{cases}\]</span></p>
+
+<hr />
+
+<h2 id="5-report-aggregation-with-statistical-summation">5. Report Aggregation with Statistical Summation</h2>
+
+<p>The <code>ReportingTool</code> implements a multi-stage data transformation pipeline: JSON directory → DataFrame → Column reordering → Mean calculation → Excel export.</p>
+
+<h3 id="code-verification-5">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py">reporting_tool.py</a></li>
+<li><strong>Lines:</strong> L42–L90 (<code>_generate_single_report</code>)</li>
+</ul>
+
+<h3 id="formalization-5">Formalization</h3>
+
+<p><strong>Stage 1 — Data Extraction:</strong> For each JSON file <span class="math inline">\(f_j\)</span> in directory <span class="math inline">\(D\)</span>:</p>
+
+<p><span class="math display">\[\texttt{row}(f_j) = \left\{ \texttt{Feature}: f_j[\texttt{name}],\; \forall m_k \in \texttt{eval} : m_k.\texttt{metric} \mapsto m_k.\texttt{score} \right\}\]</span></p>
+
+<p><strong>Stage 2 — Mean Aggregation:</strong> For the matrix of numeric columns:</p>
+
+<p><span class="math display">\[\bar{x}_c = \frac{1}{|rows|} \sum_{r=1}^{|rows|} x_{r,c} \quad \forall c \in \texttt{numeric\_cols}\]</span></p>
+
+<p>This is appended as a summary row at the bottom of the Excel sheet (L79–L81).</p>
+
+<p><strong>Stage 3 — Cross-Report Combination:</strong> The <code>_combine_reports</code> method merges multiple Excel files using a melt-pivot transformation:</p>
+
+<p><span class="math display">\[\texttt{Melt}(df, \texttt{id\_vars}, \texttt{value\_vars}) \xrightarrow{\texttt{pivot}} \texttt{CrossReport}[Feature \times (Source, Metric)]\]</span></p>
+
+<h3 id="complexity-4">Complexity</h3>
+
+<ul>
+<li><strong>Time:</strong> <span class="math inline">\(O(|D| \times |evals| + |rows| \times |cols|)\)</span> for generation; <span class="math inline">\(O(|files| \times |rows|)\)</span> for combination.</li>
+<li><strong>Space:</strong> <span class="math inline">\(O(|rows| \times |cols|)\)</span> per DataFrame.</li>
+</ul>
+
+<hr />
+
+<h2 id="6-pydantic-metrics-schema-hierarchy">6. Pydantic Metrics Schema Hierarchy</h2>
+
+<p>The domain layer defines a typed schema for performance metrics using Pydantic.</p>
+
+<h3 id="code-verification-6">Code Verification</h3>
+
+<ul>
+<li><strong>Source:</strong> <a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/domain/schemas.py">schemas.py</a> (L1–L23)</li>
+</ul>
+
+<h3 id="formalization-6">Formalization</h3>
+
+<p><span class="math display">\[\texttt{PerformanceMetrics} = \texttt{GeneralMetrics} \times \{gpu_i \mapsto \texttt{GPUMetrics}\}\]</span></p>
+
+<p><span class="math display">\[\texttt{GeneralMetrics} = (m_{name}^?,\; T_{total},\; T_{prompt},\; T_{comp},\; \Delta_t,\; CPU_{\%},\; \Delta_{mem},\; Mem_0,\; Mem_1)\]</span></p>
+
+<p><span class="math display">\[\texttt{GPUMetrics} = (\texttt{Util}_{\%},\; \Delta_{vram},\; \texttt{VRAM}_0,\; \texttt{VRAM}_1)\]</span></p>
+
+<h3 id="type-safety">Type Safety</h3>
+
+<ul>
+<li><strong>Strict typing:</strong> All fields have explicit types (float, int, Optional[str]).</li>
+<li><strong>Default values:</strong> Token fields default to 0, allowing partial metrics.</li>
+</ul>
+
+<hr />
+
+<h2 id="algorithm-index">Algorithm Index</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th>Algorithm</th>
+  <th>Source File</th>
+  <th>Lines</th>
+  <th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td>Sandwich Profiler (Resource Delta)</td>
+  <td><code>crew_performance_monitor.py</code></td>
+  <td>L27–L123</td>
+  <td><span class="math inline">\(O(N_{gpu})\)</span></td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>Token Usage Parsing</td>
+  <td><code>crew_performance_monitor.py</code></td>
+  <td>L64–L82</td>
+  <td><span class="math inline">\(O(1)\)</span></td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>Feature Consensus Quantification</td>
+  <td><code>contribution_analyzer.py</code></td>
+  <td>L65–L79</td>
+  <td><span class="math inline">\(O(M \times \bar{K})\)</span></td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>Batch Job Pipeline</td>
+  <td><code>contribution_analyzer.py</code></td>
+  <td>L25–L61</td>
+  <td><span class="math inline">\(O(P \times M)\)</span></td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>Report Aggregation + Mean</td>
+  <td><code>reporting_tool.py</code></td>
+  <td>L42–L90</td>
+  <td><span class="math inline">\(O(|D| \times |evals|)\)</span></td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>Cross-Report Melt-Pivot</td>
+  <td><code>reporting_tool.py</code></td>
+  <td>L92–L144</td>
+  <td><span class="math inline">\(O(|files| \times |rows|)\)</span></td>
+</tr>
+<tr>
+  <td>7</td>
+  <td>Pydantic Schema Validation</td>
+  <td><code>schemas.py</code></td>
+  <td>L1–L23</td>
+  <td><span class="math inline">\(O(|fields|)\)</span></td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="novelty" class="content-section">
+                    <div class="section-content">
+                        <h2 id="novelty-classification">Novelty Classification</h2>
+
+<p><strong>Status:</strong> MODERATE<br />
+<strong>Confidence:</strong> HIGH</p>
+
+<p>The <code>crew_monitor</code> module makes two primary and two supplementary contributions: a <strong>Feature Consensus Metric</strong> for quantifying multi-agent output reliability, <strong>integrated resource-token profiling</strong> bridging physical and logical observability, <strong>config-driven batch analysis pipelines</strong>, and <strong>cross-report pivot aggregation</strong> for multi-dimensional comparison.</p>
+
+<hr />
+
+<h2 id="contribution-1-multi-agent-feature-consensus-metric">Contribution 1: Multi-Agent Feature Consensus Metric</h2>
+
+<ul>
+<li><strong>Type:</strong> Methodological Innovation</li>
+<li><strong>Novelty Level:</strong> ⭐⭐⭐ (Moderate-High)</li>
+<li><strong>Claim:</strong> A quantitative metric <span class="math inline">\(P(F) = |C_F| / N_{total} \times 100\)</span> that measures the reliability of agent-generated features based on population agreement. This moves beyond qualitative "hallucination checks" to a <strong>statistical measure of feature confidence</strong>.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py#L65-L79">ContributionAnalyzer.<em>calculate</em>feature_contribution()</a></li>
+<li>Consensus formula with 4-tier interpretation in Mathematics §3</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>LangChain/AutoGen:</strong> No built-in consensus measurement for multi-agent outputs.</li>
+<li><strong>CrewAI:</strong> No mechanism to compare outputs from multiple LLM runs.</li>
+<li><strong>Amsha:</strong> Treats multi-agent agreement as a <strong>first-class quality signal</strong> — if 5/5 agents mention Feature X, confidence is 100%.</li>
+</ul></li>
+<li><strong>Scientific Impact:</strong> Provides a proxy for ground-truth accuracy in domains where labeled data is unavailable. The consensus metric can serve as an unsupervised quality indicator.</li>
+<li><strong>Publication Angle:</strong> <em>"Quantifying Confidence in Black-Box Agent Systems: A Consensus-Based Approach"</em></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-2-integrated-resource-token-profiling">Contribution 2: Integrated Resource-Token Profiling</h2>
+
+<ul>
+<li><strong>Type:</strong> Empirical Tooling / Engineering Innovation</li>
+<li><strong>Novelty Level:</strong> ⭐⭐⭐ (Moderate-High)</li>
+<li><strong>Claim:</strong> Simultaneous tracking of <strong>physical resources</strong> (CPU%, RAM MB, GPU VRAM, GPU Utilization) and <strong>logical units</strong> (prompt tokens, completion tokens, total tokens) in a single monitoring session, enabling cross-dimensional analysis like "Cost Per Feature" and "VRAM Per Token".</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/crew_performance_monitor.py">CrewPerformanceMonitor</a> — Full class</li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/domain/schemas.py">PerformanceMetrics schema</a> — Typed output</li>
+<li>Sandwich profiler formalized in Mathematics §1</li>
+</ul></li>
+<li><strong>Differentiation:</strong>
+<ul>
+<li><strong>MLflow / Weights &amp; Biases:</strong> Track metrics at training time, not inference-time agent execution.</li>
+<li><strong>CrewAI built-in:</strong> Provides token counts only, no physical resource tracking.</li>
+<li><strong>Amsha:</strong> Bridges <strong>physical and logical</strong> observability in a single profiler with GPU graceful degradation.</li>
+</ul></li>
+<li><p><strong>Enabled Analyses:</strong></p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Cross-Dimensional Metric</th>
+  <th style="text-align:left;">Formula</th>
+  <th style="text-align:left;">Significance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Tokens per Second</td>
+  <td style="text-align:left;"><span class="math inline">\(T_{total} / \Delta_t\)</span></td>
+  <td style="text-align:left;">Inference throughput</td>
+</tr>
+<tr>
+  <td style="text-align:left;">VRAM per kToken</td>
+  <td style="text-align:left;"><span class="math inline">\(\Delta_{vram} / (T_{total}/1000)\)</span></td>
+  <td style="text-align:left;">Memory efficiency</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Cost per Feature</td>
+  <td style="text-align:left;"><span class="math inline">\(\Delta_t \times cost\_rate / |features|\)</span></td>
+  <td style="text-align:left;">Economic efficiency</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong>Publication Angle:</strong> <em>"Physical-Logical Observability for Multi-Agent LLM Systems"</em></p></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-3-config-driven-batch-analysis-pipeline">Contribution 3: Config-Driven Batch Analysis Pipeline</h2>
+
+<ul>
+<li><strong>Type:</strong> Engineering</li>
+<li><strong>Novelty Level:</strong> ⭐⭐ (Moderate)</li>
+<li><strong>Claim:</strong> Both <code>ContributionAnalyzer</code> and <code>ReportingTool</code> are <strong>entirely config-driven</strong> — all input paths, output paths, keys, and options are specified in YAML. Adding new analysis jobs requires <strong>zero code changes</strong>.</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/contribution_analyzer.py#L18-L21">ContributionAnalyzer.<strong>init</strong>(config<em>path)</a></li>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py#L16-L19">ReportingTool.<strong>init</strong>(config</em>path)</a></li>
+<li>Batch pipeline formalized in Mathematics §4</li>
+</ul></li>
+</ul>
+
+<hr />
+
+<h2 id="contribution-4-cross-report-pivot-aggregation">Contribution 4: Cross-Report Pivot Aggregation</h2>
+
+<ul>
+<li><strong>Type:</strong> Engineering</li>
+<li><strong>Novelty Level:</strong> ⭐⭐ (Moderate)</li>
+<li><strong>Claim:</strong> The <code>ReportingTool._combine_reports()</code> method implements a <strong>melt-pivot transformation</strong> that converts multiple single-dimension Excel reports into a multi-dimensional cross-report matrix indexed by Feature × (Source Report, Metric).</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><a href="file:///home/dell/PycharmProjects/Amsha/src/nikhil/amsha/crew_monitor/service/reporting_tool.py#L92-L144">ReportingTool.<em>combine</em>reports()</a></li>
+<li>Melt-pivot formalized in Mathematics §5</li>
+</ul></li>
+</ul>
+
+<hr />
+
+<h2 id="suggested-empirical-studies">Suggested Empirical Studies</h2>
+
+<h3 id="study-1-consensus-accuracy-correlation">Study 1: Consensus-Accuracy Correlation</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Run <span class="math inline">\(N=1, 3, 5, 7\)</span> agents on tasks with known ground truths</li>
+<li><strong>Method:</strong> Measure <span class="math inline">\(P(F)\)</span> for each feature, correlate with accuracy</li>
+<li><strong>Hypothesis:</strong> Higher consensus correlates with higher accuracy, with diminishing returns above <span class="math inline">\(N=5\)</span></li>
+<li><strong>Validates:</strong> Contribution 1</li>
+</ul>
+
+<h3 id="study-2-observer-effect-quantification">Study 2: Observer Effect Quantification</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Run identical crews with and without <code>CrewPerformanceMonitor</code> attached</li>
+<li><strong>Method:</strong> Measure <span class="math inline">\(\Delta_t\)</span> (execution time) for both conditions, compute overhead percentage</li>
+<li><strong>Hypothesis:</strong> Monitoring overhead is &lt; 1% of total execution time</li>
+<li><strong>Validates:</strong> Contribution 2</li>
+</ul>
+
+<h3 id="study-3-multi-provider-resource-comparison">Study 3: Multi-Provider Resource Comparison</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Profile the same workflow across 4 providers (Gemini, GPT-4, Llama-3-Local, Phi-4)</li>
+<li><strong>Method:</strong> Use <code>CrewPerformanceMonitor</code> to measure VRAM, RAM, Tokens, and Time per provider</li>
+<li><strong>Hypothesis:</strong> Local models use 3–10× more VRAM per token than cloud models</li>
+<li><strong>Validates:</strong> Contribution 2</li>
+</ul>
+
+<h3 id="study-4-consensus-scaling-law">Study 4: Consensus Scaling Law</h3>
+
+<ul>
+<li><strong>Experiment:</strong> Vary <span class="math inline">\(N_{total}\)</span> from 1 to 10, measure consensus convergence</li>
+<li><strong>Method:</strong> Track when <span class="math inline">\(P(F)\)</span> stabilizes for a fixed set of features</li>
+<li><strong>Hypothesis:</strong> Consensus converges at <span class="math inline">\(N \approx 5\)</span> for most feature types</li>
+<li><strong>Validates:</strong> Contributions 1 &amp; 3</li>
+</ul>
+
+<hr />
+
+<h2 id="publication-strategy">Publication Strategy</h2>
+
+<h3 id="recommended-paper-titles">Recommended Paper Titles</h3>
+
+<ol>
+<li><em>"Consensus-Based Confidence in Multi-Agent AI: Quantifying Feature Reliability Without Ground Truth"</em></li>
+<li><em>"Physical-Logical Observability: A Unified Profiling Framework for LLM Agent Systems"</em></li>
+<li><em>"The Observer Effect in Agent Monitoring: Balancing Measurement with Performance"</em></li>
+</ol>
+
+<h3 id="target-venues">Target Venues</h3>
+
+<ul>
+<li><strong>Journal:</strong> ACM Transactions on Intelligent Systems and Technology (TIST) — AI systems focus</li>
+<li><strong>Conference:</strong> AAAI (Agent track) — Consensus methodology</li>
+<li><strong>Workshop:</strong> MLSys — Systems profiling contribution</li>
+</ul>
+
+<hr />
+
+<h2 id="novelty-summary-matrix">Novelty Summary Matrix</h2>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">Contribution</th>
+  <th style="text-align:center;">Novelty</th>
+  <th style="text-align:left;">Type</th>
+  <th style="text-align:center;">Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;">Feature Consensus Metric</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+  <td style="text-align:left;">Methodological</td>
+  <td style="text-align:center;">Mathematics §3</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;">Integrated Resource-Token Profiling</td>
+  <td style="text-align:center;">⭐⭐⭐</td>
+  <td style="text-align:left;">Empirical Tooling</td>
+  <td style="text-align:center;">Mathematics §1</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;">Config-Driven Batch Pipeline</td>
+  <td style="text-align:center;">⭐⭐</td>
+  <td style="text-align:left;">Engineering</td>
+  <td style="text-align:center;">Mathematics §4</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;">Cross-Report Pivot Aggregation</td>
+  <td style="text-align:center;">⭐⭐</td>
+  <td style="text-align:left;">Engineering</td>
+  <td style="text-align:center;">Mathematics §5</td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+                <section id="summary" class="content-section">
+                    <div class="section-content">
+                        <h2 id="overview">Overview</h2>
+
+<p>The <code>crew_monitor</code> module is the <strong>scientific instrument</strong> of the Amsha framework — it produces all observability data used in the paper's experimental evaluation. With <strong>7 Python files</strong> across <strong>3 sub-packages</strong>, it implements a dual-layer monitoring system: <strong>Physical Layer</strong> (CPU, RAM, GPU, Token profiling via sandwich pattern) and <strong>Logical Layer</strong> (feature consensus analysis and cross-report aggregation).</p>
+
+<hr />
+
+<h2 id="key-findings">Key Findings</h2>
+
+<h3 id="1-mathematical-foundation-7-algorithms-formalized">1. Mathematical Foundation (7 Algorithms Formalized)</h3>
+
+<ul>
+<li><strong>Sandwich Profiler:</strong> State delta <span class="math inline">\(\Delta R = S(t_1) - S(t_0)\)</span> across CPU/RAM/GPU/Tokens.</li>
+<li><strong>Token Parsing:</strong> Polymorphic extraction handling both dict and object responses.</li>
+<li><strong>Feature Consensus:</strong> <span class="math inline">\(P(F) = |C_F| / N_{total} \times 100\)</span> with 4-tier confidence interpretation.</li>
+<li><strong>Batch Pipeline:</strong> Config-driven sequential job processing with dual export (JSON + Excel).</li>
+<li><strong>Report Aggregation:</strong> Mean calculation with column reordering.</li>
+<li><strong>Cross-Report Pivot:</strong> Melt-pivot transformation for multi-dimensional comparison.</li>
+<li><strong>Schema Validation:</strong> 3-model Pydantic hierarchy.</li>
+</ul>
+
+<h3 id="2-architecture-design-7-patterns-7-diagrams">2. Architecture &amp; Design (7 Patterns, 7 Diagrams)</h3>
+
+<ul>
+<li><strong>Patterns:</strong> Sandwich Profiler, Graceful Degradation, Polymorphic Extraction, Batch Processor, Configuration Object, ETL Pipeline, Pivot Table.</li>
+<li><strong>Diagrams:</strong> Layered Architecture, Class, Full Monitoring Lifecycle (4-phase sequence), Contribution Analysis Pipeline, Report Dual Pipeline, Cross-Module Integration.</li>
+<li><strong>Cross-Module:</strong> <code>CrewPerformanceMonitor</code> consumed by both <code>crew_forge</code> orchestrators.</li>
+</ul>
+
+<h3 id="3-research-gaps-10-identified">3. Research Gaps (10 Identified)</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Severity</th>
+  <th style="text-align:center;">Count</th>
+  <th style="text-align:left;">Key Items</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Critical ⛔</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;">Zero unit tests, no observer effect analysis, no consensus-accuracy validation</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Moderate</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:left;">NVIDIA-only GPU, synchronous blocking, unused Pydantic schemas, no statistical significance</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Minor</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;">GPU memory leak risk, CPU snapshot accuracy, private API usage</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Critical Risk:</strong> Since this is the measurement instrument, unverified metrics invalidate all experimental claims.<br />
+<strong>Total Estimated Effort:</strong> ~13 days to close all gaps.</p>
+
+<h3 id="4-novelty-assessment">4. Novelty Assessment</h3>
+
+<ul>
+<li><strong>Status:</strong> <strong>MODERATE</strong> (upgraded from INCREMENTAL)</li>
+<li><strong>4 Contributions Identified:</strong>
+<ol>
+<li>⭐⭐⭐ Multi-Agent Feature Consensus Metric</li>
+<li>⭐⭐⭐ Integrated Resource-Token Profiling</li>
+<li>⭐⭐ Config-Driven Batch Analysis Pipeline</li>
+<li>⭐⭐ Cross-Report Pivot Aggregation</li>
+</ol></li>
+<li><strong>Publication Angle:</strong> <em>"Consensus-Based Confidence in Multi-Agent AI"</em></li>
+<li><strong>Target Venues:</strong> ACM TIST, AAAI Agent track, MLSys</li>
+</ul>
+
+<hr />
+
+<h2 id="module-statistics">Module Statistics</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Total Python Files</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sub-Packages</td>
+  <td style="text-align:left;">3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Domain Models (Pydantic)</td>
+  <td style="text-align:left;">3</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Design Patterns</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Formalized Algorithms</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Architecture Diagrams</td>
+  <td style="text-align:left;">7</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Identified Research Gaps</td>
+  <td style="text-align:left;">10</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Novel Contributions</td>
+  <td style="text-align:left;">4</td>
+</tr>
+<tr>
+  <td style="text-align:left;">External Dependencies</td>
+  <td style="text-align:left;">4 (psutil, pynvml, pandas, openpyxl)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Consumer Modules</td>
+  <td style="text-align:left;">2 (crew_forge orchestrators)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Total Source Lines</td>
+  <td style="text-align:left;">~330</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Unit Test Files</td>
+  <td style="text-align:left;">0 ⚠️</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The <code>crew_monitor</code> module occupies a <strong>uniquely critical position</strong> in the research paper: as the measurement instrument, its correctness determines the validity of ALL experimental results. The Feature Consensus Metric is the strongest novel contribution — a domain-specific quality signal for multi-agent systems that requires no labeled data. However, the <strong>triple critical gap</strong> (no tests + no observer effect analysis + no consensus validation) must be addressed before any experimental claims can be published with confidence. Priority: validate the instrument before using its outputs.</p>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Toggle
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    
+    const btn = document.querySelector('.theme-toggle .text');
+    btn.textContent = newTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+    
+    const icon = document.querySelector('.theme-toggle .icon');
+    icon.textContent = newTheme === 'light' ? '🌙' : '☀️';
+    
+    localStorage.setItem('theme', newTheme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if (savedTheme === 'dark') {
+    document.querySelector('.theme-toggle .text').textContent = 'Light Mode';
+    document.querySelector('.theme-toggle .icon').textContent = '☀️';
+}
+
+// Smooth scrolling for navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        // Smooth scroll to section
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+    });
+});
+
+// Set first link as active on load
+document.querySelector('.nav-link')?.classList.add('active');
+
+// Export PDF function (placeholder)
+function exportPDF() {
+    window.print();
+}
+
+// Intersection Observer for active nav highlighting
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${id}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.content-section').forEach(section => {
+    observer.observe(section);
+});
+
+
+        // Initialize Mermaid
+        document.addEventListener('DOMContentLoaded', () => {
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+        mermaid.initialize({ startOnLoad: true, theme: theme });
+        });
+    </script>
+</body>
+
+</html>

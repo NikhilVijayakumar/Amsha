@@ -1,0 +1,76 @@
+{
+    "scientificConcept": "The Water Cycle",
+    "coreConcept": "The water cycle is the journey water takes as it evaporates, travels through the atmosphere, and returns as precipitation. It helps provide the fresh water necessary for all living things.",
+    "keyActorsAndComponents": [
+        {
+            "name": "The Sun",
+            "role": "Provides energy",
+            "description": "The Sun heats up the water in rivers, lakes, and oceans, causing it to turn into vapor and rise into the air."
+        },
+        {
+            "name": "Clouds",
+            "role": "Store and transport water",
+            "description": "Clouds are made of tiny water droplets and they carry water vapor around the earth until it’s heavy enough to fall back down."
+        },
+        {
+            "name": "Rain",
+            "role": "Precipitation",
+            "description": "Rain is the water that falls from clouds when they become too full. It replenishes rivers, lakes, and the soil."
+        },
+        {
+            "name": "Groundwater",
+            "role": "Reserves of water",
+            "description": "Groundwater is water that seeps into the ground and is stored in rocks and soil, helping plants grow."
+        },
+        {
+            "name": "Plants",
+            "role": "Use water",
+            "description": "Plants take in water through their roots and release it back into the air through a process called transpiration."
+        }
+    ],
+    "storyOfProcess": [
+        {
+            "step": 1,
+            "name": "Evaporation",
+            "description": "Water from oceans, rivers, and lakes is heated by the Sun and turns into vapor, rising into the atmosphere."
+        },
+        {
+            "step": 2,
+            "name": "Condensation",
+            "description": "As water vapor rises, it cools and turns back into tiny droplets, forming clouds."
+        },
+        {
+            "step": 3,
+            "name": "Precipitation",
+            "description": "When the clouds get heavy with water droplets, they release the water as rain, snow, or sleet, falling back to the ground."
+        },
+        {
+            "step": 4,
+            "name": "Collection",
+            "description": "The fallen water collects in rivers, lakes, and underground, starting the cycle all over again."
+        }
+    ],
+    "corePrinciples": [
+        {
+            "name": "Energy Transfer",
+            "description": "The Sun's energy is essential to drive the water cycle and maintain temperatures for life on Earth."
+        },
+        {
+            "name": "Water Conservation",
+            "description": "Understanding the water cycle helps us appreciate and conserve our water resources that are vital for survival."
+        },
+        {
+            "name": "Ecosystem Interactions",
+            "description": "The water cycle supports diverse ecosystems by providing necessary hydration for plants and animals."
+        }
+    ],
+    "relevantVocabulary": [
+        "evaporation",
+        "condensation",
+        "precipitation",
+        "humidity",
+        "transpiration",
+        "water vapor",
+        "groundwater"
+    ]
+}

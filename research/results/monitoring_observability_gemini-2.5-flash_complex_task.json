@@ -1,0 +1,24 @@
+{
+    "experiment": "monitoring_observability",
+    "model_id": "gemini-2.5-flash",
+    "dataset": "complex_task",
+    "timestamp": "20260226_164642",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "monitored_execution": {
+            "success": true,
+            "execution_time_s": 10.33
+        },
+        "unmonitored_execution": {
+            "success": true,
+            "execution_time_s": 11.39
+        },
+        "system_ram_delta_mb": 0.29,
+        "monitor_overhead_s": -1.06
+    }
+}

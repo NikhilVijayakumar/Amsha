@@ -1,0 +1,76 @@
+{
+    "scientificConcept": "The Water Cycle",
+    "coreConcept": "The water cycle is the continuous movement of water on, above, and below the surface of the Earth. It involves processes like evaporation, condensation, and precipitation, helping to circulate water throughout the environment.",
+    "keyActorsAndComponents": [
+        {
+            "name": "The Sun",
+            "role": "Heats water to turn it into vapor.",
+            "description": "The Sun shines down on water in rivers, lakes, and oceans, warming it up and causing it to evaporate into the air."
+        },
+        {
+            "name": "Water Vapor",
+            "role": "Rises into the air and cools down.",
+            "description": "As water evaporates, it becomes water vapor that floats into the sky. When it cools, it changes back to liquid."
+        },
+        {
+            "name": "Clouds",
+            "role": "Store water before it falls as precipitation.",
+            "description": "Water vapor collects in the sky to form clouds, which hold tiny water droplets until they are heavy enough to fall as rain."
+        },
+        {
+            "name": "Rain",
+            "role": "Delivers water back to the ground.",
+            "description": "When clouds get too full, they release water as rain, which falls back to Earth, watering plants and filling rivers and lakes."
+        },
+        {
+            "name": "The Earth",
+            "role": "Absorbs water and supports plant life.",
+            "description": "The ground soaks up rainwater, which plants use to grow. Some of this water also runs off into rivers and oceans."
+        }
+    ],
+    "storyOfProcess": [
+        {
+            "step": 1,
+            "name": "Evaporation",
+            "description": "The Sun heats water in rivers and oceans, turning it into vapor that rises into the air."
+        },
+        {
+            "step": 2,
+            "name": "Condensation",
+            "description": "As the water vapor rises, it cools and changes back into tiny droplets, forming clouds."
+        },
+        {
+            "step": 3,
+            "name": "Precipitation",
+            "description": "When the clouds get heavy enough, they let go of the water in the form of rain."
+        },
+        {
+            "step": 4,
+            "name": "Collection",
+            "description": "Rainwater collects in bodies of water, and the cycle starts all over again."
+        }
+    ],
+    "corePrinciples": [
+        {
+            "name": "Conservation of Water",
+            "description": "The water we use is part of a larger system that continuously cycles."
+        },
+        {
+            "name": "Climate Impact",
+            "description": "Changes in temperature can affect how water moves through the cycle."
+        },
+        {
+            "name": "Ecosystem Balance",
+            "description": "The water cycle supports all forms of life by providing essential water."
+        }
+    ],
+    "relevantVocabulary": [
+        "evaporation",
+        "condensation",
+        "precipitation",
+        "water vapor",
+        "clouds",
+        "rain",
+        "collection"
+    ]
+}

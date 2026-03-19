@@ -1,13 +1,12 @@
 [project]
 name = "Amsha"
-version = "2.2.7"
+version = "2.10.0"
 description = "Amsha is a lightweight library designed to provide common configuration and helper utilities for CrewAI orchestration. It serves as a foundational component for building scalable and maintainable AI agent systems"
 dependencies = [
-    "Nibandha @ git+https://github.com/NikhilVijayakumar/Nibandha.git@main",
+     "Nibandha[export] @ git+https://github.com/NikhilVijayakumar/Nibandha.git@main",
      "PyYAML ==6.0.3",
-    "crewai == 1.8.0",
-    "crewai-tools == 1.8.0",
-    "litellm  >=  1.72.1",
+    "crewai == 0.201.1",
+    "crewai-tools == 0.75.0",
     "dependency-injector == 4.48.2",
      "pandas == 2.3.2",
     "openpyxl == 3.1.5",
@@ -16,10 +15,15 @@ dependencies = [
     "docling == 2.53.0",
     "psutil == 7.1.3",
     "chardet == 5.2.0",
-    "nvidia-ml-py == 13.580.82",
-    "hypothesis == 6.148.7",
-    "pytest == 9.0.2",
-    "pytest-cov == 5.0.0"
+    "nvidia-ml-py == 13.580.82"
+]
+
+[project.optional-dependencies]
+research = [
+    "scikit-learn >= 1.3.0",
+    "matplotlib >= 3.7.0",
+    "seaborn >= 0.12.0",
+    "jupyter >= 1.0.0"
 ]
 
 [tool.setuptools]

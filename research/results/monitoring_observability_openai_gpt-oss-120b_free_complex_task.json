@@ -1,0 +1,23 @@
+{
+    "experiment": "monitoring_observability",
+    "model_id": "openai/gpt-oss-120b:free",
+    "dataset": "complex_task",
+    "timestamp": "20260226_183343",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "monitored_execution": {
+            "success": false,
+            "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+        },
+        "unmonitored_execution": {
+            "success": false,
+            "error": "Failed to get streaming response: litellm.NotFoundError: NotFoundError: OpenAIException - No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy"
+        },
+        "system_ram_delta_mb": 0.07
+    }
+}

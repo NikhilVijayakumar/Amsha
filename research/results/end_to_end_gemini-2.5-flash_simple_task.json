@@ -1,0 +1,26 @@
+{
+    "experiment": "end_to_end",
+    "model_id": "gemini-2.5-flash",
+    "dataset": "simple_task",
+    "timestamp": "20260226_164645",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "pipeline_timing": {
+            "total_time_s": 3.35,
+            "init_time_s": 0.0,
+            "exec_time_s": 3.34,
+            "tokens_used": 844,
+            "initialized_successfully": true,
+            "crew_output_preview": "Quick brown fox jumps over lazy dog near river bank."
+        },
+        "comparative": {
+            "amsha_loc": 1500,
+            "crewai_loc": 2200
+        }
+    }
+}

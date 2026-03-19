@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Report</title>
+    <style>
+        /* Modern Dashboard Layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --accent: #667eea;
+    --accent-dark: #5568d3;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --sidebar-width: 260px;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #1a202c;
+    --bg-secondary: #2d3748;
+    --bg-tertiary: #4a5568;
+    --text-primary: #f7fafc;
+    --text-secondary: #cbd5e0;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-primary);
+    border-right: 1px solid var(--bg-tertiary);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: var(--bg-secondary);
+}
+
+.grade-badge.grade-a { background: var(--success); color: white; }
+.grade-badge.grade-b { background: var(--info); color: white; }
+.grade-badge.grade-c { background: var(--warning); color: white; }
+.grade-badge.grade-d,
+.grade-badge.grade-f { background: var(--danger); color: white; }
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.nav-link.active {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    border-right: 3px solid var(--accent);
+}
+
+.nav-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.theme-toggle {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    background: var(--bg-primary);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.status-complete { background: #d1fae5; color: #065f46; }
+.status-badge.status-in-progress { background: #fef3c7; color: #92400e; }
+.status-badge.status-critical { background: #fee2e2; color: #991b1b; }
+
+.topbar-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Content */
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1400px;
+}
+
+.content-section {
+    margin-bottom: 3rem;
+}
+
+/* Metric Cards Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.card-green .card-icon { background: #d1fae5; }
+.card-red .card-icon { background: #fee2e2; }
+.card-yellow .card-icon { background: #fef3c7; }
+.card-blue .card-icon { background: #dbeafe; }
+
+.card-content {
+    flex: 1;
+}
+
+.card-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.card-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Section Content Styling */
+.section-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.section-content h2 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.section-content h3 {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.section-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-content th {
+    background: var(--accent);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.section-content td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.section-content tr:last-child td {
+    border-bottom: none;
+}
+
+.section-content tr:hover {
+    background: var(--bg-secondary);
+}
+
+.section-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-md);
+}
+
+.section-content pre {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.section-content code {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.section-content ul,
+.section-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.section-content li {
+    margin: 0.5rem 0;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar,
+    .topbar {
+        display: none;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .metric-card {
+        break-inside: avoid;
+    }
+}
+
+    </style>
+    <!-- Mermaid.js for diagram rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <!-- MathJax for LaTeX mathematical equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body data-theme="light">
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">Nibandha</h1>
+                <div class="grade-badge grade-n/a">
+                    N/A
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#final-journal-report" class="nav-link" data-section="final-journal-report">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-text">Final Journal Report</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="icon">🌙</span>
+                    <span class="text">Dark Mode</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <span class="status-badge status-complete">
+                        Complete
+                    </span>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <span>📄 Print</span>
+                    </button>
+                    <button class="btn btn-primary" onclick="exportPDF()">
+                        <span>📥 Export PDF</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <section id="final-journal-report" class="content-section">
+                    <div class="section-content">
+                        <p><strong>Abstract</strong></p>
+
+<p>The rapid proliferation of Large Language Models (LLMs) has catalyzed the emergence of autonomous Multi-Agent Systems (MAS). However, existing frameworks such as CrewAI, LangChain, and AutoGen prioritize rapid prototyping over software engineering rigor, resulting in tightly-coupled, difficult-to-maintain, and privacy-unaware applications. This paper presents <strong>Amsha</strong>, a novel MAS orchestration framework built on <strong>Clean Architecture</strong> principles. Amsha introduces: (1) a <strong>Dual-State Orchestration Engine</strong> supporting seamless transition between file-based prototyping and database-driven production via idempotent configuration synchronization; (2) a <strong>Privacy-First Multi-Provider LLM Factory</strong> with dual-layer telemetry neutralization (environment override + reflection-based method replacement); (3) an <strong>Integrated Physical-Logical Observability</strong> system that simultaneously profiles CPU/RAM/GPU resources and tokens while computing feature consensus metrics; and (4) a <strong>Psychometric Evaluation Pipeline</strong> applying Z-score relative grading with cascading JSON sanitization for fair agent assessment. We formally define 28 algorithms across 4 modules, identify 30 design patterns, catalog 45 research gaps, and present 18 novel contributions. Our architectural analysis demonstrates strict unidirectional dependencies (7/8 relationships valid) with one identified circular dependency requiring refactoring.</p>
+
+<p><strong>Keywords:</strong> Multi-Agent Systems, Clean Architecture, LLM Orchestration, Privacy-First Design, Agent Evaluation, Software Engineering for AI</p>
+
+<hr />
+
+<h2 id="1-introduction">1. Introduction</h2>
+
+<p>The engineering of Agentic AI systems is at an inflection point. While "Prompt Engineering" has dominated the discourse, the challenge is shifting towards <strong>Agent Systems Engineering</strong> — the creation of robust, scalable, and verifiable architectures that can harness non-deterministic LLM outputs for production use.</p>
+
+<p>Standard frameworks suffer from three fundamental weaknesses:</p>
+
+<ol>
+<li><strong>Tight Coupling:</strong> Agent logic is frequently intertwined with specific LLM providers. LangChain requires different client classes (<code>ChatOpenAI</code> vs. <code>ChatOllama</code> vs. <code>ChatGoogleGenerativeAI</code>), while AutoGen uses per-model configuration blocks.</li>
+<li><strong>Runtime Fragility:</strong> Configuration errors are detected only deep into execution, wasting tokens and compute. No existing framework provides static pre-execution validation of agent-task graphs.</li>
+<li><strong>Privacy Blind Spots:</strong> Third-party telemetry in libraries like CrewAI transmits usage data without explicit consent — problematic for research, healthcare, and government environments.</li>
+<li><strong>Evaluation Subjectivity:</strong> LLM-as-a-Judge scenarios produce biased scores without normalization. Absolute thresholds (e.g., MMLU's pass/fail) are sensitive to grader calibration.</li>
+</ol>
+
+<p>Amsha addresses these challenges by enforcing a <strong>Modular Monolith</strong> architecture with strict interface-based boundaries, dual-layer privacy enforcement, and psychometric evaluation methods. This paper details the design, mathematical foundations, and novel contributions of the framework.</p>
+
+<h3 id="11-paper-contributions">1.1 Paper Contributions</h3>
+
+<p>This paper makes the following contributions:</p>
+
+<ol>
+<li><strong>Architectural:</strong> A 4-module Clean Architecture framework with formally verified dependency structure (§2)</li>
+<li><strong>Mathematical:</strong> 28 formalized algorithms with complexity analysis and code-verified variable mappings (§3)</li>
+<li><strong>Methodological:</strong> Privacy-first LLM provisioning, psychometric agent evaluation, and feature consensus metrics (§4, §5)</li>
+<li><strong>Empirical:</strong> Identification of 45 research gaps with severity classification and effort estimation (§6)</li>
+<li><strong>Comparative:</strong> Systematic comparison against CrewAI, LangChain, and AutoGen across 8 dimensions (§7)</li>
+</ol>
+
+<hr />
+
+<h2 id="2-system-architecture">2. System Architecture</h2>
+
+<h3 id="21-module-structure">2.1 Module Structure</h3>
+
+<p>Amsha comprises <strong>4 primary modules</strong> totaling <strong>87 Python files</strong> across <strong>24 sub-packages</strong>, plus a shared utility layer:</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:center;">Files</th>
+  <th style="text-align:center;">Sub-Packages</th>
+  <th style="text-align:left;">Purpose</th>
+  <th style="text-align:center;">Source Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><strong>crew_forge</strong></td>
+  <td style="text-align:center;">56</td>
+  <td style="text-align:center;">12</td>
+  <td style="text-align:left;">Central orchestration engine</td>
+  <td style="text-align:center;">~2,500</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>llm_factory</strong></td>
+  <td style="text-align:center;">14</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:left;">Multi-provider LLM abstraction</td>
+  <td style="text-align:center;">~400</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>crew_monitor</strong></td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;">Physical-logical observability</td>
+  <td style="text-align:center;">~330</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>output_process</strong></td>
+  <td style="text-align:center;">10</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:left;">Validation &amp; evaluation pipeline</td>
+  <td style="text-align:center;">~860</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>amsha.utils</strong></td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:left;">Shared foundation (YAML, JSON, UTF-8)</td>
+  <td style="text-align:center;">~200</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Total</strong></td>
+  <td style="text-align:center;"><strong>91</strong></td>
+  <td style="text-align:center;"><strong>25</strong></td>
+  <td style="text-align:left;"></td>
+  <td style="text-align:center;"><strong>~4,290</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="22-dependency-architecture">2.2 Dependency Architecture</h3>
+
+<p>The system follows a <strong>Hub-and-Spoke</strong> model with <code>crew_forge</code> as the central orchestrator consuming services from three independent support modules. All dependencies are verified at the import level.</p>
+
+<div class="mermaid">
+%%{init: {'theme': 'base'}}%%
+flowchart TD
+    classDef core fill:#ff9999,stroke:#333,stroke-width:2px;
+    classDef support fill:#99ccff,stroke:#333,stroke-width:2px;
+    classDef shared fill:#ffffcc,stroke:#333,stroke-width:2px;
+
+    subgraph "Core Layer (Ce=3)"
+        CF["crew_forge<br/>56 files | I=0.75"]:::core
+    end
+
+    subgraph "Support Layer (Ce=0)"
+        LLM["llm_factory<br/>14 files | I=0.00"]:::support
+        MON["crew_monitor<br/>7 files | I=0.00"]:::support
+        OUT["output_process<br/>10 files | I=1.00"]:::support
+    end
+
+    subgraph "Foundation Layer (Ca=4)"
+        Utils["amsha.utils"]:::shared
+    end
+
+    CF -->|"LLMContainer, LLMType (4 imports)"| LLM
+    CF -->|"CrewPerformanceMonitor (2 imports)"| MON
+    OUT -.->|"CrewParser ⚠️ Circular (1 import)"| CF
+
+    CF --> Utils
+    LLM --> Utils
+    MON --> Utils
+    OUT --> Utils
+</div>
+
+<p><em>Figure 1: Code-verified module dependency graph with Martin's Instability index (<span class="math inline">\(I = C_e / (C_a + C_e)\)</span>). Dashed line indicates the single architectural violation.</em></p>
+
+<h3 id="23-coupling-analysis">2.3 Coupling Analysis</h3>
+
+<p>Using Robert Martin's Instability metric, we verify that support modules are maximally stable (<span class="math inline">\(I=0.00\)</span>) while the orchestrator carries appropriate instability (<span class="math inline">\(I=0.75\)</span>):</p>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:center;">Efferent (<span class="math inline">\(C_e\)</span>)</th>
+  <th style="text-align:center;">Afferent (<span class="math inline">\(C_a\)</span>)</th>
+  <th style="text-align:center;">Instability (<span class="math inline">\(I\)</span>)</th>
+  <th style="text-align:left;">Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:center;">0.75</td>
+  <td style="text-align:left;">Core orchestrator</td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">2</td>
+  <td style="text-align:center;">0.00</td>
+  <td style="text-align:left;">Stable provider</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:center;">0.00</td>
+  <td style="text-align:left;">Stable provider</td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:center;">1</td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">1.00</td>
+  <td style="text-align:left;">Consumer only</td>
+</tr>
+<tr>
+  <td style="text-align:left;">amsha.utils</td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">0.00</td>
+  <td style="text-align:left;">Foundation</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Architectural Validation Result:</strong> 7/8 dependency relationships follow valid downward direction. One violation detected: <code>output_process</code> → <code>crew_forge</code> (via <code>CrewParser</code> import).</p>
+
+<hr />
+
+<h2 id="3-mathematical-foundations">3. Mathematical Foundations</h2>
+
+<p>Amsha formalizes <strong>28 algorithms</strong> across 4 modules with complexity analysis and code-verified variable mappings. We present the key formalizations here.</p>
+
+<h3 id="31-blueprint-materialization-crew_forge">3.1 Blueprint Materialization (crew_forge)</h3>
+
+<p>The assembly of a crew follows a two-phase materialization process. A master <strong>Blueprint</strong> <span class="math inline">\(B\)</span> defines the crew topology:</p>
+
+<p><span class="math display">\[B = (\texttt{name}, \{id_{a_1}, \dots, id_{a_n}\}, \{id_{t_1}, \dots, id_{t_m}\})\]</span></p>
+
+<p>The materialization function <span class="math inline">\(\mathcal{M}: B \times \texttt{LLM} \to \texttt{Crew}\)</span>:</p>
+
+<p><span class="math display">\[\mathcal{M}(B, llm) = \texttt{Build}\left(\bigcup_{i=1}^{n} \texttt{Repo.get}(id_{a_i}),\; \bigcup_{j=1}^{m} \texttt{Repo.get}(id_{t_j}),\; llm\right)\]</span></p>
+
+<p><strong>Complexity:</strong> <span class="math inline">\(O(|A| + |T|)\)</span> for construction.</p>
+
+<h3 id="32-hierarchical-llm-configuration-resolution-llm_factory">3.2 Hierarchical LLM Configuration Resolution (llm_factory)</h3>
+
+<p>The configuration space uses a two-level hierarchical lookup. Let <span class="math inline">\(U = \{\texttt{creative}, \texttt{evaluation}\}\)</span> be use cases and <span class="math inline">\(M_u\)</span> available models per use case. The resolution function <span class="math inline">\(\mathcal{R}: U \times M^? \to \texttt{LLMModelConfig}\)</span>:</p>
+
+<p><span class="math display">\[\mathcal{R}(u, k_{opt}) = \begin{cases}
+\mathcal{S}[u].models[k_{opt}] & \text{if } k_{opt} \neq \bot \land k_{opt} \in M_u \\
+\mathcal{S}[u].models[\delta_u] & \text{if } k_{opt} = \bot \\
+\text{raise ValueError} & \text{otherwise}
+\end{cases}\]</span></p>
+
+<p>Where <span class="math inline">\(\delta_u\)</span> is the default model key for use case <span class="math inline">\(u\)</span>.</p>
+
+<h3 id="33-conditional-provider-instantiation-llm_factory">3.3 Conditional Provider Instantiation (llm_factory)</h3>
+
+<p>The factory branches on <code>base_url</code> presence to create cloud or local LLM instances:</p>
+
+<p><span class="math display">\[\mathcal{I}(c, p) = \begin{cases}
+\texttt{LLM}(api\_key, model, \tau, p_{top}, \dots) & \text{if } c.base\_url = \bot \text{ (Cloud)} \\
+\texttt{LLM}(base\_url, api\_key, model, \tau, \dots) & \text{if } c.base\_url \neq \bot \text{ (Local)}
+\end{cases}\]</span></p>
+
+<p>This enables zero-code provider switching across 6 supported configurations (Gemini, LM Studio/Phi-4, LM Studio/Llama-3, LM Studio/Gemma, LM Studio/GPT-OSS, Azure GPT-4o).</p>
+
+<h3 id="34-reflective-telemetry-interception-llm_factory">3.4 Reflective Telemetry Interception (llm_factory)</h3>
+
+<p>A dual-layer privacy defense neutralizes all CrewAI telemetry:</p>
+
+<p><strong>Layer 1:</strong> <span class="math inline">\(\texttt{env}[\texttt{OTEL\_SDK\_DISABLED}] \leftarrow \texttt{"true"}\)</span></p>
+
+<p><strong>Layer 2:</strong> For each callable attribute <span class="math inline">\(a\)</span> in the <code>Telemetry</code> class:</p>
+
+<p><span class="math display">\[T'.a = \lambda \texttt{*args, **kwargs}: \bot \quad \forall a \in \texttt{Attr}(T) : \texttt{callable}(a) \land \neg\texttt{startswith}(a, \texttt{"\_\_"})\]</span></p>
+
+<p><strong>Properties:</strong> Complete (all non-dunder callables replaced), idempotent (<span class="math inline">\(\texttt{disable}^n = \texttt{disable}^1\)</span>), non-invasive (no source modification).</p>
+
+<h3 id="35-resource-delta-profiling-crew_monitor">3.5 Resource Delta Profiling (crew_monitor)</h3>
+
+<p>The sandwich profiler captures states <span class="math inline">\(S(t_0)\)</span> and <span class="math inline">\(S(t_1)\)</span> around execution:</p>
+
+<p><span class="math display">\[S(t) = \langle \texttt{Mem}(t),\; \texttt{CPU}(t),\; \{(\texttt{VRAM}_i(t), \texttt{Util}_i(t))\}_{i=0}^{N_{gpu}-1} \rangle\]</span></p>
+
+<p><span class="math display">\[\Delta_{mem} = \frac{\texttt{Mem}(t_1) - \texttt{Mem}(t_0)}{1024^2} \text{ (MB)} \qquad \Delta_t = t_1 - t_0 \text{ (seconds)}\]</span></p>
+
+<p>With GPU graceful degradation: metrics are collected only when <code>pynvml</code> is available.</p>
+
+<h3 id="36-feature-consensus-quantification-crew_monitor">3.6 Feature Consensus Quantification (crew_monitor)</h3>
+
+<p>For <span class="math inline">\(N_{total}\)</span> participating LLMs and contributor set <span class="math inline">\(C_k\)</span> for feature <span class="math inline">\(F_k\)</span>:</p>
+
+<p><span class="math display">\[P(F_k) = \frac{|C_k|}{N_{total}} \times 100\]</span></p>
+
+<p>This provides an <strong>unsupervised quality signal</strong> — unanimous consensus (<span class="math inline">\(P=100\%\)</span>) indicates high-confidence features without requiring labeled ground truth.</p>
+
+<h3 id="37-z-score-relative-grading-output_process">3.7 Z-Score Relative Grading (output_process)</h3>
+
+<p>For score population <span class="math inline">\(S = \{s_1, \dots, s_n\}\)</span>:</p>
+
+<p><span class="math display">\[\mu = \frac{1}{n}\sum s_i \qquad \sigma = \sqrt{\frac{1}{n}\sum(s_i - \mu)^2}\]</span></p>
+
+<p><span class="math display">\[G(s_i) = \begin{cases} A & s_i > \mu + \sigma \\ B & \mu < s_i \leq \mu + \sigma \\ C & \mu - \sigma < s_i \leq \mu \\ D & s_i \leq \mu - \sigma \end{cases}\]</span></p>
+
+<p>Final CGPA: <span class="math inline">\(\texttt{CGPA} = \frac{1}{n}\sum W(G(s_i))\)</span> with <span class="math inline">\(W = \{A \mapsto 4.0, B \mapsto 3.0, C \mapsto 2.0, D \mapsto 1.0\}\)</span>.</p>
+
+<h3 id="38-cascading-json-sanitization-output_process">3.8 Cascading JSON Sanitization (output_process)</h3>
+
+<p>A 4-stage short-circuit cascade for extracting valid JSON from noisy LLM outputs:</p>
+
+<p><span class="math display">\[\texttt{Clean}(C) = \texttt{Parse}_1(\texttt{Fence}(C)) \lor \texttt{Parse}_2 \lor \texttt{Parse}_3 \lor \bot\]</span></p>
+
+<p>Where Stage 1 strips markdown fences, Stage 2 attempts direct parsing, Stage 3 extracts concatenated <code>{...}{...}</code> objects, and Stage 4 repairs stray quotes.</p>
+
+<h3 id="39-algorithm-summary">3.9 Algorithm Summary</h3>
+
+<table>
+<thead>
+<tr>
+  <th>#</th>
+  <th style="text-align:left;">Algorithm</th>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td style="text-align:left;">Blueprint Materialization</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;"><span class="math inline">\(O(|A|+|T|)\)</span></td>
+</tr>
+<tr>
+  <td>2</td>
+  <td style="text-align:left;">Idempotent Config Sync</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;"><span class="math inline">\(O(N \times P)\)</span></td>
+</tr>
+<tr>
+  <td>3</td>
+  <td style="text-align:left;">Configuration Resolution</td>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;"><span class="math inline">\(O(1)\)</span></td>
+</tr>
+<tr>
+  <td>4</td>
+  <td style="text-align:left;">Conditional Instantiation</td>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;"><span class="math inline">\(O(1)\)</span></td>
+</tr>
+<tr>
+  <td>5</td>
+  <td style="text-align:left;">Telemetry Interception</td>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;"><span class="math inline">\(O(|\texttt{Attr}|)\)</span></td>
+</tr>
+<tr>
+  <td>6</td>
+  <td style="text-align:left;">Sandwich Profiling</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;"><span class="math inline">\(O(N_{gpu})\)</span></td>
+</tr>
+<tr>
+  <td>7</td>
+  <td style="text-align:left;">Feature Consensus</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;"><span class="math inline">\(O(M \times \bar{K})\)</span></td>
+</tr>
+<tr>
+  <td>8</td>
+  <td style="text-align:left;">Z-Score Grading</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><span class="math inline">\(O(n)\)</span></td>
+</tr>
+<tr>
+  <td>9</td>
+  <td style="text-align:left;">Cascading Sanitization</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><span class="math inline">\(O(|C|)\)</span></td>
+</tr>
+<tr>
+  <td></td>
+  <td style="text-align:left;"><em>+ 19 additional algorithms</em></td>
+  <td style="text-align:left;"><em>See module papers</em></td>
+  <td style="text-align:left;"></td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="4-design-patterns">4. Design Patterns</h2>
+
+<p>The framework employs <strong>30 design patterns</strong> across all modules. We identify universal, majority, and unique patterns:</p>
+
+<h3 id="41-pattern-frequency">4.1 Pattern Frequency</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Pattern</th>
+  <th style="text-align:center;">crew_forge</th>
+  <th style="text-align:center;">llm_factory</th>
+  <th style="text-align:center;">crew_monitor</th>
+  <th style="text-align:center;">output_process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Configuration Object (YAML)</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Batch Processor</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Dependency Injection</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Builder/Factory</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Repository</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Monkey Patching</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sandwich Profiler</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Graceful Degradation</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">—</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Cascading Parser</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Statistical Strategy</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Pivot Table</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">—</td>
+  <td style="text-align:center;">✅</td>
+  <td style="text-align:center;">✅</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Key Finding:</strong> The Configuration Object pattern is <strong>universal</strong> (4/4 modules), demonstrating consistent config-as-code philosophy across the entire framework.</p>
+
+<h3 id="42-architectural-style">4.2 Architectural Style</h3>
+
+<p>The project follows <strong>Clean Architecture</strong> with 4 layers per module:</p>
+
+<ol>
+<li><strong>Domain:</strong> Pydantic models, enums (dependency-free)</li>
+<li><strong>Service:</strong> Business logic (depends inward on domain only)</li>
+<li><strong>Infrastructure:</strong> DI containers, repositories, external adapters</li>
+<li><strong>Application:</strong> Orchestrators, examples (compose services)</li>
+</ol>
+
+<hr />
+
+<h2 id="5-novel-contributions">5. Novel Contributions</h2>
+
+<h3 id="51-per-module-contributions-18-total">5.1 Per-Module Contributions (18 Total)</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Key Contributions</th>
+  <th style="text-align:center;">Novelty Rating</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">Blueprint Pattern, Idempotent Config Sync, Dual-Backend, Knowledge Pipeline, Privacy Reflection</td>
+  <td style="text-align:center;"><strong>MODERATE-HIGH</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;">Unified Multi-Provider Factory, Dual-Layer Privacy, Use-Case Parameters, Pre-Wired DI</td>
+  <td style="text-align:center;"><strong>MODERATE</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">Feature Consensus Metric, Integrated Resource-Token Profiling, Batch Pipeline, Pivot Aggregation</td>
+  <td style="text-align:center;"><strong>MODERATE</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Psychometric Z-Score Grading, Cascading JSON Sanitization, Multi-Model Consolidation, Rubric Scoring, Pre-Exec Validation</td>
+  <td style="text-align:center;"><strong>MODERATE</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="52-system-level-innovations-7">5.2 System-Level Innovations (7)</h3>
+
+<p><strong>Innovation 1: Dual-State Orchestration Engine.</strong> A single framework supports both YAML-file and MongoDB-database backends with idempotent synchronization between them. Unlike CrewAI (YAML-only) or AutoGen (code-only), Amsha enables a seamless prototype-to-production workflow.</p>
+
+<p><strong>Innovation 2: Privacy-First Multi-Provider Factory.</strong> The <code>llm_factory</code> creates LLMs for 6+ providers via YAML config with dual-layer privacy enforcement. The conditional <code>base_url</code> branching means zero client code changes when switching between Cloud SaaS and Local LM Studio.</p>
+
+<p><strong>Innovation 3: Integrated Physical-Logical Observability.</strong> Simultaneous tracking of physical resources (CPU, RAM, GPU VRAM) and logical units (tokens, features) enables cross-dimensional metrics like "VRAM per kToken" and "Cost per Feature."</p>
+
+<p><strong>Innovation 4: Psychometric Evaluation Pipeline.</strong> A 4-stage pipeline — cascading JSON sanitization → rubric scoring → Z-score grading → multi-model consolidation — applies psychometric principles to AI evaluation.</p>
+
+<p><strong>Innovation 5: Privacy-Guarded Monitored Execution.</strong> The integration of privacy (llm<em>factory) → orchestration (crew</em>forge) → profiling (crew_monitor) creates a system property where zero telemetry leaks during fully profiled execution.</p>
+
+<p><strong>Innovation 6: End-to-End Build-Execute-Evaluate.</strong> The complete lifecycle from crew assembly through monitored execution to fair evaluation in a single framework.</p>
+
+<p><strong>Innovation 7: Config-as-Code Universality.</strong> Every module uses YAML-driven configuration, enabling a consistent developer experience.</p>
+
+<hr />
+
+<h2 id="6-comparative-analysis">6. Comparative Analysis</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Feature</th>
+  <th style="text-align:left;">Amsha</th>
+  <th style="text-align:left;">CrewAI</th>
+  <th style="text-align:left;">LangChain</th>
+  <th style="text-align:left;">AutoGen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;"><strong>Backend</strong></td>
+  <td style="text-align:left;">Hybrid File+DB</td>
+  <td style="text-align:left;">File only</td>
+  <td style="text-align:left;">Code only</td>
+  <td style="text-align:left;">Code only</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>LLM Switching</strong></td>
+  <td style="text-align:left;">Zero-code (YAML)</td>
+  <td style="text-align:left;">Partial</td>
+  <td style="text-align:left;">Different classes</td>
+  <td style="text-align:left;">Config dicts</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Privacy</strong></td>
+  <td style="text-align:left;">Dual-layer (env + reflection)</td>
+  <td style="text-align:left;">None built-in</td>
+  <td style="text-align:left;">None</td>
+  <td style="text-align:left;">None</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Monitoring</strong></td>
+  <td style="text-align:left;">Physical+Logical+Consensus</td>
+  <td style="text-align:left;">Token counts</td>
+  <td style="text-align:left;">Callbacks</td>
+  <td style="text-align:left;">Conversation log</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Evaluation</strong></td>
+  <td style="text-align:left;">Z-score + multi-judge</td>
+  <td style="text-align:left;">None built-in</td>
+  <td style="text-align:left;">None</td>
+  <td style="text-align:left;">None</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>JSON Recovery</strong></td>
+  <td style="text-align:left;">4-stage cascade</td>
+  <td style="text-align:left;">None</td>
+  <td style="text-align:left;">OutputParser</td>
+  <td style="text-align:left;">None</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Architecture</strong></td>
+  <td style="text-align:left;">Clean Arch + DI</td>
+  <td style="text-align:left;">Monolithic</td>
+  <td style="text-align:left;">Library</td>
+  <td style="text-align:left;">Framework</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Config Sync</strong></td>
+  <td style="text-align:left;">Idempotent YAML↔DB</td>
+  <td style="text-align:left;">N/A</td>
+  <td style="text-align:left;">N/A</td>
+  <td style="text-align:left;">N/A</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="7-critical-gaps-and-limitations">7. Critical Gaps and Limitations</h2>
+
+<p>Our analysis identified <strong>45 research gaps</strong> across 4 modules. The most critical are summarized below:</p>
+
+<h3 id="71-testing-gaps-critical">7.1 Testing Gaps (Critical)</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Gap ID</th>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">QA-001</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">No unit tests for service/orchestrator layers</td>
+</tr>
+<tr>
+  <td style="text-align:left;">QA-002</td>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;">Test <code>.pyc</code> caches exist but <code>.py</code> files are missing</td>
+</tr>
+<tr>
+  <td style="text-align:left;">QA-003</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">Zero test files — all metrics are unverified</td>
+</tr>
+<tr>
+  <td style="text-align:left;">QA-004</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">No tests for evaluation/validation (2 missing import bugs found)</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="72-experimental-gaps">7.2 Experimental Gaps</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Gap ID</th>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">PERF-001</td>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;">No provider latency benchmarks</td>
+</tr>
+<tr>
+  <td style="text-align:left;">EXP-001</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">No observer effect quantification</td>
+</tr>
+<tr>
+  <td style="text-align:left;">EXP-002</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">No consensus-accuracy correlation data</td>
+</tr>
+<tr>
+  <td style="text-align:left;">METH-001</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">No inter-rater reliability (Cohen's/Fleiss' κ)</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="73-implementation-bugs-discovered">7.3 Implementation Bugs Discovered</h3>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Module</th>
+  <th style="text-align:left;">Bug</th>
+  <th style="text-align:left;">Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">llm_factory</td>
+  <td style="text-align:left;">Azure prefix <code>"azure"</code> should be <code>"azure/"</code></td>
+  <td style="text-align:left;">Minor</td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><code>JsonUtils</code> used but <strong>never imported</strong> (2 files)</td>
+  <td style="text-align:left;"><strong>Runtime crash</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;"><code>_apply_relative_grading()</code> duplicated across 2 files</td>
+  <td style="text-align:left;">Moderate</td>
+</tr>
+<tr>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;"><code>PerformanceMetrics</code> schema defined but never imported</td>
+  <td style="text-align:left;">Minor</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="74-architectural-violation">7.4 Architectural Violation</h3>
+
+<p><code>output_process.validation.crew_validator</code> imports <code>CrewParser</code> from <code>crew_forge.seeding.parser</code>, creating a circular dependency that violates the Dependency Inversion Principle.</p>
+
+<p><strong>Recommended Fix:</strong> Extract <code>CrewParser</code> to <code>amsha.utils.parsing</code>.</p>
+
+<hr />
+
+<h2 id="8-gap-summary">8. Gap Summary</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Severity</th>
+  <th style="text-align:center;">Count</th>
+  <th style="text-align:left;">Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Critical ⛔</td>
+  <td style="text-align:center;">10</td>
+  <td style="text-align:left;">Missing tests (all modules), no benchmarks, no consensus validation</td>
+</tr>
+<tr>
+  <td style="text-align:left;">High</td>
+  <td style="text-align:center;">5</td>
+  <td style="text-align:left;">Missing imports (bugs), no telemetry verification</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Moderate</td>
+  <td style="text-align:center;">18</td>
+  <td style="text-align:left;">Hardcoded configs, synchronous blocking, no confidence intervals</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Minor</td>
+  <td style="text-align:center;">12</td>
+  <td style="text-align:left;">Debug prints, API naming, CPU snapshot accuracy</td>
+</tr>
+<tr>
+  <td style="text-align:left;"><strong>Total</strong></td>
+  <td style="text-align:center;"><strong>45</strong></td>
+  <td style="text-align:left;"><strong>Estimated total effort: ~51 days</strong></td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="9-suggested-empirical-studies">9. Suggested Empirical Studies</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Study</th>
+  <th style="text-align:left;">Method</th>
+  <th style="text-align:left;">Validates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Provider Latency Comparison</td>
+  <td style="text-align:left;">100 prompts × 6 providers, measure TTFT/TotalTime</td>
+  <td style="text-align:left;">Multi-provider factory</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Privacy Enforcement Completeness</td>
+  <td style="text-align:left;">Wireshark network capture with/without telemetry disabling</td>
+  <td style="text-align:left;">Dual-layer privacy</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Consensus-Accuracy Correlation</td>
+  <td style="text-align:left;"><span class="math inline">\(N=1,3,5,7\)</span> agents vs. ground truth, measure Kendall tau</td>
+  <td style="text-align:left;">Feature consensus metric</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Observer Effect Quantification</td>
+  <td style="text-align:left;">Identical crews with/without monitor, compare <span class="math inline">\(\Delta_t\)</span></td>
+  <td style="text-align:left;">Monitoring overhead</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Absolute vs. Relative Grading</td>
+  <td style="text-align:left;">10 runs, compare rank stability (Kendall tau-distance)</td>
+  <td style="text-align:left;">Z-score grading</td>
+</tr>
+<tr>
+  <td style="text-align:left;">Cross-Evaluator Agreement</td>
+  <td style="text-align:left;">Fleiss' κ across 4 evaluator models</td>
+  <td style="text-align:left;">Multi-judge pipeline</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h2 id="10-conclusion">10. Conclusion</h2>
+
+<p>Amsha represents a <strong>Structure-First</strong> approach to Generative AI engineering. By prioritizing architectural rigor — typified by Clean Architecture layers, 28 formal algorithms, 30 design patterns, dual-layer privacy enforcement, and psychometric evaluation — it offers a comprehensive blueprint for building reliable, enterprise-grade Multi-Agent Systems.</p>
+
+<p>The framework's novelty is <strong>greater than the sum of its parts</strong>: while individual module contributions are MODERATE, their compositional synergy — privacy-guarded execution with integrated profiling, config-as-code universality, and psychometric evaluation — produces a system-level innovation rated <strong>MODERATE-HIGH</strong>.</p>
+
+<p>Critical limitations include the testing gap across all modules (10 critical gaps), the architectural circular dependency, and the absence of empirical benchmarks. Addressing the 45 identified gaps (~51 engineering days) would elevate the framework from architecturally sound to production-validated.</p>
+
+<p>The shift from "Prompt Engineering" to "Agent Systems Engineering" requires exactly this kind of rigorous, privacy-conscious, and scientifically evaluable framework design.</p>
+
+<hr />
+
+<h2 id="appendix-a-module-statistics">Appendix A: Module Statistics</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Metric</th>
+  <th style="text-align:center;">crew_forge</th>
+  <th style="text-align:center;">llm_factory</th>
+  <th style="text-align:center;">crew_monitor</th>
+  <th style="text-align:center;">output_process</th>
+  <th style="text-align:center;"><strong>Total</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">Python Files</td>
+  <td style="text-align:center;">56</td>
+  <td style="text-align:center;">14</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">10</td>
+  <td style="text-align:center;"><strong>87</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Sub-Packages</td>
+  <td style="text-align:center;">12</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:center;"><strong>24</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Pydantic Models</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">3</td>
+  <td style="text-align:center;">0</td>
+  <td style="text-align:center;"><strong>13</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Design Patterns</td>
+  <td style="text-align:center;">9</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">8</td>
+  <td style="text-align:center;"><strong>30</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Algorithms</td>
+  <td style="text-align:center;">8</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;"><strong>28</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Diagrams</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;">7</td>
+  <td style="text-align:center;">6</td>
+  <td style="text-align:center;"><strong>26</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Research Gaps</td>
+  <td style="text-align:center;">14</td>
+  <td style="text-align:center;">11</td>
+  <td style="text-align:center;">10</td>
+  <td style="text-align:center;">10</td>
+  <td style="text-align:center;"><strong>45</strong></td>
+</tr>
+<tr>
+  <td style="text-align:left;">Novel Contributions</td>
+  <td style="text-align:center;">5</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">4</td>
+  <td style="text-align:center;">5</td>
+  <td style="text-align:center;"><strong>18</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="appendix-b-external-dependencies">Appendix B: External Dependencies</h2>
+
+<table>
+<thead>
+<tr>
+  <th style="text-align:left;">Library</th>
+  <th style="text-align:left;">Modules</th>
+  <th style="text-align:left;">Risk Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:left;">crewai</td>
+  <td style="text-align:left;">crew<em>forge, llm</em>factory</td>
+  <td style="text-align:left;">High (API changes)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">pymongo</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;">pydantic</td>
+  <td style="text-align:left;">crew<em>forge, llm</em>factory</td>
+  <td style="text-align:left;">Medium</td>
+</tr>
+<tr>
+  <td style="text-align:left;">dependency-injector</td>
+  <td style="text-align:left;">crew<em>forge, llm</em>factory</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;">docling</td>
+  <td style="text-align:left;">crew_forge</td>
+  <td style="text-align:left;">Medium</td>
+</tr>
+<tr>
+  <td style="text-align:left;">psutil</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;">pynvml</td>
+  <td style="text-align:left;">crew_monitor</td>
+  <td style="text-align:left;">Low (optional)</td>
+</tr>
+<tr>
+  <td style="text-align:left;">pandas</td>
+  <td style="text-align:left;">crew<em>monitor, output</em>process</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;">numpy</td>
+  <td style="text-align:left;">output_process</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+<tr>
+  <td style="text-align:left;">openpyxl</td>
+  <td style="text-align:left;">crew<em>monitor, output</em>process</td>
+  <td style="text-align:left;">Low</td>
+</tr>
+</tbody>
+</table>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Toggle
+function toggleTheme() {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    
+    const btn = document.querySelector('.theme-toggle .text');
+    btn.textContent = newTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+    
+    const icon = document.querySelector('.theme-toggle .icon');
+    icon.textContent = newTheme === 'light' ? '🌙' : '☀️';
+    
+    localStorage.setItem('theme', newTheme);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if (savedTheme === 'dark') {
+    document.querySelector('.theme-toggle .text').textContent = 'Light Mode';
+    document.querySelector('.theme-toggle .icon').textContent = '☀️';
+}
+
+// Smooth scrolling for navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        // Smooth scroll to section
+        targetSection.scrollIntoView({ behavior: 'smooth' });
+    });
+});
+
+// Set first link as active on load
+document.querySelector('.nav-link')?.classList.add('active');
+
+// Export PDF function (placeholder)
+function exportPDF() {
+    window.print();
+}
+
+// Intersection Observer for active nav highlighting
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${id}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.content-section').forEach(section => {
+    observer.observe(section);
+});
+
+
+        // Initialize Mermaid
+        document.addEventListener('DOMContentLoaded', () => {
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+        mermaid.initialize({ startOnLoad: true, theme: theme });
+        });
+    </script>
+</body>
+
+</html>

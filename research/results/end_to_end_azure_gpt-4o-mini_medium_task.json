@@ -1,0 +1,26 @@
+{
+    "experiment": "end_to_end",
+    "model_id": "azure/gpt-4o-mini",
+    "dataset": "medium_task",
+    "timestamp": "20260226_164318",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "pipeline_timing": {
+            "total_time_s": 3.5,
+            "init_time_s": 0.0,
+            "exec_time_s": 3.49,
+            "tokens_used": 624,
+            "initialized_successfully": true,
+            "crew_output_preview": "1. **Stay Hydrated, Stay Healthy**  \n   Experience the power of AquaPure Filter Bottle, designed for urban professionals who understand the importance of pure water. With lab-tested filtration technology that removes 99.9% of waterborne pathogens, stay refreshed and protected all day long.  \n   **Ge"
+        },
+        "comparative": {
+            "amsha_loc": 1500,
+            "crewai_loc": 2200
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "experiment": "end_to_end",
+    "model_id": "azure/gpt-4o-mini",
+    "dataset": "complex_task",
+    "timestamp": "20260226_164326",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "pipeline_timing": {
+            "total_time_s": 8.36,
+            "init_time_s": 0.0,
+            "exec_time_s": 8.36,
+            "tokens_used": 1249,
+            "initialized_successfully": true,
+            "crew_output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The water cycle is the continuous movement of water on, above, and below the surface of the Earth. It involves processes like evaporation, condensation, and precipitation, helping to circulate water throughout the environment.\",\n    \""
+        },
+        "comparative": {
+            "amsha_loc": 1500,
+            "crewai_loc": 2200
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "experiment": "end_to_end",
+    "model_id": "gemini-2.5-flash",
+    "dataset": "complex_task",
+    "timestamp": "20260226_164703",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "pipeline_timing": {
+            "total_time_s": 12.5,
+            "init_time_s": 0.0,
+            "exec_time_s": 12.49,
+            "tokens_used": 3251,
+            "initialized_successfully": true,
+            "crew_output_preview": "Thought: I have carefully reviewed the instructions and the provided dataset content. I need to generate a JSON object representing a knowledge base about \"The Water Cycle\" for children aged 8-12. I will ensure all schema requirements and constraints, such as the exact number of actors, steps, and p"
+        },
+        "comparative": {
+            "amsha_loc": 1500,
+            "crewai_loc": 2200
+        }
+    }
+}

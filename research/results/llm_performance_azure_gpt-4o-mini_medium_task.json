@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "azure/gpt-4o-mini",
+    "dataset": "medium_task",
+    "timestamp": "20260226_164231",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 1.0,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": "Error code: 404 - {'error': {'code': '404', 'message': 'Resource not found'}}",
+            "output_preview": ""
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 3.28,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "1. **Stay Hydrated, Stay Healthy**\n   Eliminate the worry of waterborne pathogens with the AquaPure Filter Bottle, featuring triple-stage filtration tested to remove 99.9% of contaminants. Crafted fro..."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 2.67,
+            "tokens_in": 0,
+            "tokens_out": 627,
+            "error": null,
+            "output_preview": "1. **Headline**: Pure Hydration Anywhere You Go  \n   **Body text**: Discover the AquaPure Filter Bottle, designed for urban professionals who prioritize health. With triple-stage filtration, it guaran..."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": 2.28,
+            "amsha_crew_overhead_s": -0.61
+        }
+    }
+}

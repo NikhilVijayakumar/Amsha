@@ -1,0 +1,8 @@
+task:
+  name: "Dataset Processing Task"
+  description: |
+    Process the following dataset content exactly according to its embedded instructions.
+
+    Dataset Content:
+    {dataset_content}
+  expected_output: "The properly formatted output requested by the dataset instructions. Output only the final result."

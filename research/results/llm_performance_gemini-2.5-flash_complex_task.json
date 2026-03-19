@@ -1,0 +1,42 @@
+{
+    "experiment": "llm_performance",
+    "model_id": "gemini-2.5-flash",
+    "dataset": "complex_task",
+    "timestamp": "20260226_164605",
+    "system_info": {
+        "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "cpu_cores": 8,
+        "ram_gb": 15.37,
+        "gpu": "None"
+    },
+    "data": {
+        "tier1_native": {
+            "success": true,
+            "latency_s": 11.23,
+            "tokens_in": 380,
+            "tokens_out": 823,
+            "error": null,
+            "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The Water Cycle is like Earth's giant recycling system for water! It's how water moves all around our planet, from the ground to the s..."
+        },
+        "tier2_amsha_llm": {
+            "success": true,
+            "latency_s": 12.67,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "error": null,
+            "output_preview": "{\n    \"scientificConcept\": \"The Water Cycle\",\n    \"coreConcept\": \"The Water Cycle is like Earth's giant recycling system for water! It's how water moves all around our planet, from oceans to the sky a..."
+        },
+        "tier3_amsha_crew": {
+            "success": true,
+            "latency_s": 13.09,
+            "tokens_in": 0,
+            "tokens_out": 3623,
+            "error": null,
+            "output_preview": "{\"scientificConcept\": \"The Water Cycle\", \"coreConcept\": \"The Water Cycle is like Earth's big recycling system for water! Water is always moving all around our planet, changing from liquid to gas and b..."
+        },
+        "analysis": {
+            "amsha_llm_overhead_s": 1.44,
+            "amsha_crew_overhead_s": 0.42
+        }
+    }
+}
