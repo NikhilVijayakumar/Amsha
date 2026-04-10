@@ -5,7 +5,7 @@ This directory documents bugs found in the Nibandha logging library that affect 
 ## Critical Bugs
 
 ### 1. Handler Attachment Using basicConfig() ⚠️ CRITICAL
-**File**: [`handler_attachment_basicConfig.md`](./handler_attachment_basicConfig.md)
+**File**: [`handler_attachment_basicConfig.md`](handler_attachment_basicConfig.md)
 
 **Issue**: Nibandha uses `logging.basicConfig()` which attaches handlers to Python's ROOT logger instead of the application-specific logger (e.g., "Amsha").
 
@@ -21,7 +21,7 @@ This directory documents bugs found in the Nibandha logging library that affect 
 ---
 
 ### 2. Default Timestamp Format Too Granular ⚠️ MEDIUM  
-**File**: [`logger_timestamp_default.md`](./logger_timestamp_default.md)
+**File**: [`logger_timestamp_default.md`](logger_timestamp_default.md)
 
 **Issue**: Default `timestamp_format` is `%Y-%m-%d_%H-%M-%S` (includes time), causing a new log file on every restart.
 
