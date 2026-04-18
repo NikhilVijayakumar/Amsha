@@ -128,3 +128,5 @@ Thumbs.db
 /final/copy/gemini-2.5-flash_1.json
 /output/intermediate/output/copy/output_20260319180031/gemini-2.5-flash.json
 /output/intermediate/output/copy/output_20260319180141/gemini-2.5-flash.json
+/final/copy/openai_gpt-oss-20b.json
+/output/intermediate/output/copy/output_20260418084651/openai_gpt-oss-20b.json
