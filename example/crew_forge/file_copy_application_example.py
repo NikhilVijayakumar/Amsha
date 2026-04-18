@@ -1,7 +1,8 @@
 from typing import Dict, Any
 
 from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
-from amsha.llm_factory.domain.llm_type import LLMType
+from amsha.llm_factory.domain.model.llm_type import LLMType
+
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
 
 
