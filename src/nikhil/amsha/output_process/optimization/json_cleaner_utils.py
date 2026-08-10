@@ -93,8 +93,7 @@ class JsonCleanerUtils:
         """Ensures the directory for the final output file exists."""
         self.output_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    @staticmethod
-    def _clean_and_parse_string(content: str) -> Optional[Any]:
+    def _clean_and_parse_string(self, content: str) -> Optional[Any]:
         """
         Cleans and parses JSON strings, even if:
         - There’s junk text above ```json or ``` fences.
