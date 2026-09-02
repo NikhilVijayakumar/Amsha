@@ -3,7 +3,7 @@ CrewApplication Protocol interface.
 
 Defines the high-level interface for crew application management that clients
 depend on. This Protocol enables structural typing and duck typing for
-different application implementations (File-based, DB-based, etc.).
+different file-based application implementations.
 """
 
 from typing import Protocol, Dict, Any, Optional, Union, runtime_checkable
@@ -17,8 +17,8 @@ class CrewApplication(Protocol):
     High-level interface for crew application management.
     
     This Protocol defines the client-facing interface for crew applications,
-    enabling different backend implementations (file-based, database-based)
-    to be used interchangeably through structural typing.
+    enabling different file-based application implementations to be used
+    interchangeably through structural typing.
     
     All implementations must provide these methods with compatible signatures
     and behavior to ensure Protocol compliance.

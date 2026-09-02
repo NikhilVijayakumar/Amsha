@@ -87,6 +87,9 @@ class AmshaCrewDoclingSource(BaseKnowledgeSource):
             self.chunks.extend(list(new_chunks_iterable))
         self._save_documents()
 
+    async def aadd(self) -> None:
+        self.add()
+
     def _convert_source_to_docling_documents(self) -> List["DoclingDocument"]:
         conv_results_iter = self.document_converter.convert_all(self.safe_file_paths)
         return [result.document for result in conv_results_iter]

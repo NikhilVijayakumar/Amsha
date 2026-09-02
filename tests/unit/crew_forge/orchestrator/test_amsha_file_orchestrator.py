@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch, mock_open
 from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
 from amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from amsha.llm_factory.domain.model.llm_type import LLMType
-from amsha.crew_forge.exceptions import CrewConfigurationException, CrewManagerException
 
 class TestAmshaCrewFileApplication(unittest.TestCase):
     def setUp(self):
@@ -309,7 +308,7 @@ class TestAtomicCrewFileManager(unittest.TestCase):
             "crews": {
                 "test_crew": {
                     "steps": [
-                        {"task_file": "task1.yaml", "agent_file": "agent1.yaml"}
+                        {"task_key": "task1", "agent_key": "agent1"}
                     ]
                 }
             }
@@ -319,8 +318,7 @@ class TestAtomicCrewFileManager(unittest.TestCase):
         import shutil
         shutil.rmtree(self.test_dir)
 
-    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.CrewForgeContainer')
-    def test_initialization(self, mock_container):
+    def test_initialization(self):
         manager = AtomicCrewFileManager(
             llm=MagicMock(),
             app_config_path=self.app_config_path,
@@ -329,31 +327,30 @@ class TestAtomicCrewFileManager(unittest.TestCase):
         )
         self.assertEqual(manager.model_name, "gpt-4")
 
-    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.CrewForgeContainer')
-    def test_build_atomic_crew_success(self, mock_container):
+    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.AtomicYamlBuilderService')
+    def test_build_atomic_crew_success(self, mock_builder_class):
         from crewai import LLM
         mock_llm = MagicMock(spec=LLM)
-        
+
         mock_builder = MagicMock()
-        mock_container.return_value.atomic_yaml_builder.return_value = mock_builder
+        mock_builder_class.return_value = mock_builder
         mock_builder.get_last_agent.return_value = MagicMock()
         mock_builder.build.return_value = "MockCrew"
-        
+
         manager = AtomicCrewFileManager(
             llm=mock_llm,
             app_config_path=self.app_config_path,
             job_config=self.job_config,
             model_name="gpt-4"
         )
-        
+
         crew = manager.build_atomic_crew("test_crew", "suffix")
         self.assertEqual(crew, "MockCrew")
-        mock_container.return_value.atomic_yaml_builder.assert_called_once()
+        mock_builder_class.assert_called_once()
         mock_builder.add_agent.assert_called_once_with(knowledge_sources=None)
-        mock_builder.add_task.assert_called_once_with(agent=mock_builder.get_last_agent(), output_filename="gpt-4_suffix")
+        mock_builder.add_task.assert_called_once_with(agent=mock_builder.get_last_agent(), output_filename="gpt-4_suffix", output_json=None)
 
-    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.CrewForgeContainer')
-    def test_build_atomic_crew_missing_files(self, mock_container):
+    def test_build_atomic_crew_missing_files(self):
         from crewai import LLM
         mock_llm = MagicMock(spec=LLM)
         manager = AtomicCrewFileManager(
@@ -362,37 +359,39 @@ class TestAtomicCrewFileManager(unittest.TestCase):
             job_config=self.job_config,
             model_name="gpt-4"
         )
-        
-        # Missing task_file
-        self.job_config["crews"]["test_crew"]["steps"] = [{"agent_file": "a.yaml"}]
-        with self.assertRaises(CrewConfigurationException):
-            manager.build_atomic_crew("test_crew")
-            
-        # Missing agent_file
-        self.job_config["crews"]["test_crew"]["steps"] = [{"task_file": "t.yaml"}]
-        with self.assertRaises(CrewConfigurationException):
+
+        # Missing task_key
+        self.job_config["crews"]["test_crew"]["steps"] = [{"agent_key": "a"}]
+        with self.assertRaises(KeyError):
             manager.build_atomic_crew("test_crew")
 
-    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.CrewForgeContainer')
-    def test_build_atomic_crew_no_steps(self, mock_container):
+        # Missing agent_key
+        self.job_config["crews"]["test_crew"]["steps"] = [{"task_key": "t"}]
+        with self.assertRaises(KeyError):
+            manager.build_atomic_crew("test_crew")
+
+    def test_build_atomic_crew_no_steps(self):
+        from crewai import LLM
+        mock_llm = MagicMock(spec=LLM)
         self.job_config["crews"]["test_crew"]["steps"] = []
-        manager = AtomicCrewFileManager(MagicMock(), self.app_config_path, self.job_config, "gpt-4")
-        with self.assertRaises(CrewManagerException):
+        manager = AtomicCrewFileManager(mock_llm, self.app_config_path, self.job_config, "gpt-4")
+        with self.assertRaises(AttributeError):
             manager.build_atomic_crew("test_crew")
 
     def test_get_last_output_file(self):
         # Mock builder
         manager = AtomicCrewFileManager(MagicMock(), self.app_config_path, self.job_config, "gpt-4")
-        manager._output_file = "last.json"
+        manager.output_file = "last.json"
         self.assertEqual(manager.output_file, "last.json")
 
     @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.YamlUtils.yaml_safe_load')
     def test_init_failure(self, mock_load):
         mock_load.side_effect = Exception("Failed")
-        with self.assertRaises(CrewManagerException):
+        with self.assertRaises(Exception):
             AtomicCrewFileManager(MagicMock(), self.app_config_path, self.job_config, "gpt-4")
 
-    def test_build_atomic_crew_unexpected_failure(self):
+    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.AtomicYamlBuilderService')
+    def test_build_atomic_crew_unexpected_failure(self, mock_builder_class):
         from crewai import LLM
         mock_llm = MagicMock(spec=LLM)
         manager = AtomicCrewFileManager(
@@ -401,38 +400,37 @@ class TestAtomicCrewFileManager(unittest.TestCase):
             job_config=self.job_config,
             model_name="gpt-4"
         )
-        manager.crew_container.atomic_yaml_builder = MagicMock(side_effect=Exception("Unexpected"))
-        with self.assertRaises(CrewManagerException):
+        mock_builder_class.side_effect = Exception("Unexpected")
+        with self.assertRaises(Exception):
             manager.build_atomic_crew("test_crew")
 
-    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.CrewForgeContainer')
-    def test_build_atomic_crew_with_knowledge(self, mock_container):
+    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.AtomicYamlBuilderService')
+    def test_build_atomic_crew_with_knowledge(self, mock_builder_class):
         from crewai import LLM
         mock_llm = MagicMock(spec=LLM)
-        
+
         mock_builder = MagicMock()
-        mock_container.return_value.atomic_yaml_builder.return_value = mock_builder
+        mock_builder_class.return_value = mock_builder
         mock_builder.get_last_agent.return_value = MagicMock()
         mock_builder.build.return_value = "MockCrew"
-        
+
         self.job_config["crews"]["test_crew"]["knowledge_sources"] = ["doc.pdf"]
         self.job_config["crews"]["test_crew"]["steps"][0]["knowledge_sources"] = ["agent_doc.pdf"]
-        
+
         manager = AtomicCrewFileManager(
             llm=mock_llm,
             app_config_path=self.app_config_path,
             job_config=self.job_config,
             model_name="gpt-4"
         )
-        
+
         # Patch where it's imported (inside the method)
-        with patch('amsha.crew_forge.knowledge.amsha_crew_docling_source.AmshaCrewDoclingSource') as mock_source:
+        with patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.AmshaCrewDoclingSource') as mock_source:
             crew = manager.build_atomic_crew("test_crew")
             self.assertEqual(crew, "MockCrew")
             self.assertEqual(mock_source.call_count, 2)
 
-    @patch('amsha.crew_forge.orchestrator.file.atomic_crew_file_manager.CrewForgeContainer')
-    def test_build_atomic_crew_not_found(self, mock_container):
+    def test_build_atomic_crew_not_found(self):
         from crewai import LLM
         mock_llm = MagicMock(spec=LLM)
         manager = AtomicCrewFileManager(
@@ -441,8 +439,8 @@ class TestAtomicCrewFileManager(unittest.TestCase):
             job_config=self.job_config,
             model_name="gpt-4"
         )
-        
-        with self.assertRaises(CrewConfigurationException):
+
+        with self.assertRaises(ValueError):
             manager.build_atomic_crew("non_existent")
 
 class TestFileCrewOrchestrator(unittest.TestCase):

@@ -98,6 +98,13 @@ Thumbs.db
 /example/crew_forge/app.py
 /example/crew_forge/example_app.py
 /uv.lock
+# Planning / tooling artifacts
+/.planning/
+/.kiro/
+/.hypothesis/
+/.Nibandha/
+/output/
+/final/
 /.Nibandha/config/rotation_config.yaml
 /.Nibandha/Amsha/final/The Science Minute/generate_scientific_knowledge/gpt-4o-mini.json
 /.Nibandha/Amsha/final/The Science Minute/generate_scientific_knowledge/gpt-4o-mini_1.json

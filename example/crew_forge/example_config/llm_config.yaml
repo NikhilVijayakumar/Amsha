@@ -1,6 +1,6 @@
 llm:
   creative:
-    default: gemini
+    default: qwen
     models:
       gemini:
         model: "gemini/gemini-2.5-flash"
@@ -13,6 +13,10 @@ llm:
         base_url: "http://localhost:1234/v1"
         model: "lm_studio/meta-llama-3.1-8b-instruct"
         api_key: ""
+      qwen:
+        base_url: "http://localhost:1234/v1"
+        model: "lm_studio/qwen3.5-9b"
+        api_key: "lm_studio"
   evaluation:
     default: gemma
     models:

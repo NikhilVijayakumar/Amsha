@@ -1,9 +1,9 @@
 from typing import Optional, Dict, Any
 from pathlib import Path
 
-from amsha.crew_forge.dependency.crew_forge_container import CrewForgeContainer
 from amsha.crew_forge.domain.models.crew_data import CrewData
 from amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
+from amsha.crew_forge.seeding.parser.crew_parser import CrewParser
 from amsha.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
 from amsha.utils.yaml_utils import YamlUtils
 
@@ -19,14 +19,10 @@ class AtomicCrewFileManager:
         print("[Manager] Initializing Factory...")
         self.llm = llm
         self.job_config = job_config
-        self.crew_container = CrewForgeContainer()
         self.model_name = model_name
 
-
-        # Load app config for DI
         app_config = YamlUtils.yaml_safe_load(app_config_path)
         self.app_config = app_config
-        self.crew_container.config.from_dict(app_config)
         self.output_file:Optional[str] = None
 
 
@@ -64,7 +60,12 @@ class AtomicCrewFileManager:
             task_yaml_file = str(domain_root_path / module_name / "tasks" / f"{task_key}.yaml")
             agent_yaml_file = str(domain_root_path / module_name / "agents" / f"{agent_key}.yaml")
 
-            crew_builder = self.crew_container.atomic_yaml_builder(data=crew_data,task_yaml_file=task_yaml_file,agent_yaml_file=agent_yaml_file)
+            crew_builder = AtomicYamlBuilderService(
+                data=crew_data,
+                parser=CrewParser(),
+                agent_yaml_file=agent_yaml_file,
+                task_yaml_file=task_yaml_file,
+            )
 
             agent_knowledge_paths = set()
             for path in step.get('knowledge_sources', []):
