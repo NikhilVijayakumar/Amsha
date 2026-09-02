@@ -2,162 +2,44 @@
 
 ## 1. Purpose
 
-This document defines the first step in designing an Amsha workflow:
-
 > **Understand and formalize the user's problem before designing any Process, Flow, Crew, Agent, Task, Tool, Knowledge source, Memory, or MCP integration.**
 
-Amsha must not begin by asking:
-
-- How many agents are needed?
-- How many tasks are needed?
-- Should this use a Crew?
-- Should this use a Flow?
-- Which LLM should be used?
-- Which tools should be attached?
-- Should MCP be used?
-
-Those are implementation and architecture questions.
-
-The first question is:
-
-> **What problem is the system actually expected to solve?**
-
-The problem definition becomes the foundation from which the later Process, Flow, Crew, Agent, Task, and capability architecture is derived.
+Do not start by asking how many agents, tasks, or Crews are needed, which LLM to use, or whether MCP should be used — those are implementation questions. The first question is: **What problem is the system actually expected to solve?**
 
 ---
 
 # 2. Core Principle
 
-Amsha follows this principle:
-
 > **Define the problem before defining the architecture.**
 
-The correct direction is:
-
 ```text
-User Problem
-     ↓
-Problem Definition
-     ↓
-Start / End Goals
-     ↓
-Process Decomposition
-     ↓
-Process Contracts
-     ↓
-Flow Design
-     ↓
-Capability Selection
-     ↓
-Crew / Agent / Task Design
-     ↓
-Implementation
-````
-
-The incorrect direction is:
-
-```text
-User Problem
-     ↓
-Create Agents
-     ↓
-Create Tasks
-     ↓
-Create Crew
-     ↓
-Create Flow
-     ↓
-Try to fit the problem into the architecture
+User Problem → Problem Definition → Start/End Goals → Process Decomposition
+→ Process Contracts → Flow Design → Capability Selection → Crew/Agent/Task Design → Implementation
 ```
 
-The second approach encourages unnecessary agents, oversized tasks, unnecessary Crews, excessive context, and monolithic workflows.
+The incorrect direction (problem → Agents → Tasks → Crew → Flow → fit the problem) encourages unnecessary agents, oversized tasks, excessive context, and monolithic workflows.
 
 ---
 
 # 3. What Is a Problem?
 
-A problem is the meaningful transformation the user wants the system to accomplish.
-
-A problem should describe:
-
-1. What exists now.
-2. What needs to change.
-3. What the desired result is.
-4. What constitutes completion.
-5. What constraints matter.
-
-A problem is **not** an implementation plan.
-
-### Bad
+A problem is the meaningful transformation the user wants the system to accomplish. It should describe what exists now, what needs to change, the desired result, what constitutes completion, and what constraints matter. A problem is **not** an implementation plan.
 
 ```text
-Create three CrewAI agents using a sequential Crew
-and connect them through a Flow.
+# Bad: describes implementation
+Create three CrewAI agents using a sequential Crew and connect them through a Flow.
+
+# Good: describes the actual problem
+Given a screenplay chapter summary and its surrounding story context, produce a validated
+chapter development package that identifies the chapter's narrative role, goal, character
+contribution, and thematic contribution.
 ```
-
-This describes an implementation.
-
-### Good
-
-```text
-Given a screenplay chapter summary and its surrounding
-story context, produce a validated chapter development
-package that identifies the chapter's narrative role,
-goal, character contribution, and thematic contribution.
-```
-
-This describes the actual problem.
 
 ---
 
 # 4. Problem Definition Is Architecture-Neutral
 
-At this stage, do not decide whether the solution requires:
-
-* Python
-* Agent
-* Task
-* Crew
-* Flow
-* Tool
-* MCP
-* Knowledge
-* Memory
-* Skill
-* a particular LLM
-* a particular CrewAI process
-
-Those decisions belong to later stages.
-
-The problem definition should remain valid even if the eventual implementation changes.
-
-For example:
-
-```text
-Problem:
-Evaluate a generated screenplay chapter against
-defined narrative quality criteria.
-```
-
-The implementation might eventually be:
-
-```text
-Python
-```
-
-or:
-
-```text
-Agent + Task
-```
-
-or:
-
-```text
-Crew
-```
-
-The problem definition should not change merely because the implementation changes.
+At this stage, do not decide whether the solution requires Python, Agent, Task, Crew, Flow, Tool, MCP, Knowledge, Memory, Skill, a particular LLM, or a particular CrewAI process. Those decisions belong to later stages. The problem definition should remain valid even if the eventual implementation changes.
 
 ---
 
@@ -166,32 +48,7 @@ The problem definition should not change merely because the implementation chang
 A complete Amsha problem definition should establish at least:
 
 ```text
-Problem
-Start Condition
-Desired End Condition
-Primary Objective
-Constraints
-Success Definition
-```
-
-Conceptually:
-
-```text
-                 PROBLEM
-                    │
-          ┌─────────┴─────────┐
-          ▼                   ▼
-      START STATE          END STATE
-          │                   │
-          └─────────┬─────────┘
-                    ▼
-                OBJECTIVE
-                    │
-                    ▼
-               CONSTRAINTS
-                    │
-                    ▼
-             SUCCESS CRITERIA
+Problem, Start Condition, Desired End Condition, Primary Objective, Constraints, Success Definition
 ```
 
 ---
@@ -221,48 +78,14 @@ The statement should describe the desired transformation without prescribing imp
 
 # 7. Start Condition
 
-The start condition defines what must exist before the workflow can begin.
+The start condition defines what must exist before the workflow can begin: **What is available when this problem starts?**
 
-It answers:
-
-> **What is available when this problem starts?**
-
-Example:
-
-```yaml
-start:
-  condition: >
-    A chapter summary, relevant story context,
-    and narrative-structure information are available.
-```
-
-More explicitly:
-
-```yaml
-start:
-  inputs:
-    - chapter_summary
-    - story_context
-    - narrative_stage
-```
-
-The start condition should distinguish between:
-
-### Required inputs
-
-Information without which the problem cannot reasonably begin.
-
-### Optional inputs
-
-Information that can improve the result but is not mandatory.
-
-Example:
+It should distinguish required inputs (information without which the problem cannot begin) from optional inputs (information that can improve the result but is not mandatory).
 
 ```yaml
 start:
   required:
     - chapter_summary
-
   optional:
     - story_context
     - character_profiles
@@ -273,54 +96,15 @@ start:
 
 # 8. End Condition
 
-The end condition defines what constitutes completion.
+The end condition defines what constitutes completion: **When can we say that the problem has been successfully solved?**
 
-It answers:
-
-> **When can we say that the problem has been successfully solved?**
-
-Example:
-
-```yaml
-end:
-  condition: >
-    A validated chapter development specification exists
-    and satisfies the required quality criteria.
-```
-
-Do not define completion as:
-
-```text
-Crew completed.
-```
-
-or:
-
-```text
-Agent returned an answer.
-```
-
-Technical execution completion is not necessarily problem completion.
-
-The system should distinguish:
-
-```text
-Execution completed
-```
-
-from:
-
-```text
-Problem successfully solved
-```
+Technical execution completion (e.g. "Crew completed" or "Agent returned an answer") is not necessarily problem completion. The system should distinguish "execution completed" from "problem successfully solved."
 
 ---
 
 # 9. Start State and End State
 
-For more complex problems, define the states explicitly.
-
-Example:
+For more complex problems, define states explicitly:
 
 ```yaml
 start_state:
@@ -332,55 +116,24 @@ end_state:
     status: "development_specification_validated"
 ```
 
-Conceptually:
-
-```text
-START
-Summary Available
-       │
-       │
-       ▼
-   PROCESSING
-       │
-       ▼
-END
-Validated Development Specification
-```
-
 This provides the foundation for later Flow state design.
 
 ---
 
 # 10. Primary Objective
 
-The primary objective describes the main outcome.
+The primary objective describes the main outcome: **What is the most important thing this system must accomplish?**
 
-It should answer:
-
-> **What is the most important thing this system must accomplish?**
-
-Example:
+It should not become a list of implementation instructions.
 
 ```yaml
-objective: >
-  Produce a coherent and validated chapter development
-  specification that advances the overall narrative.
-```
-
-The objective should not become a list of implementation instructions.
-
-### Bad
-
-```yaml
+# Bad
 objective: >
   Ask an LLM to analyze the chapter, call three agents,
   compare their answers, use memory, then ask an evaluator
   to score the result.
-```
 
-### Good
-
-```yaml
+# Good
 objective: >
   Produce a validated chapter development specification
   aligned with the overall narrative.
@@ -419,101 +172,17 @@ Secondary objectives should not obscure the primary objective.
 
 # 12. Constraints
 
-Constraints define boundaries within which the problem must be solved.
+Constraints define boundaries within which the problem must be solved. They can be data (format, fields, allowed values), quality (minimum scores, accuracy), operational (max iterations, time, cost), or human (approval required).
 
-Examples:
-
-```yaml
-constraints:
-  - preserve established character motivations
-  - do not contradict the story bible
-  - output must conform to the defined schema
-  - existing story facts must not be invented
-  - output must remain compatible with the next process
-```
-
-Constraints can be:
-
-### Data constraints
-
-```text
-Required input format
-Required fields
-Allowed values
-```
-
-### Quality constraints
-
-```text
-Minimum quality score
-Accuracy requirements
-Consistency requirements
-```
-
-### Operational constraints
-
-```text
-Maximum iterations
-Maximum execution time
-Maximum cost
-```
-
-### Human constraints
-
-```text
-Human approval required
-Human review required before proceeding
-```
-
-Do not prematurely convert constraints into implementation mechanisms.
-
-For example:
-
-```text
-"Maximum three iterations"
-```
-
-is a problem constraint.
-
-Whether that becomes a Flow loop, retry mechanism, or another implementation mechanism is decided later.
+Do not prematurely convert constraints into implementation mechanisms — "Maximum three iterations" is a problem constraint; whether that becomes a Flow loop or retry mechanism is decided later.
 
 ---
 
 # 13. Success Definition
 
-The problem must have an observable definition of success.
+The problem must have an observable definition of success. Ask: **What evidence would demonstrate that the desired outcome has been achieved?**
 
-Ask:
-
-> **What evidence would demonstrate that the desired outcome has been achieved?**
-
-Example:
-
-```yaml
-success:
-  conditions:
-    - output_schema_valid
-    - narrative_role_defined
-    - chapter_goal_defined
-    - contribution_defined
-    - no critical continuity conflicts
-    - quality_score >= minimum_threshold
-```
-
-Success criteria should be measurable whenever practical.
-
-Avoid:
-
-```text
-The output should be good.
-```
-
-Prefer:
-
-```text
-The output must satisfy all required structural checks
-and achieve the minimum evaluation threshold.
-```
+Success criteria should be measurable whenever practical. Avoid "The output should be good"; prefer "The output must satisfy all required structural checks and achieve the minimum evaluation threshold."
 
 ---
 
@@ -550,22 +219,7 @@ That comes later.
 
 # 15. Problem vs Task
 
-A problem can contain many Tasks.
-
-For example:
-
-```text
-Problem:
-Produce a validated chapter.
-
-Process:
-Evaluate chapter.
-
-Task:
-Evaluate character consistency.
-```
-
-Therefore:
+A problem contains many Tasks, which are contained in Processes:
 
 ```text
 Problem
@@ -585,82 +239,13 @@ Do not jump directly from the problem to Tasks.
 
 # 16. Problem vs Flow
 
-A problem describes **what must be achieved**.
-
-A Flow describes **how execution moves between Processes**.
-
-Example:
-
-```text
-Problem:
-Produce a validated chapter.
-```
-
-Later:
-
-```text
-Flow:
-
-Analyze
-   ↓
-Generate
-   ↓
-Evaluate
-   ↓
- ┌─┴─────────┐
- │           │
-PASS        FAIL
- │           │
- ▼           ▼
-Approve    Improve
-             │
-             └──► Evaluate
-```
-
-The Flow should be derived from the problem and Process architecture.
-
-It should not be invented before those are understood.
+A problem describes **what must be achieved**. A Flow describes **how execution moves between Processes**. The Flow is derived from the problem and Process architecture — it should not be invented before those are understood.
 
 ---
 
 # 17. Problem Definition Should Be Implementation-Neutral
 
-The following should normally NOT appear in the initial problem definition:
-
-```text
-GPT-5
-CrewAI
-Crew
-Agent
-Task
-Flow
-MCP
-Ollama
-Python
-Knowledge
-Memory
-```
-
-unless the user explicitly imposes one as a requirement or constraint.
-
-For example:
-
-```text
-User requirement:
-"The system must run locally using Ollama."
-```
-
-That is a legitimate constraint.
-
-But:
-
-```text
-Use three agents and one Crew.
-```
-
-should not automatically become the architecture.
-
-Amsha should first determine whether that architecture is actually justified.
+The problem definition should not normally include implementation specifics (`GPT-5`, `CrewAI`, `Crew`, `Agent`, `Task`, `Flow`, `MCP`, `Python`, `Knowledge`, `Memory`) unless the user explicitly imposes one as a requirement or constraint (e.g. "The system must run locally using Ollama" is a legitimate constraint).
 
 ---
 
@@ -1083,91 +668,14 @@ and passed the required quality gate.
 
 # 26. Relationship to the Next Prerequisite
 
-This document should end at the problem boundary.
+This document ends at the problem boundary — it should not perform Process decomposition.
 
-It should **not** perform Process decomposition.
+**Next:** `01-goal-and-boundary-definition.md` — establishes precise start, boundary, and end conditions from this Problem Definition.
 
-The next document:
-
-```text
-01-goal-and-boundary-definition.md
-```
-
-will take the validated Problem Definition and establish the precise:
-
-```text
-START
-   ↓
-BOUNDARY
-   ↓
-END
-```
-
-Then:
-
-```text
-02-process-decomposition.md
-```
-
-will derive:
-
-```text
-Process 1
-Process 2
-...
-Process N
-```
-
-Therefore the prerequisite chain is:
-
-```text
-00 Problem Definition
-        ↓
-01 Goal & Boundary Definition
-        ↓
-02 Process Decomposition
-        ↓
-03 Process Contracts & Atomicity
-        ↓
-04 Process Validation & Human Review
-        ↓
-05 Flow & State Planning
-        ↓
-06 Corner Cases & Failure Planning
-        ↓
-07 Capability Selection
-        ↓
-08 Architecture Validation
-```
+**Full prerequisite chain:** 00 Problem Definition → 01 Goal & Boundary → 02 Process Decomposition → 03 Process Contracts → 04 Process Validation → 05 Flow & State → 06 Corner Cases & Failures → 07 Capability Selection → 08 Architecture Validation.
 
 ---
 
 # 27. Amsha Rule
 
-The final rule of this document is:
-
-> **Never design the CrewAI implementation before the problem has been sufficiently defined.**
-
-The Amsha decision hierarchy is:
-
-```text
-WHAT PROBLEM?
-      ↓
-WHAT GOAL?
-      ↓
-WHAT PROCESSES?
-      ↓
-WHAT FLOW?
-      ↓
-WHAT CAPABILITIES?
-      ↓
-WHAT CREW?
-      ↓
-WHAT AGENTS?
-      ↓
-WHAT TASKS?
-      ↓
-WHAT IMPLEMENTATION?
-```
-
-**Problem first. Architecture second. Implementation last.**
+> **Never design the CrewAI implementation before the problem has been sufficiently defined. Problem first. Architecture second. Implementation last.**

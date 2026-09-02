@@ -514,53 +514,18 @@ This is a much more complete execution architecture.
 
 # 57. Failure Planning Principles
 
-### Rule 1
-
-> **Design the workflow for meaningful failure paths, not only successful execution.**
-
-### Rule 2
-
-> **Distinguish execution failure from a valid negative domain result.**
-
-### Rule 3
-
-> **Retry only when retry is meaningful and safe.**
-
-### Rule 4
-
-> **All automatic retries and iterations must be bounded.**
-
-### Rule 5
-
-> **Do not silently invent recovery behavior for unresolved requirements.**
-
-### Rule 6
-
-> **Validate outputs at Process boundaries before invalid state propagates downstream.**
-
-### Rule 7
-
-> **External side effects require explicit retry and idempotency reasoning.**
-
-### Rule 8
-
-> **State invariants should be validated where they materially protect workflow correctness.**
-
-### Rule 9
-
-> **Failures should be contained at the smallest safe scope.**
-
-### Rule 10
-
-> **Human rejection is not automatically a technical failure.**
-
-### Rule 11
-
-> **Recovery complexity should be proportional to failure impact and recovery cost.**
-
-### Rule 12
-
-> **Failure planning should identify requirements; capability selection decides implementation mechanisms.**
+1. > Design the workflow for meaningful failure paths, not only successful execution.
+2. > Distinguish execution failure from a valid negative domain result.
+3. > Retry only when retry is meaningful and safe.
+4. > All automatic retries and iterations must be bounded.
+5. > Do not silently invent recovery behavior for unresolved requirements.
+6. > Validate outputs at Process boundaries before invalid state propagates downstream.
+7. > External side effects require explicit retry and idempotency reasoning.
+8. > State invariants should be validated where they materially protect workflow correctness.
+9. > Failures should be contained at the smallest safe scope.
+10. > Human rejection is not automatically a technical failure.
+11. > Recovery complexity should be proportional to failure impact and recovery cost.
+12. > Failure planning should identify requirements; capability selection decides implementation mechanisms.
 
 ---
 

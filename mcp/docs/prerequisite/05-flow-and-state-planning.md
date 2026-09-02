@@ -49,22 +49,7 @@ Flow planning consumes: start condition, end condition, Process IDs, Process dep
 
 # 6. What Is Flow State?
 
-Flow state represents the information required to control the current execution.
-
-```yaml
-flow_state:
-  workflow_id: ""
-  status: ""
-  current_process: ""
-  inputs: {}
-  outputs: {}
-  decisions: {}
-  approvals: {}
-  iteration: {}
-  errors: []
-```
-
-The exact structure depends on the workflow. The key principle:
+Flow state represents the information required to control the current execution (see the full schema in §14). The exact structure depends on the workflow. The key principle:
 
 > State should represent the execution context necessary to continue and reason about the workflow.
 
@@ -570,53 +555,18 @@ The output is a **Flow & State Plan** combining the validated Process architectu
 
 # 42. Core Amsha Rules
 
-### Rule 1
-
-> **Process defines meaningful work; Flow defines execution control.**
-
-### Rule 2
-
-> **Do not create Flow structure before the Process architecture is validated.**
-
-### Rule 3
-
-> **State should contain the minimum information required to execute, decide, and recover the workflow.**
-
-### Rule 4
-
-> **Flow state is not Knowledge and is not Memory.**
-
-### Rule 5
-
-> **State should follow Process contracts and data dependencies.**
-
-### Rule 6
-
-> **Transitions must represent explicit logical conditions, not accidental execution order.**
-
-### Rule 7
-
-> **Parallel execution requires logical independence and safe state ownership.**
-
-### Rule 8
-
-> **Every iteration requires a meaningful success condition and bounded termination behavior.**
-
-### Rule 9
-
-> **Human decisions must be explicit workflow boundaries.**
-
-### Rule 10
-
-> **Large artifacts should normally be referenced rather than copied into Flow state.**
-
-### Rule 11
-
-> **Flow state and LLM context are different abstractions.**
-
-### Rule 12
-
-> **Implementation mechanisms are selected only after the Flow and State architecture is understood.**
+1. > Process defines meaningful work; Flow defines execution control.
+2. > Do not create Flow structure before the Process architecture is validated.
+3. > State should contain the minimum information required to execute, decide, and recover the workflow.
+4. > Flow state is not Knowledge and is not Memory.
+5. > State should follow Process contracts and data dependencies.
+6. > Transitions must represent explicit logical conditions, not accidental execution order.
+7. > Parallel execution requires logical independence and safe state ownership.
+8. > Every iteration requires a meaningful success condition and bounded termination behavior.
+9. > Human decisions must be explicit workflow boundaries.
+10. > Large artifacts should normally be referenced rather than copied into Flow state.
+11. > Flow state and LLM context are different abstractions.
+12. > Implementation mechanisms are selected only after the Flow and State architecture is understood.
 
 ---
 

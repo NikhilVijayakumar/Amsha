@@ -2,23 +2,9 @@
 
 ## 1. Purpose
 
-This document defines the second step in Amsha workflow design:
-
 > **Establish a precise start boundary, desired end state, and scope of responsibility before decomposing the problem into Processes.**
 
-The Problem Definition establishes what the user wants to accomplish.
-
-Goal and Boundary Definition determines:
-
-- where the workflow begins
-- what the workflow is responsible for
-- where the workflow ends
-- what constitutes completion
-- what is inside the workflow
-- what is outside the workflow
-- what must be passed to or received from external systems or workflows
-
-This document must be completed before Process Decomposition.
+The Problem Definition establishes what the user wants. Goal and Boundary Definition determines where the workflow begins, what it owns, where it ends, and what constitutes completion.
 
 ---
 
@@ -50,98 +36,23 @@ Do not begin Process Decomposition until the start and end boundaries are suffic
 
 These concepts must remain separate.
 
-### Problem
-
-Describes what needs to be solved.
-
-```text
-Transform an existing chapter summary into
-a validated chapter development specification.
-```
-
-### Goal
-
-Describes the desired end state.
-
-```text
-A validated chapter development specification exists.
-```
-
-### Boundary
-
-Defines what the workflow owns and where its responsibility stops.
-
-```text
-START:
-Chapter summary is available.
-
-END:
-Validated chapter development specification is produced.
-
-OUTSIDE:
-Final screenplay publication.
-```
-
-Conceptually:
-
-```text
-                  PROBLEM
-                     │
-                     ▼
-              ┌─────────────┐
-              │    START    │
-              │   BOUNDARY  │
-              └──────┬──────┘
-                     │
-                 WORKFLOW
-                  SCOPE
-                     │
-                     ▼
-              ┌─────────────┐
-              │     END     │
-              │   BOUNDARY  │
-              └─────────────┘
-```
+* **Problem:** Describes what needs to be solved (e.g. "Transform a chapter summary into a validated chapter development specification").
+* **Goal:** Describes the desired end state (e.g. "A validated chapter development specification exists").
+* **Boundary:** Defines what the workflow owns and where its responsibility stops (e.g. START: chapter summary available; END: validated spec produced; OUTSIDE: final publication).
 
 ---
 
 # 4. Start Boundary
 
-The start boundary defines the condition under which the workflow is allowed to begin.
+The start boundary defines the condition under which the workflow is allowed to begin: **What must be true before execution starts?**
 
-It answers:
-
-> **What must be true before execution starts?**
-
-Examples:
+It should describe a meaningful state, not an implementation detail.
 
 ```text
-A chapter summary is available.
-```
-
-```text
-A customer request has been submitted.
-```
-
-```text
-A source document has been uploaded.
-```
-
-```text
-An approved image-generation specification exists.
-```
-
-The start boundary should describe a meaningful state, not an implementation detail.
-
-### Bad
-
-```text
+# Bad
 The Flow object has been initialized.
-```
 
-### Good
-
-```text
+# Good
 A validated chapter specification is available for generation.
 ```
 
@@ -149,189 +60,37 @@ A validated chapter specification is available for generation.
 
 # 5. Start Preconditions
 
-The start boundary may require preconditions.
-
-For example:
-
-```yaml
-start:
-  condition: >
-    A chapter summary is available for analysis.
-
-  preconditions:
-    - chapter_summary_exists
-    - chapter_summary_is_readable
-```
-
-Preconditions should answer:
-
-> **What must be true for the workflow to safely begin?**
-
-Possible preconditions include:
-
-* required input exists
-* required fields are present
-* input is readable
-* input has the expected format
-* required external dependency is available
-* required approval has been obtained
-* required configuration exists
-
-Do not add preconditions merely because they are technically convenient.
-
-They should protect the actual workflow boundary.
+The start boundary may require preconditions — things that must be true for the workflow to safely begin (e.g. required input exists, is readable, has expected format, external dependency available, approval obtained). Preconditions should protect the actual workflow boundary, not be added merely because they are technically convenient.
 
 ---
 
 # 6. Required and Optional Inputs
 
-Start-boundary inputs should be classified.
-
-```yaml
-start:
-  required_inputs:
-    - chapter_summary
-
-  optional_inputs:
-    - story_bible
-    - character_profiles
-    - previous_evaluation
-```
-
-### Required input
-
-Without it, the workflow cannot reasonably perform its intended responsibility.
-
-### Optional input
-
-The workflow can still execute without it, although the result may be improved by its presence.
-
-Do not silently treat optional information as mandatory.
-
-Likewise, do not make every available piece of information a required input.
+Start-boundary inputs should be classified. Required inputs: without them the workflow cannot perform its intended responsibility. Optional inputs: the workflow can execute without them, though results may improve. Do not silently treat optional information as mandatory, nor make everything required.
 
 ---
 
 # 7. End Goal
 
-The end goal defines the desired state of the workflow.
-
-It answers:
-
-> **What must exist when the workflow has successfully completed?**
-
-Example:
-
-```yaml
-end:
-  condition: >
-    A validated chapter development specification exists.
-```
-
-The end goal should describe the result rather than the implementation.
-
-### Bad
-
-```text
-The Crew has completed all its tasks.
-```
-
-### Good
-
-```text
-A validated chapter development specification satisfying
-the required quality criteria exists.
-```
-
-A Crew, Agent, Task, Python function, or Flow completing does not automatically mean the user's goal has been achieved.
+The end goal defines the desired state of the workflow: **What must exist when the workflow has successfully completed?** It should describe the result rather than the implementation. A Crew, Agent, Task, Python function, or Flow completing does not automatically mean the user's goal has been achieved.
 
 ---
 
 # 8. End State
 
-For complex workflows, represent the desired end state explicitly.
-
-Example:
-
-```yaml
-end:
-  state:
-    chapter:
-      status: validated
-      artifact: chapter_development_specification
-```
-
-Conceptually:
-
-```text
-START
-  │
-  │
-  ▼
-Workflow Execution
-  │
-  │
-  ▼
-END STATE
-
-chapter.status = validated
-```
-
-The end state should be observable.
-
-Avoid end conditions such as:
-
-```text
-The chapter should be good.
-```
-
-Prefer:
-
-```text
-The chapter satisfies all required validation criteria
-and passes the minimum quality threshold.
-```
+For complex workflows, represent the desired end state explicitly and ensure it is observable. Avoid vague end conditions like "The chapter should be good"; prefer "The chapter satisfies all required validation criteria and passes the minimum quality threshold."
 
 ---
 
 # 9. Success vs Completion
 
-Amsha must distinguish between **execution completion** and **successful completion**.
-
-### Execution completion
-
-The workflow reached a terminal execution state.
-
-```text
-Flow finished.
-```
-
-### Successful completion
-
-The workflow reached the desired business/domain outcome.
-
-```text
-Output was produced, validated,
-and passed the required quality gate.
-```
-
-Therefore:
-
-```text
-Execution completed
-        ≠
-Goal achieved
-```
-
-This distinction becomes important later when designing Flow states and evaluation gates.
+Amsha must distinguish **execution completion** (workflow reached a terminal state) from **successful completion** (workflow reached the desired business outcome). `Execution completed ≠ Goal achieved`. This distinction matters for Flow states and evaluation gates.
 
 ---
 
 # 10. Workflow Scope
 
-The scope defines what the workflow is responsible for.
-
-Example:
+The scope defines what the workflow is responsible for, and should prevent unrelated work from entering the Process graph.
 
 ```yaml
 scope:
@@ -341,7 +100,6 @@ scope:
     - generate chapter specification
     - evaluate chapter specification
     - improve failed results
-
   excluded:
     - screenplay publication
     - marketing
@@ -349,312 +107,63 @@ scope:
     - image generation
 ```
 
-The scope should prevent unrelated work from entering the Process graph.
-
 ---
 
 # 11. In-Scope vs Out-of-Scope
 
-Every significant workflow should identify its boundaries.
-
-### In scope
-
-Work required to achieve the defined goal.
-
-### Out of scope
-
-Work that may be related but is not required for this workflow to achieve its goal.
-
-For example:
-
-```text
-Goal:
-Produce a validated screenplay chapter.
-
-In scope:
-- chapter analysis
-- chapter generation
-- chapter evaluation
-- chapter improvement
-
-Out of scope:
-- publishing
-- marketing
-- audiobook production
-- social-media promotion
-```
-
-This prevents scope expansion during Process Decomposition.
+Every significant workflow should identify its boundaries. In scope: work required to achieve the goal. Out of scope: related work not required for this workflow. This prevents scope expansion during Process Decomposition.
 
 ---
 
 # 12. Boundary Ownership
 
-A workflow should clearly define what it owns.
-
-For example:
-
-```text
-                    External System
-                         │
-                         ▼
-                  ┌─────────────┐
-                  │    START    │
-                  ├─────────────┤
-                  │             │
-                  │   AM SHA    │
-                  │  WORKFLOW   │
-                  │             │
-                  ├─────────────┤
-                  │     END     │
-                  └─────────────┘
-                         │
-                         ▼
-                    External System
-```
-
-Amsha should not automatically absorb every activity surrounding the goal.
-
-The boundary should be based on responsibility, not on what technically could be automated.
+A workflow should clearly define what it owns. Amsha should not automatically absorb every activity surrounding the goal — the boundary should be based on responsibility, not on what technically could be automated.
 
 ---
 
 # 13. External Dependencies
 
-A workflow may depend on external systems.
-
-Examples:
-
-```text
-Database
-File system
-ComfyUI
-Unreal Engine
-External API
-MCP server
-Human approval
-```
-
-At this stage, identify the dependency but do not yet decide how it will be implemented.
-
-Example:
-
-```yaml
-dependencies:
-  - source_data
-  - human_approval
-  - external_rendering_system
-```
-
-Later, Capability Selection determines whether the dependency requires:
-
-```text
-Python
-Tool
-MCP
-Knowledge
-Memory
-Human Gate
-```
-
-Do not prematurely convert dependencies into implementation decisions.
+A workflow may depend on external systems (database, file system, ComfyUI, external API, MCP server, human approval). At this stage, identify the dependency but do not yet decide how it will be implemented — Capability Selection determines whether the dependency requires Python, Tool, MCP, Knowledge, Memory, or Human Gate.
 
 ---
 
 # 14. Goal Granularity
 
-The goal must be large enough to represent a meaningful user outcome.
+The goal must be large enough to represent a meaningful user outcome but bounded enough to have a recognizable completion condition.
 
-### Too broad
-
-```text
-Create an entire AI entertainment production platform.
-```
-
-This would contain many independent workflows.
-
-### Appropriate
-
-```text
-Produce a validated screenplay chapter.
-```
-
-### Too narrow
-
-```text
-Change one character's name in a JSON object.
-```
-
-That may be a Task or deterministic operation rather than an entire workflow.
-
-Amsha should identify the appropriate workflow boundary from the user's actual objective.
+* **Too broad:** "Create an entire AI entertainment production platform" (many independent workflows).
+* **Appropriate:** "Produce a validated screenplay chapter."
+* **Too narrow:** "Change one character's name in a JSON object" (a Task or deterministic operation, not a workflow).
 
 ---
 
 # 15. One Workflow, One Meaningful Goal
 
-A workflow should normally have one primary end goal.
-
-### Bad
-
-```text
-Workflow:
-Write a screenplay,
-generate concept art,
-create music,
-build Unreal scenes,
-publish the project,
-and generate marketing material.
-```
-
-This contains multiple independent objectives.
-
-### Better
-
-```text
-Workflow A:
-Produce validated screenplay.
-
-Workflow B:
-Produce validated concept art.
-
-Workflow C:
-Produce validated music.
-
-Workflow D:
-Build validated Unreal scene.
-```
-
-A higher-level system may later orchestrate these workflows, but each workflow should retain a coherent responsibility.
+A workflow should normally have one primary end goal. Multiple independent objectives (write screenplay + generate concept art + create music + build scenes + publish + marketing) should be separate workflows. A higher-level system may later orchestrate them.
 
 ---
 
 # 16. Goal Hierarchy
 
-Complex projects may have multiple levels of goals.
-
-For example:
-
-```text
-PROJECT
-   │
-   ├── Produce screenplay
-   │      │
-   │      ├── Produce chapter
-   │      ├── Evaluate chapter
-   │      └── Approve chapter
-   │
-   ├── Produce visual assets
-   │
-   └── Produce audio assets
-```
-
-The current workflow should clearly identify which goal it owns.
-
-Do not mix project-level goals with Process-level goals.
+Complex projects may have multiple levels of goals (project → workflows → processes). The current workflow should clearly identify which goal it owns, and not mix project-level goals with Process-level goals.
 
 ---
 
 # 17. Goal Dependencies
 
-A goal may depend on another approved result.
-
-Example:
-
-```text
-Story Architecture
-        ↓
-Chapter Specification
-        ↓
-Chapter Generation
-        ↓
-Chapter Evaluation
-        ↓
-Chapter Approval
-```
-
-The start boundary of a downstream workflow may therefore be:
-
-```text
-An approved chapter specification exists.
-```
-
-rather than:
-
-```text
-The project has started.
-```
-
-This creates explicit workflow boundaries.
+A goal may depend on another approved result. A downstream workflow's start boundary may therefore be "An approved chapter specification exists" rather than "The project has started." This creates explicit workflow boundaries.
 
 ---
 
 # 18. Human Approval as a Boundary
 
-Some workflows require human approval.
-
-For example:
-
-```text
-Process A
-   ↓
-Output
-   ↓
-Human Review
-   ↓
-Approved
-   ↓
-Workflow continues
-```
-
-The approval may represent:
-
-* design approval
-* content approval
-* quality approval
-* safety approval
-* business approval
-* production approval
-
-Human approval should be explicitly defined if it is part of the goal or workflow contract.
-
-Do not assume every workflow needs human approval.
+Some workflows require human approval (design, content, quality, safety, business, production). Human approval should be explicitly defined if it is part of the goal or workflow contract. Do not assume every workflow needs human approval.
 
 ---
 
 # 19. Design-Time Review vs Runtime Approval
 
-These are different.
-
-### Design-time review
-
-The user approves the architecture before implementation.
-
-```text
-Problem
-   ↓
-Goals
-   ↓
-Processes
-   ↓
-Human approves architecture
-```
-
-### Runtime approval
-
-A human approves an actual execution result.
-
-```text
-Process
-   ↓
-Generated output
-   ↓
-Human review
-   ↓
-Approved
-```
-
-Both may exist, but they serve different purposes.
+These are different. Design-time review: the user approves the architecture before implementation. Runtime approval: a human approves an actual execution result. Both may exist but serve different purposes.
 
 ---
 
@@ -781,34 +290,7 @@ Process boundaries will be formally defined in the next stages.
 
 # 23. Boundary Stability
 
-A good boundary should remain stable when implementation changes.
-
-For example:
-
-```text
-Goal:
-Produce a validated chapter evaluation.
-```
-
-This should remain valid whether evaluation is implemented using:
-
-```text
-Python
-```
-
-or:
-
-```text
-Agent + Task
-```
-
-or:
-
-```text
-Evaluation Crew
-```
-
-The boundary belongs to the problem, not the implementation.
+A good boundary should remain stable when implementation changes. The boundary belongs to the problem, not the implementation.
 
 ---
 
@@ -1110,64 +592,14 @@ or the maximum iteration limit is reached.
 
 # 28. Relationship to the Next Stage
 
-This document does not decompose the workflow into Processes.
+This document establishes the boundaries within which Process Decomposition must operate. It does not decompose the workflow into Processes.
 
-It establishes the boundaries within which Process Decomposition must operate.
+**Next:** `02-process-decomposition.md` — given the validated problem, start boundary, end goal, and scope, what meaningful Processes must occur between start and end states? (No implementation decisions yet.)
 
-The prerequisite sequence is:
-
-```text
-00 Problem Definition
-        │
-        ▼
-01 Goal & Boundary Definition
-        │
-        ▼
-02 Process Decomposition
-        │
-        ▼
-03 Process Contracts & Atomicity
-        │
-        ▼
-04 Process Validation & Human Review
-        │
-        ▼
-05 Flow & State Planning
-        │
-        ▼
-06 Corner Cases & Failure Planning
-        │
-        ▼
-07 Capability Selection
-        │
-        ▼
-08 Architecture Validation
-```
-
-The next document, `02-process-decomposition.md`, should therefore answer:
-
-> **Given the validated problem, start boundary, end goal, and scope, what meaningful Processes must occur between the start and end states?**
-
-It should **not yet decide whether those Processes are implemented with Agents, Tasks, Crews, Python, Tools, Knowledge, Memory, Skills, or MCP.**
+**Prerequisite chain:** See `00-problem-definition.md` §2.
 
 ---
 
 # 29. Amsha Rule
 
-> **Every Amsha workflow must have a defined start boundary, a single primary end goal, a bounded scope, and an observable completion condition before Process Decomposition begins.**
-
-The design progression is:
-
-```text
-WHAT IS THE PROBLEM?
-        ↓
-WHERE DOES IT START?
-        ↓
-WHAT MUST IT ACHIEVE?
-        ↓
-WHERE DOES OUR RESPONSIBILITY END?
-        ↓
-WHAT PROCESSES ARE REQUIRED?
-```
-
-**Do not design the implementation until these boundaries are sufficiently clear.**
+> **Every Amsha workflow must have a defined start boundary, a single primary end goal, a bounded scope, and an observable completion condition before Process Decomposition begins. Do not design the implementation until these boundaries are sufficiently clear.**
