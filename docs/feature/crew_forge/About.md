@@ -247,7 +247,9 @@ agent:
         DB_HOST: localhost
 ```
 
-**Security note:** Stdio config specifies a `command` + `args` for a subprocess. Restrict which commands are permitted at the application level — don't let untrusted YAML declare arbitrary subprocess commands.
+**Security note:** Stdio config specifies a `command` + `args` for a subprocess. Default-deny: set `AMSHA_MCP_STDIO_ALLOWLIST` (comma-separated exact command values, e.g. `AMSHA_MCP_STDIO_ALLOWLIST=python`) to permit specific commands — this is an application-owner env var, not something untrusted YAML can set for itself.
+
+Real, runnable example (built-in tool + a local MCP stdio server, driven by a live LLM): `example/crew_forge/verify_capability_example.py --kickoff` — see the module docstring for the required env vars.
 
 ### 10. Crew Tracing (Opt-In)
 

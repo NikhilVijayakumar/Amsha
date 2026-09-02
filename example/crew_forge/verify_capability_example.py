@@ -7,12 +7,25 @@ This exercises the REAL path used in production:
     -> CrewParser -> AgentRequest/TaskRequest -> CrewBuilderService
     -> crewai.Agent(skills=..., max_iter=..., ...) / Task(context=[...], ...)
 
+Also covers proposals 12 (tools + MCP) and 13 (tracing passthrough): the
+copywriter agent carries a built-in `file_read` tool and an MCP stdio server
+(`example/crew_forge/example_config/mcp_server/word_count_server.py`) whose
+`count_words` tool the task instructs the agent to call for real on --kickoff
+— this is the Windows stdio subprocess spawn/cleanup check proposal 12 flagged
+as deferred/unverified.
+
 Run without args to just build + inspect (no LLM call):
     python example/crew_forge/verify_capability_example.py
 
 Pass --kickoff to also run the crew directly against the configured LLM server
-(proposals 01/02/04/06/07/08/09 — single-crew path):
-    python example/crew_forge/verify_capability_example.py --kickoff
+(proposals 01/02/04/06/07/08/09/12/13 — single-crew path, including a real MCP
+stdio tool call). This requires two things in the environment, not just the
+YAML: the stdio command allowlist gate (proposal 12 Part 2 security mitigation)
+and the venv's python being resolvable via bare "python" on PATH (since
+MCPServerStdio spawns "python" from PATH, not sys.executable):
+    AMSHA_MCP_STDIO_ALLOWLIST=python python example/crew_forge/verify_capability_example.py --kickoff
+(run with the venv activated, or its Scripts/bin dir first on PATH, so the
+spawned "python" subprocess actually has the `mcp` package installed)
 
 Pass --pipeline to run the job_config `pipeline` as a real CrewAI Flow against
 the configured LLM server (proposal 03/10 — multi-crew Flow path, via the same
@@ -23,6 +36,8 @@ import argparse
 import sys
 from pathlib import Path
 from typing import Dict, Any
+
+from crewai_tools import FileReadTool
 
 from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
 from amsha.crew_forge.orchestrator.flow import FlowCrewOrchestrator
@@ -77,6 +92,17 @@ def main() -> int:
             True, any(expected_skill_root in p for p in skill_paths),
             f"{agent.role}.skills loaded from {expected_skill_root} (got {skill_paths})",
         ))
+        # proposal 12 part 1: "file_read" resolved through the tool registry to a real FileReadTool
+        results.append(_verify(
+            True, any(isinstance(t, FileReadTool) for t in (agent.tools or [])),
+            f"{agent.role}.tools resolved 'file_read' -> FileReadTool (got {[type(t).__name__ for t in (agent.tools or [])]})",
+        ))
+        # proposal 12 part 2: mcp_servers YAML -> Agent(mcps=[MCPServerStdio(...)]); connection
+        # itself only happens at kickoff (see --kickoff), this just confirms the config landed
+        mcps = getattr(agent, "mcps", None) or []
+        results.append(_verify(True, len(mcps) == 1, f"{agent.role}.mcps has 1 entry (got {len(mcps)})"))
+        if mcps:
+            results.append(_verify("python", getattr(mcps[0], "command", None), f"{agent.role}.mcps[0].command"))
 
     for task in crew.tasks:
         print(f"\nTask name: {task.name!r}")
@@ -103,6 +129,10 @@ def main() -> int:
         f"crew.checkpoint.location (YAML location) got={ckpt!r}",
     ))
 
+    print("\n== Tracing (proposal 13) ==")
+    # tracing: false in YAML -> Crew(tracing=False), explicit opt-out passthrough
+    results.append(_verify(False, crew.tracing, f"crew.tracing (YAML: false)"))
+
     print("\n== Flow pipeline (proposal 03) ==")
     pipeline = app.job_config.get("pipeline") or []
     if pipeline:
@@ -125,9 +155,13 @@ def main() -> int:
 
     if args.kickoff:
         print("\n== [2] Running copy_crew.kickoff() against configured LLM server ==")
+        print("     (spawns the word_count_server.py MCP subprocess for real -- proposal 12 Windows check)")
         result = app.orchestrator.run_crew(crew_name="copy_crew", inputs={})
+        raw = str(getattr(result, "raw", result))
         print("\n-- CrewOutput raw (first 500 chars) --")
-        print(str(getattr(result, "raw", result))[:500])
+        print(raw[:500])
+        print(f"\n[{'PASS' if 'word_count' in raw else 'CHECK'}] output mentions 'word_count' "
+              f"(agent should have called the MCP count_words tool per task instructions)")
         out_file = app.orchestrator.get_last_output_file()
         if out_file:
             print(f"\nOutput file: {out_file}")

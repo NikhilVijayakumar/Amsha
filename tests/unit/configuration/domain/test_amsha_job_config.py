@@ -23,6 +23,15 @@ class TestCrewDefinition(unittest.TestCase):
         crew_def = self._def()
         self.assertFalse(crew_def.memory)
         self.assertIsNone(crew_def.checkpoint)
+        self.assertIsNone(crew_def.tracing)
+
+    def test_tracing_false_round_trips(self):
+        crew_def = self._def(tracing=False)
+        self.assertIs(crew_def.tracing, False)
+
+    def test_tracing_true_round_trips(self):
+        crew_def = self._def(tracing=True)
+        self.assertIs(crew_def.tracing, True)
 
     def test_memory_true_round_trips(self):
         crew_def = self._def(memory=True)
@@ -43,7 +52,9 @@ class TestCrewDefinition(unittest.TestCase):
             module_name="copy",
             output_filepath="output/crew.json",
             crews={
-                "copy_crew": self._def(memory=True, checkpoint={"enabled": True, "location": "./ck"})
+                "copy_crew": self._def(
+                    memory=True, checkpoint={"enabled": True, "location": "./ck"}, tracing=False
+                )
             },
             pipeline=["copy_crew"],
         )
@@ -51,6 +62,7 @@ class TestCrewDefinition(unittest.TestCase):
         dumped_crew = dumped["crews"]["copy_crew"]
         self.assertIs(dumped_crew["memory"], True)
         self.assertEqual(dumped_crew["checkpoint"]["location"], "./ck")
+        self.assertIs(dumped_crew["tracing"], False)
 
 
 if __name__ == "__main__":

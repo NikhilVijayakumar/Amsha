@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | ✅ Partial — Part 1 (Tools) done; Part 2 (MCP) config passthrough done, lifecycle deferred |
+| **Status** | ✅ Partial — Part 1 (Tools) done; Part 2 (MCP) config passthrough done and verified end-to-end on Windows against a real local LLM, lifecycle wrapper still deferred |
 | **Priority** | New — requested directly, high value |
 | **Risk** | Medium — MCP stdio is a real code-execution surface if exposed to untrusted YAML |
 | **Effort** | Medium |
@@ -28,10 +28,18 @@
 - `Agent(mcps=[...])` wired through `CrewBuilderService.add_agent()`.
 - 2 new tests in `test_crew_builder_service.py`, 1 new test in `test_crew_parser.py`.
 
+### Part 3 — Real example + Windows verification ✅ (2026-09-02)
+
+`example/crew_forge/verify_capability_example.py --kickoff` now exercises this for real: the copywriter agent carries `tools: ["file_read"]` and an `mcp_servers` stdio entry pointing at `example/crew_forge/example_config/mcp_server/word_count_server.py` (a minimal `FastMCP` server), and the task instructs the agent to call `count_words` on each ad copy variation. Ran against a live local LLM (LM Studio, `qwen3.5-9b`) on Windows:
+
+- **Windows stdio subprocess spawn/cleanup verified** — the previously-deferred blocker. `MCPServerStdio(command="python", args=[...])` spawned the server subprocess, the agent called `count_words` for real (output word counts matched, e.g. `"word_count": 23`), and the crew completed without a leaked/hung process.
+- **Allowlist gate confirmed working as designed**: running without `AMSHA_MCP_STDIO_ALLOWLIST=python` set raises `CrewConfigurationException` before any subprocess spawns — the security mitigation from this proposal's Part 2 §2 is live, not just unit-tested.
+- **Gotcha for anyone reproducing this**: `command: "python"` resolves against the *spawning process's* `PATH`, not `sys.executable` — if a system Python without `mcp` installed is ahead of the venv on `PATH`, the subprocess exits immediately and CrewAI reports it as `MCPConnectionError: Connection closed` (no import-error detail surfaces). Put the venv's `Scripts`/`bin` dir first on `PATH` before running `--kickoff`.
+- **Correction to this proposal's own docs**: the "DSL `mcps=[...]` fails soft" claim in Part 2's "What CrewAI 1.15.18 offers" section does not hold in practice — a real connection failure raises `MCPConnectionError` and fails the crew, it does not silently degrade. Worth relying on the hard-fail behavior being real, not assuming soft-fail as a fallback.
+
 ### Deferred
 
-- MCP adapter lifecycle management (open before `build()`, close after `kickoff()`) — requires real-run verification.
-- Windows stdio subprocess spawn/cleanup verification — blocks "MCP stdio supported" claim.
+- MCP adapter lifecycle management as an explicit Amsha-owned context-manager wrapper (open before `build()`, close after `kickoff()`) — CrewAI's own per-task `Agent.get_mcp_tools()` already handles connect/cleanup around the `mcps=[...]` DSL path (verified above), so this is now a "nice to have for explicit control," not a correctness gap.
 - `tool_filter` on `McpServerConfig` — `create_static_tool_filter` not available in crewai 1.15.18; deferred until needed.
 - HTTP/SSE transport full wiring — config shape ready, actual adapter wiring deferred.
 

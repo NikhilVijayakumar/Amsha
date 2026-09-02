@@ -10,3 +10,8 @@ agent:
   # max_reasoning_attempts: 3
   # system_template: "You are {{.Role}}..."
   skills: ["domain-skills"]   # resolved to <domain_root_path>/copy/skills/domain-skills
+  tools: ["file_read"]        # proposal 12 part 1: built-in tool registry
+  mcp_servers:                # proposal 12 part 2: local stdio MCP server (real subprocess)
+    - transport: stdio
+      command: "python"
+      args: ["example/crew_forge/example_config/mcp_server/word_count_server.py"]

@@ -6,6 +6,9 @@ output_filepath: ".Amsha/output/intermediate/crew/crew_configurations.json"
 crews:
   copy_crew:
     memory: true
+    # proposal 13: explicit opt-out (default is None/off either way). Set true only
+    # after a `crewai login` -- it sends full prompts/responses to app.crewai.com.
+    tracing: false
     checkpoint:
       enabled: true
       provider: json

@@ -20,6 +20,13 @@ class CrewDefinition(BaseModel):
             "or a dict with keys enabled/on_events/provider/location/max_checkpoints."
         ),
     )
+    tracing: Optional[bool] = Field(
+        None,
+        description=(
+            "Enable CrewAI native tracing (proposal 13). True/False = explicit "
+            "opt-in/out; None (default) leaves CrewAI's own default in place."
+        ),
+    )
 
 class AmshaJobConfig(BaseModel):
     """

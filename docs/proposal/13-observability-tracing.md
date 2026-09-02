@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | ✅ Done — tracing passthrough wired, default off |
+| **Status** | ✅ Done — tracing passthrough wired, default off, verified end-to-end through the YAML path with a real kickoff |
 | **Priority** | New — requested directly |
 | **Risk** | Low for adoption itself; **the decision it forces (cloud vs. local) is the real risk to get right** |
 | **Effort** | Small (it's mostly a decision + a flag, not new plumbing) |
@@ -16,6 +16,10 @@
 - Default is `None` (off) — matches the proposal's "do not enable by default" requirement.
 - 2 new tests in `test_crew_builder_service.py` (`test_build_crew_with_tracing_enabled`, `test_build_crew_tracing_default_none`).
 - `AmshaEventListener` remains Amsha's primary, default observability path (proposal 09).
+
+### Bug found + fixed while adding a real example (2026-09-02)
+
+The passthrough above was unreachable from actual `job_config.yaml` files: `AmshaJobConfig`'s strict-validation schema (`CrewDefinition` in `amsha_job_config.py`) never declared a `tracing` field, so `ConfigurationManager.load_from_yaml(...).model_dump()` silently dropped a YAML-authored `tracing: false`/`true` before `AtomicCrewFileManager` ever saw it — `crew_def.get("tracing")` always returned `None`. Only a caller constructing `CrewData` directly in Python (bypassing the YAML path entirely) could actually exercise this. Fixed by adding `tracing: Optional[bool] = None` to `CrewDefinition`, with matching tests in `test_amsha_job_config.py` (`test_tracing_false_round_trips`, `test_tracing_true_round_trips`, plus the `tracing` assertion added to `test_full_job_config_keeps_crew_fields`). `example/crew_forge/example_config/job_config.yaml` now sets `tracing: false` explicitly on `copy_crew`, and `verify_capability_example.py` asserts `crew.tracing is False` at build time and confirms the runtime "Tracing is disabled" banner on `--kickoff` — this is the first real (non-unit-test) exercise of the field end-to-end through the YAML config-as-code path.
 
 ## The core finding: these are two independent, non-overlapping systems
 

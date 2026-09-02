@@ -1,10 +1,10 @@
 task:
   name: "Ad Copy Generation"
-  description: "Generate five unique pieces of ad copy for a new product."
-  expected_output: "A JSON file containing five ad copy variations."
+  description: "Generate five unique pieces of ad copy for a new product. For each variation, call the count_words tool on the copy text to get its exact word count -- do not count manually."
+  expected_output: "A JSON array of five objects: {\"copy\": \"<ad copy text, no counts inline>\", \"word_count\": <int from the count_words tool>}."
   # Optional execution / guardrail fields (all default to CrewAI's own defaults when omitted):
   markdown: true
-  guardrail: "output must be a JSON array of five ad copy strings"
+  guardrail: "output must be a JSON array of five objects, each with a 'copy' string field (pure ad copy text, no counts inline) and a 'word_count' integer field"
   guardrail_max_retries: 2
   # async_execution: false
   # human_input: false
