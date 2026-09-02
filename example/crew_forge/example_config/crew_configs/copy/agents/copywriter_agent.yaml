@@ -9,4 +9,4 @@ agent:
   # reasoning: true
   # max_reasoning_attempts: 3
   # system_template: "You are {{.Role}}..."
-  # skills: ["path/to/skill_search_dir"]   # a dir whose subdirs each contain SKILL.md
+  skills: ["domain-skills"]   # resolved to <domain_root_path>/copy/skills/domain-skills

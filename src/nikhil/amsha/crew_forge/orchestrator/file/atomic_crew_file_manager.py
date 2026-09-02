@@ -3,6 +3,7 @@ from pathlib import Path
 
 from amsha.crew_forge.domain.models.crew_data import CrewData
 from amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
+from amsha.crew_forge.knowledge.amsha_json_knowledge_source import AmshaJsonKnowledgeSource
 from amsha.crew_forge.seeding.parser.crew_parser import CrewParser
 from amsha.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
 from amsha.utils.yaml_utils import YamlUtils
@@ -26,6 +27,21 @@ class AtomicCrewFileManager:
         self.output_file:Optional[str] = None
 
 
+
+    @staticmethod
+    def _build_knowledge_source(paths):
+        """Build one or more knowledge sources, routing `.json` paths to the
+        native JSON source and everything else to the docling source."""
+        if not paths:
+            return None
+        json_paths = [p for p in paths if str(p).lower().endswith(".json")]
+        doc_paths = [p for p in paths if str(p).lower().endswith(".json") is False]
+        sources = []
+        if json_paths:
+            sources.append(AmshaJsonKnowledgeSource(file_paths=json_paths))
+        if doc_paths:
+            sources.append(AmshaCrewDoclingSource(file_paths=doc_paths))
+        return sources[0] if len(sources) == 1 else sources
 
     def build_atomic_crew(self, crew_name: str, filename_suffix:Optional[str]=None,
                           output_json: Any = None):
@@ -65,20 +81,12 @@ class AtomicCrewFileManager:
                 parser=CrewParser(),
                 agent_yaml_file=agent_yaml_file,
                 task_yaml_file=task_yaml_file,
+                skills_root=str(domain_root_path / module_name / "skills"),
             )
 
-            agent_knowledge_paths = set()
-            for path in step.get('knowledge_sources', []):
-                print(f"knowledge_sources:{path}")
-                agent_knowledge_paths.add(path)
-            if agent_knowledge_paths:
-                agent_text_source = AmshaCrewDoclingSource(
-                    file_paths=list(agent_knowledge_paths)
-                )
-            else:
-                agent_text_source = None
+            agent_knowledge = self._build_knowledge_source(step.get('knowledge_sources', []))
             crew_builder.add_agent(
-                knowledge_sources=agent_text_source
+                knowledge_sources=agent_knowledge
             )
             safe_model_name = self.model_name.replace("/", "_") if self.model_name else "default"
             if filename_suffix:
@@ -96,19 +104,7 @@ class AtomicCrewFileManager:
 
         self.output_file = crew_builder.get_last_file()
 
-        crew_knowledge_paths = set()
-
-        # 2. Add crew-level knowledge sources
-        crew_knowledge = crew_def.get('knowledge_sources') or []
-        for path in crew_knowledge:
-            print(f"knowledge_sources:{path}")
-            crew_knowledge_paths.add(path)
-        if crew_knowledge_paths:
-            crew_text_source = AmshaCrewDoclingSource(
-                file_paths=list(crew_knowledge_paths)
-            )
-        else:
-            crew_text_source = None
+        crew_text_source = self._build_knowledge_source(crew_def.get('knowledge_sources') or [])
 
         print(f"[Manager] Finished building '{crew_name}'.")
         return crew_builder.build(knowledge_sources=crew_text_source)

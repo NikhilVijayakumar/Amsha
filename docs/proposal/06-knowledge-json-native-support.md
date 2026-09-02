@@ -6,6 +6,7 @@
 | **Risk** | Low |
 | **Effort** | Small |
 | **Depends on** | [02](02-crewai-version-migration.md) |
+| **Status** | ✅ Done (2026-09-02) |
 
 ## The specific gap the user flagged
 
@@ -24,3 +25,11 @@ CrewAI ships **JSON as a native, built-in knowledge source type** alongside `Str
 ## What NOT to do
 
 - Don't extend `AmshaCrewDoclingSource` itself to handle JSON — docling isn't the right tool for structured JSON knowledge, and forcing it through a document-conversion pipeline designed for unstructured/semi-structured documents would be the wrong abstraction. Use CrewAI's native JSON source directly.
+
+## Execution log
+
+- Added `AmshaJsonKnowledgeSource` (`crew_forge/knowledge/amsha_json_knowledge_source.py`), a thin wrapper over CrewAI's native `JSONKnowledgeSource` that replaces the native string-path prefixing with Amsha-style local path/URL handling (local filesystem paths must exist; remote URLs rejected with a clear message).
+- `AtomicCrewFileManager._build_knowledge_source()` now routes `.json` `knowledge_sources` entries to `AmshaJsonKnowledgeSource` and every other format to `AmshaCrewDoclingSource` (single source returned as-is, mixed sources returned as a list).
+- Example `job_config.yaml` + `crew_configs/copy/knowledge/products.json` added; verified against the example via `verify_capability_example.py` (crew reports a JSON knowledge source).
+- Unit tests: `tests/unit/crew_forge/knowledge/test_amsha_json_knowledge_source.py` (7 tests, all pass).
+- Docs updated: `docs/feature/crew_forge/About.md` (Knowledge Management sections) and `functional.md` (FR-STRUCT-06).

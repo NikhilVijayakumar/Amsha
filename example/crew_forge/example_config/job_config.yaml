@@ -5,6 +5,8 @@ output_filepath: ".Amsha/output/intermediate/crew/crew_configurations.json"
 
 crews:
   copy_crew:
+    knowledge_sources:
+      - "./example/crew_forge/example_config/crew_configs/copy/knowledge/products.json"
 #    knowledge_sources:
 #      - "./docs/shared_project_guidelines.md"
 #      - "./docs/style_guide.txt"
@@ -14,6 +16,8 @@ crews:
     steps:
       - task_key: "ad_copy_task"
         agent_key: "copywriter_agent"
+        knowledge_sources:
+          - "./example/crew_forge/example_config/crew_configs/copy/knowledge/products.json"
 #    knowledge_sources:
 #      - "./data/market_research_summary.csv"
 #      - "./data/competitor_analysis.pdf"

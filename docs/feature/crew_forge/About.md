@@ -17,9 +17,10 @@ Amsha abstracts away the repetitive boilerplate code required to set up CrewAI a
 
 ### 📚 Advanced Knowledge Management
 Amsha integrates powerful knowledge source management capabilities.
-*   **Multi-Format Support**: Uses `AmshaCrewDoclingSource` (powered by [Docling](https://github.com/DS4SD/docling)) to ingest knowledge. **(Currently tested with Markdown)**.
+*   **Multi-Format Support**: Uses `AmshaCrewDoclingSource` (powered by [Docling](https://github.com/DS4SD/docling)) to ingest documents (Markdown, PDF, DOCX, HTML, XLSX, PPTX, images), and `AmshaJsonKnowledgeSource` (powered by CrewAI's native `JSONKnowledgeSource`) for structured JSON files. Reasonably tested with Markdown; the other formats flow through the same source classes.
+*   **Automatic Format Routing**: When a `knowledge_sources` entry ends in `.json` it is routed to `AmshaJsonKnowledgeSource`; every other format goes to `AmshaCrewDoclingSource`.
 *   **Markdown Conversion**: Automatically converts various document formats into Markdown for optimal LLM consumption.
-*   **Flexible Sources**: Supports both local file paths and URLs.
+*   **Flexible Sources**: Supports both local file paths and URLs (URLs for docling sources only — the JSON source is local-file only).
 
 ### 🔄 Input & Data Handling
 *   **Flexible Inputs**: seamlessly handle inputs from multiple sources—direct configuration values, text files, or JSON data.
@@ -83,22 +84,50 @@ app = AmshaCrewDBApplication(config_paths=config_paths, llm_type=LLMType.CREATIV
 
 ### 3. Knowledge Management
 
-Easily attach knowledge sources to your agents or crews using `AmshaCrewDoclingSource`.
+Easily attach knowledge sources to your agents or crews. In the file-based orchestrator, list paths under a crew's or a step's `knowledge_sources` in the job config; `.json` entries automatically use `AmshaJsonKnowledgeSource` and every other format uses `AmshaCrewDoclingSource`. You can also construct sources directly:
 
 ```python
 from nikhil.amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
+from nikhil.amsha.crew_forge.knowledge.amsha_json_knowledge_source import AmshaJsonKnowledgeSource
 
-# Create a knowledge source from a Markdown file
-knowledge_source = AmshaCrewDoclingSource(
-    file_paths=[
-        "path/to/document.md"
-    ]
+# Document knowledge source (Markdown, PDF, DOCX, HTML, XLSX, PPTX, images)
+doc_source = AmshaCrewDoclingSource(
+    file_paths=["path/to/document.md"]
 )
 
-# This source can now be passed to your CrewAI agents
+# Structured JSON knowledge source (local file paths only)
+json_source = AmshaJsonKnowledgeSource(
+    file_paths=["path/to/products.json"]
+)
+
+# These sources can now be passed to your CrewAI agents
 ```
 
-### 4. Syncing Configurations to MongoDB
+### 4. Skills
+
+CrewAI Skills inject instructions/context ("how to think") rather than callable actions. Place a `skills/` directory next to an agent's `agents/` and `tasks/` directories inside its use case, with each immediate child being a skill search path whose own subdirectories contain a `SKILL.md`. Reference a skill in the agent YAML by its search-path directory name:
+
+```yaml
+# copy/agents/copywriter_agent.yaml
+agent:
+  role: "Expert Copywriter"
+  ...
+  skills: ["domain-skills"]   # resolves to <use case>/skills/domain-skills
+```
+
+```text
+copy/
+├── agents/copywriter_agent.yaml
+├── tasks/ad_copy_task.yaml
+└── skills/
+    └── domain-skills/
+        └── ad-copy/
+            └── SKILL.md
+```
+
+Amsha resolves the bare name to the `skills/<name>` path before passing it to CrewAI. This is a runtime **agent/crew Skill** — unrelated to the Claude Code project-development skills under `docs/reference/agent/skills/` that are used to work *on* Amsha's own codebase.
+
+### 5. Syncing Configurations to MongoDB
 
 Keep your database in sync with your local YAML configurations.
 

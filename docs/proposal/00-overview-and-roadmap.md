@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Phases 1–2, 8 done (2026-09-02); see below |
+| **Status** | Phases 1–2, 4, 6, 7, 8 done (2026-09-02); see below |
 | **Date** | 2026-09-02 |
 | **Author** | Nikhil (compiled with Claude) |
 | **Scope** | Align Amsha with current CrewAI (docs v1.15.18) capabilities |
@@ -50,7 +50,7 @@ Doing these in the wrong order compounds risk. Recommended phase order:
 1. **[01 — Remove Nibandha](01-nibandha-removal.md). ✅ Done (2026-09-02).** Independent of CrewAI entirely. Removed the git-sourced dependency before it could complicate `pip`/`uv` resolution during the CrewAI bump — logger rewritten to stdlib, 45 logger-dependent tests passing. Pre-existing unrelated test failures remain (see execution log in 01) and are unaffected by this change.
 2. **[02 — CrewAI version migration](02-crewai-version-migration.md).** Get onto 1.x before building anything new against 1.x-only APIs. Everything below assumes this is done.
 3. **[08 — Agent/Task capability expansion](08-agent-task-capability-expansion.md). ✅ Done (2026-09-02).** `AgentRequest`/`TaskRequest` extended with optional execution/capability/prompt fields (backward-compatible), `CrewBuilderService` passes them through to CrewAI 1.15.18 constructors conditionally, `TaskRequest.context` resolves names to `Task` objects, and `CrewParser` now forwards new YAML fields instead of silently dropping them. Unblocks memory, skills, reasoning, planning, guardrails.
-4. **[06 — Knowledge JSON support](06-knowledge-json-native-support.md)** and **[07 — Skills](07-skills-adoption.md)** — additive, low-risk, can happen in parallel once (3) lands.
+4. **[06 — Knowledge JSON support](06-knowledge-json-native-support.md)** ✅ Done (2026-09-02) and **[07 — Skills](07-skills-adoption.md)** ✅ Done (2026-09-02) — additive, low-risk, done in parallel once (3) landed. JSON knowledge routes to CrewAI's native JSON source; skills resolve by name from a `skills/` directory convention.
 5. **[04 — Memory](04-memory-adoption.md)** and **[05 — Checkpointing consolidation](05-checkpointing-consolidation.md)** — these two should be designed together since CrewAI's native checkpoint already snapshots memory state; Amsha's `StateManager` needs to either delegate to or be replaced by it.
 6. **[03 — Flows adoption](03-flows-adoption.md)** and **[10 — Production architecture alignment](10-production-architecture-alignment.md)** — the bigger architectural shift; do this once the smaller pieces are stable, since Flow-first changes how `BaseCrewOrchestrator` fits in.
 7. **[09 — Event observability upgrade](09-event-observability-upgrade.md)** — replace/augment `CrewPerformanceMonitor` once Flows/Memory land, since new event categories (memory ops, flow methods) only exist once those are in use.

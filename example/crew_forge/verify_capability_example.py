@@ -61,6 +61,14 @@ def main() -> int:
         results.append(_verify(True, agent.allow_delegation, f"{agent.role}.allow_delegation (YAML: true, default False)"))
         # reasoning commented out in YAML -> should fall back to crewai default (False)
         results.append(_verify(False, agent.reasoning, f"{agent.role}.reasoning (commented out -> default False)"))
+        # skills: "domain-skills" from YAML should resolve to the <module>/skills/domain-skills
+        # search path, which crewai then loads into Skill objects (path under .../domain-skills).
+        skill_paths = [str(getattr(s, "path", "")).replace("\\", "/") for s in (agent.skills or [])]
+        expected_skill_root = "example/crew_forge/example_config/crew_configs/copy/skills/domain-skills"
+        results.append(_verify(
+            True, any(expected_skill_root in p for p in skill_paths),
+            f"{agent.role}.skills loaded from {expected_skill_root} (got {skill_paths})",
+        ))
 
     for task in crew.tasks:
         print(f"\nTask name: {task.name!r}")
@@ -68,6 +76,12 @@ def main() -> int:
         results.append(_verify(True, isinstance(task.guardrail, str) and "JSON array" in task.guardrail,
                                f"{task.name}.guardrail set (YAML guardrail)"))
         results.append(_verify(2, task.guardrail_max_retries, f"{task.name}.guardrail_max_retries (YAML: 2)"))
+
+    print("\n== Knowledge sources on crew ==")
+    ks = crew.knowledge_sources
+    sources = ks if isinstance(ks, list) else [ks]
+    json_sources = [s for s in sources if s is not None and getattr(s, "source_type", None) == "json"]
+    results.append(_verify(True, len(json_sources) == 1, f"crew has a JSON knowledge source (found {len(json_sources)})"))
 
     passed = all(results)
     print(f"\n== Build inspection: {'ALL PASS' if passed else 'SOME FAILED'} ({sum(results)}/{len(results)}) ==")

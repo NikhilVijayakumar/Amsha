@@ -6,6 +6,7 @@
 | **Risk** | Low — additive, net-new concept |
 | **Effort** | Small-Medium |
 | **Depends on** | [02](02-crewai-version-migration.md), [08](08-agent-task-capability-expansion.md) |
+| **Status** | ✅ Done (2026-09-02) |
 
 ## What a CrewAI Skill is
 
@@ -24,3 +25,10 @@ No concept of this at all — `AgentRequest` has no `skills` field, `CrewBuilder
 ## What NOT to do
 
 - Don't conflate this with Amsha's own MongoDB "sync" concept or with Amsha's `docs/reference/agent/skills/*.md` (those are Claude Code project-development skills for working *on* Amsha's own codebase — a completely different thing from CrewAI agent Skills, which are runtime capabilities *for the agents Amsha builds*). Naming collision risk — call out clearly in docs which "skill" is meant where.
+
+## Execution log
+
+- Proposition 08 already delivered `AgentRequest.skills` + `CrewBuilderService.add_agent()` passthrough. This phase adds the YAML configuration-as-code convention: `AtomicYamlBuilderService._resolve_skills()` resolves a bare skill search-path directory name from an agent's YAML to `<domain_root_path>/<module>/skills/<name>` (an existing absolute/relative path is passed through unchanged; an unresolvable name raises a clear `ValueError`). The manager threads `skills_root` into the builder.
+- Example: `crew_configs/copy/skills/domain-skills/ad-copy/SKILL.md` added, referenced via `skills: ["domain-skills"]` in `copywriter_agent.yaml`; verified via `verify_capability_example.py` (crewai loads the `ad-copy` skill from the resolved path).
+- Unit tests: `tests/unit/crew_forge/service/test_atomic_builders.py` (4 new skill-resolution tests, all pass).
+- Docs updated: `docs/feature/crew_forge/About.md` (new Skills section) and `functional.md` (FR-STRUCT-05).

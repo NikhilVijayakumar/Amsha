@@ -56,6 +56,17 @@ The library will expose its functionality through a single, cohesive service int
 -   **FR-STRUCT-02: Component Subdirectories:** Each 'use case' directory must contain exactly two subdirectories named `agents` and `tasks`.
 -   **FR-STRUCT-03: Agent File Convention:** Agent definitions must be contained in YAML files located within the `agents` subdirectory. All agent YAML filenames must end with the suffix `_agent.yaml`.
 -   **FR-STRUCT-04: Task File Convention:** Task definitions must be contained in YAML files located within the `tasks` subdirectory. All task YAML filenames must end with the suffix `_task.yaml`.
+-   **FR-STRUCT-05: Optional Skills Directory:** A use case directory *may* contain a `skills` subdirectory. Each immediate child of `skills` is a CrewAI skill **search path**, whose own subdirectories each contain a `SKILL.md`. An agent's YAML references a skill by its search-path directory name via the `skills` list; Amsha resolves that name to `<use case>/skills/<name>` before passing it to CrewAI. Example layout:
+    ```
+    copy/
+    ├── agents/copywriter_agent.yaml   # skills: ["domain-skills"]
+    ├── tasks/ad_copy_task.yaml
+    └── skills/
+        └── domain-skills/             # one skill search path (name referenced above)
+            └── ad-copy/
+                └── SKILL.md
+    ```
+-   **FR-STRUCT-06: Optional Knowledge Directory:** File-based knowledge source paths listed under a crew's or a step's `knowledge_sources` are routed by extension — `.json` to `AmshaJsonKnowledgeSource`, all other formats to `AmshaCrewDoclingSource`.
 
 #### 4.2. Synchronization Logic (`FR-SYNC`)
 

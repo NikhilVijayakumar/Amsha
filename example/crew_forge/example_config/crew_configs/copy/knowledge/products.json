@@ -1,0 +1,8 @@
+{
+  "product": {
+    "name": "NexusFocus AI",
+    "benefits": ["reclaim deep work time", "adaptive task prioritization"],
+    "target_audience": "knowledge workers and remote professionals",
+    "pricing": {"free_trial_days": 14, "monthly": "$9"}
+  }
+}
