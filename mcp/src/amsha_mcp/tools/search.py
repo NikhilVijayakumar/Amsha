@@ -1,6 +1,8 @@
 """Search tool over Amsha's docs, README, and methodology."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from .. import docs_loader as dl
 
 
