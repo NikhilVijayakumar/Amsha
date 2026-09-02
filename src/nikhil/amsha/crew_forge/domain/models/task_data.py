@@ -12,6 +12,7 @@ class TaskRequest(BaseModel):
 
     # Execution
     context: Optional[List[str]] = Field(None, description="Names of prerequisite TaskRequests whose output feeds this task.")
+    tools: Optional[List[str]] = Field(None, description="Tool names resolved against the tool registry. Task-level tools override agent-level tools.")
     async_execution: Optional[bool] = Field(None, description="Execute this task asynchronously.")
     human_input: Optional[bool] = Field(None, description="Require human input before final output.")
     markdown: Optional[bool] = Field(None, description="Render the task output as markdown.")

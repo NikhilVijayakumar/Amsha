@@ -107,8 +107,10 @@ class AmshaCrewFileApplication:
         from a list of sources in the job config.
         """
         crew_def = self.job_config["crews"][crew_name]
-        # Expect a list of inputs, defaulting to an empty list
-        inputs_def = crew_def.get("input", [])
+        # Expect a list of inputs, defaulting to an empty list. Validated job_config
+        # dumps declare `input` explicitly as None when unset (not absent), so
+        # `.get("input", [])`'s default alone doesn't cover that case.
+        inputs_def = crew_def.get("input") or []
         final_inputs = {}
 
         print(f"📦 [App] Preparing inputs for '{crew_name}'...")

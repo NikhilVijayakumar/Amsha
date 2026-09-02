@@ -72,3 +72,17 @@ crew:
 - Example: `job_config.yaml` `copy_crew` opts into `json` checkpointing; `verify_capability_example.py` asserts the built crew's `CheckpointConfig.location` matches the YAML.
 - Unit tests: builder coercion (bool/dict/provider/enabled-false/unknown-provider) in `test_crew_builder_service.py`; `attach_checkpoint` in `test_state_manager.py`; recording + `resume_crew` (+ error paths) in `test_base_crew_orchestrator.py`; config schema in `tests/unit/configuration/domain/test_amsha_job_config.py`.
 - Docs updated: `functional.md` (FR-CREW-04), `About.md` §5, `00-overview-and-roadmap.md §4`.
+
+## Discovered gotcha (2026-09-02, real LLM run via Flow pipeline)
+
+Running `verify_capability_example.py --pipeline` live against LM Studio (the same crew that also exercises a guardrail retry) surfaced a **CrewAI-internal, non-fatal checkpoint failure**:
+
+```
+WARNING - Auto-checkpoint failed for event task_completed
+...
+pydantic_core._pydantic_core.PydanticSerializationError: Unable to serialize unknown type: <class 'RuntimeError'>
+```
+
+This happens inside `crewai/state/checkpoint_listener.py`'s `_do_checkpoint` → `state.model_dump(mode="json")` — CrewAI's own checkpoint snapshot tries to serialize its internal state after a guardrail retry, and something in that state (most likely the first failed guardrail attempt's exception) is a raw `RuntimeError` instance, which isn't JSON-serializable. CrewAI catches this and logs a warning rather than crashing — the crew and flow both completed successfully, guardrail retry (2 attempts) worked, final output was produced — but **the checkpoint for that `task_completed` event silently did not save**.
+
+This is not an Amsha bug — Amsha's `checkpoint=CheckpointConfig(...)` passthrough is doing exactly what it should; the failure is inside CrewAI 1.15.18's own checkpoint serialization when a guardrail has retried. Documenting rather than fixing: nothing in Amsha's control here short of monkeypatching CrewAI internals, which isn't warranted for a caught-and-logged warning. Practical implication for Amsha users: **don't assume every checkpoint-eligible event actually saved** if the task involved a guardrail retry — `resume_crew()` would resume from the last checkpoint that *did* save, which may be earlier than expected. Worth a CrewAI upstream issue if this becomes a real pain point; out of scope for Amsha's own proposal set.

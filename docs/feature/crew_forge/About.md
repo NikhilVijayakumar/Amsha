@@ -193,6 +193,76 @@ handle = app.run_pipeline({"brief": "..."}, mode=ExecutionMode.BACKGROUND)  # Ex
 
 `outputs` maps each crew name to its raw result (`PipelineState.outputs`). Inputs passed to `run_pipeline` are fed to every crew step; omitted, they default to the union of each pipeline crew's declared `input` definitions. Single-crew runs remain exactly as before via `orchestrator.run_crew()` — the Flow path is strictly additive, and branching (`@router`) is a future extension, not part of this version.
 
+### 8. Tools
+
+Agents and tasks can declare tools by name in YAML. Tool names are resolved against a registry that ships with built-in tools (`file_read`, `directory_read`, `scrape_website`) and can be extended with custom `BaseTool` subclasses.
+
+```yaml
+# copy/agents/researcher_agent.yaml
+agent:
+  role: "Researcher"
+  ...
+  tools: [file_read, directory_read]
+```
+
+Task-level tools override agent-level tools for that task (CrewAI's own precedence):
+
+```yaml
+# copy/tasks/scrape_task.yaml
+task:
+  name: "scrape"
+  ...
+  tools: [scrape_website]    # replaces agent tools for this task only
+```
+
+Register custom tools programmatically:
+
+```python
+from amsha.crew_forge.service.tool_registry import register_tool
+from crewai.tools import BaseTool
+
+class MyCustomTool(BaseTool):
+    name: str = "my_tool"
+    description: str = "Does something useful"
+    def _run(self, **kwargs) -> str:
+        return "result"
+
+register_tool("my_tool", MyCustomTool)
+```
+
+### 9. MCP Server Integration
+
+Agents can connect to MCP servers (stdio, HTTP, or SSE transports) via structured YAML configuration. Stdio is the recommended transport for local MCP servers.
+
+```yaml
+# copy/agents/db_agent.yaml
+agent:
+  role: "Database Agent"
+  ...
+  mcp_servers:
+    - transport: stdio
+      command: python
+      args: [servers/db_server.py]
+      env:
+        DB_HOST: localhost
+```
+
+**Security note:** Stdio config specifies a `command` + `args` for a subprocess. Restrict which commands are permitted at the application level — don't let untrusted YAML declare arbitrary subprocess commands.
+
+### 10. Crew Tracing (Opt-In)
+
+CrewAI native tracing sends full prompt/response content to CrewAI's hosted dashboard. **Off by default** — enable explicitly only if you've reviewed the cloud dependency and data-sensitivity implications.
+
+```yaml
+# job_config.yaml
+crews:
+  copy_crew:
+    tracing: true          # requires crewai login; sends prompts to app.crewai.com
+    steps: [...]
+```
+
+Amsha's `AmshaEventListener` (local, self-hosted observability) remains the primary default path. Tracing is additive for teams that specifically want CrewAI's hosted trace UI.
+
 ---
 
 ## ⚙️ Configuration Structure

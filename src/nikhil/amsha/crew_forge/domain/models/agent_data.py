@@ -3,6 +3,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
+from amsha.crew_forge.domain.models.mcp_data import McpServerConfig
+
 
 class AgentRequest(BaseModel):
     role: str = Field(..., description="The role or persona of the agent.")
@@ -23,6 +25,8 @@ class AgentRequest(BaseModel):
     max_reasoning_attempts: Optional[int] = Field(None, description="Maximum reasoning attempts when reasoning is enabled.")
     multimodal: Optional[bool] = Field(None, description="Enable multimodal (image/audio) inputs.")
     skills: Optional[List[str]] = Field(None, description="Skill names or paths to attach to the agent.")
+    tools: Optional[List[str]] = Field(None, description="Tool names resolved against the tool registry.")
+    mcp_servers: Optional[List[McpServerConfig]] = Field(None, description="MCP server configurations for this agent.")
 
     # Prompt customization
     system_template: Optional[str] = Field(None, description="System template override.")

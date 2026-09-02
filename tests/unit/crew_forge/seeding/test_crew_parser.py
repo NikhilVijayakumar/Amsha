@@ -73,6 +73,47 @@ class TestCrewParser(unittest.TestCase):
         self.assertIsNone(task.async_execution)
         self.assertIsNone(task.context)
 
+    def test_parse_agent_with_tools(self):
+        """Test tools field flows through from YAML."""
+        path = self._write(
+            "agent:\n"
+            "  role: r\n"
+            "  goal: g\n"
+            "  backstory: b\n"
+            "  tools: [file_read, directory_read]\n"
+        )
+        agent = self.parser.parse_agent(path)
+        self.assertEqual(agent.tools, ["file_read", "directory_read"])
+
+    def test_parse_agent_with_mcp_servers(self):
+        """Test mcp_servers field flows through from YAML."""
+        path = self._write(
+            "agent:\n"
+            "  role: r\n"
+            "  goal: g\n"
+            "  backstory: b\n"
+            "  mcp_servers:\n"
+            "    - transport: stdio\n"
+            "      command: python\n"
+            "      args: [server.py]\n"
+        )
+        agent = self.parser.parse_agent(path)
+        self.assertEqual(len(agent.mcp_servers), 1)
+        self.assertEqual(agent.mcp_servers[0].transport, "stdio")
+        self.assertEqual(agent.mcp_servers[0].command, "python")
+
+    def test_parse_task_with_tools(self):
+        """Test task tools field flows through from YAML."""
+        path = self._write(
+            "task:\n"
+            "  name: n\n"
+            "  description: d\n"
+            "  expected_output: o\n"
+            "  tools: [scrape_website]\n"
+        )
+        task = self.parser.parse_task(path)
+        self.assertEqual(task.tools, ["scrape_website"])
+
 
 if __name__ == '__main__':
     unittest.main()

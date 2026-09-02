@@ -21,3 +21,10 @@ class CrewData(BaseModel):
             "or a dict with keys enabled/on_events/provider/location/max_checkpoints."
         ),
     )
+    tracing: Optional[bool] = Field(
+        default=None,
+        description=(
+            "Enable CrewAI native tracing (sends full prompt/response content "
+            "to CrewAI's hosted dashboard). Off by default — requires crewai login."
+        ),
+    )

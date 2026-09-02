@@ -10,8 +10,14 @@ This exercises the REAL path used in production:
 Run without args to just build + inspect (no LLM call):
     python example/crew_forge/verify_capability_example.py
 
-Pass --kickoff to also run the crew against the configured LLM server:
+Pass --kickoff to also run the crew directly against the configured LLM server
+(proposals 01/02/04/06/07/08/09 — single-crew path):
     python example/crew_forge/verify_capability_example.py --kickoff
+
+Pass --pipeline to run the job_config `pipeline` as a real CrewAI Flow against
+the configured LLM server (proposal 03/10 — multi-crew Flow path, via the same
+production entry point AmshaCrewFileApplication.run_pipeline()):
+    python example/crew_forge/verify_capability_example.py --pipeline
 """
 import argparse
 import sys
@@ -40,6 +46,7 @@ def _verify(expected: Any, actual: Any, label: str) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Proposal 08 capability-field verification")
     parser.add_argument("--kickoff", action="store_true", help="also run the crew against the LLM server")
+    parser.add_argument("--pipeline", action="store_true", help="also run the job_config pipeline as a real Flow against the LLM server")
     args = parser.parse_args()
 
     configs: Dict[str, str] = {
@@ -124,6 +131,16 @@ def main() -> int:
         out_file = app.orchestrator.get_last_output_file()
         if out_file:
             print(f"\nOutput file: {out_file}")
+
+    if args.pipeline:
+        print("\n== [3] Running job_config pipeline as a real Flow (proposal 03/10) ==")
+        # Real production entry point -- not FlowCrewOrchestrator directly, so this
+        # exercises exactly what a caller running `app.run_pipeline()` would get.
+        pipeline_app = AmshaCrewFileApplication(config_paths=configs, llm_type=LLMType.CREATIVE)
+        outputs = pipeline_app.run_pipeline()
+        print(f"\n-- Pipeline outputs (crew name -> raw, first 300 chars each) --")
+        for crew_name, raw in (outputs or {}).items():
+            print(f"[{crew_name}] {str(raw)[:300]}")
 
     return 0
 

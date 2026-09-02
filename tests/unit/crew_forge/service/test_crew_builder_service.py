@@ -503,6 +503,179 @@ class TestCrewBuilderService(unittest.TestCase):
                 checkpoint={"enabled": True, "provider": "dynamodb"},
             )).build()
 
+    # ── Tool resolution tests ──
+
+    def test_add_agent_resolves_tools_from_registry(self):
+        """Agent tools list is resolved through the tool registry."""
+        service = CrewBuilderService(self.crew_data)
+        agent_request = AgentRequest(
+            role="Researcher", goal="Research", backstory="Expert",
+            tools=["file_read"],
+        )
+        service.add_agent(agent_request)
+        agent = service._agents[0]
+        self.assertEqual(len(agent.tools), 1)
+        from crewai_tools import FileReadTool
+        self.assertIsInstance(agent.tools[0], FileReadTool)
+
+    def test_add_agent_unknown_tool_raises(self):
+        """Unknown tool name in AgentRequest.tools raises ValueError."""
+        service = CrewBuilderService(self.crew_data)
+        with self.assertRaises(ValueError) as ctx:
+            service.add_agent(AgentRequest(
+                role="R", goal="G", backstory="S",
+                tools=["nonexistent_tool"],
+            ))
+        self.assertIn("nonexistent_tool", str(ctx.exception))
+
+    def test_add_agent_merges_explicit_and_registry_tools(self):
+        """Explicitly passed tools + registry tools are merged."""
+        from crewai_tools import FileReadTool
+        service = CrewBuilderService(self.crew_data)
+        agent_request = AgentRequest(
+            role="R", goal="G", backstory="S",
+            tools=["directory_read"],
+        )
+        explicit = [FileReadTool()]
+        service.add_agent(agent_request, tools=explicit)
+        agent = service._agents[0]
+        self.assertEqual(len(agent.tools), 2)
+
+    def test_add_agent_no_tools_empty_list(self):
+        """Agent with no tools gets empty list."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(role="R", goal="G", backstory="S"))
+        agent = service._agents[0]
+        self.assertEqual(agent.tools, [])
+
+    def test_add_task_resolves_tools_from_registry(self):
+        """Task tools list is resolved through the tool registry."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(role="A", goal="G", backstory="S"))
+        agent = service.get_last_agent()
+        task_request = TaskRequest(
+            name="t", description="d", expected_output="o",
+            tools=["file_read"],
+        )
+        service.add_task(task_request, agent)
+        task = service._tasks[0]
+        self.assertEqual(len(task.tools), 1)
+        from crewai_tools import FileReadTool
+        self.assertIsInstance(task.tools[0], FileReadTool)
+
+    def test_task_tools_override_agent_tools(self):
+        """Task-level tools replace agent-level tools at the Task level."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(
+            role="A", goal="G", backstory="S",
+            tools=["file_read", "directory_read"],
+        ))
+        agent = service.get_last_agent()
+        task_request = TaskRequest(
+            name="t", description="d", expected_output="o",
+            tools=["scrape_website"],
+        )
+        service.add_task(task_request, agent)
+        task = service._tasks[0]
+        self.assertEqual(len(task.tools), 1)
+        from crewai_tools import ScrapeWebsiteTool
+        self.assertIsInstance(task.tools[0], ScrapeWebsiteTool)
+        # Agent still has its own tools
+        self.assertEqual(len(agent.tools), 2)
+
+    # ── MCP config tests ──
+
+    def test_add_agent_mcp_stdio_config(self):
+        """MCP stdio config converts to MCPServerStdio and passes to Agent, when the
+        command is explicitly allowlisted by the application owner (env var)."""
+        from amsha.crew_forge.domain.models.mcp_data import McpServerConfig
+        from amsha.crew_forge.service.crew_builder_service import MCP_STDIO_ALLOWLIST_ENV
+        service = CrewBuilderService(self.crew_data)
+        agent_request = AgentRequest(
+            role="R", goal="G", backstory="S",
+            mcp_servers=[
+                McpServerConfig(
+                    transport="stdio",
+                    command="python",
+                    args=["server.py"],
+                    env={"KEY": "val"},
+                ),
+            ],
+        )
+        with patch.dict(os.environ, {MCP_STDIO_ALLOWLIST_ENV: "python,node"}):
+            service.add_agent(agent_request)
+        agent = service._agents[0]
+        self.assertEqual(len(agent.mcps), 1)
+        from crewai.mcp import MCPServerStdio
+        self.assertIsInstance(agent.mcps[0], MCPServerStdio)
+
+    def test_add_agent_mcp_stdio_denied_by_default(self):
+        """Security property: stdio MCP command is refused unless explicitly
+        allowlisted via AMSHA_MCP_STDIO_ALLOWLIST -- YAML alone cannot enable it."""
+        from amsha.crew_forge.domain.models.mcp_data import McpServerConfig
+        from amsha.crew_forge.exceptions.crew_configuration_exception import CrewConfigurationException
+        from amsha.crew_forge.service.crew_builder_service import MCP_STDIO_ALLOWLIST_ENV
+        service = CrewBuilderService(self.crew_data)
+        agent_request = AgentRequest(
+            role="R", goal="G", backstory="S",
+            mcp_servers=[McpServerConfig(transport="stdio", command="bash", args=["-c", "echo pwned"])],
+        )
+        env_without_allowlist = {k: v for k, v in os.environ.items() if k != MCP_STDIO_ALLOWLIST_ENV}
+        with patch.dict(os.environ, env_without_allowlist, clear=True):
+            with self.assertRaises(CrewConfigurationException):
+                service.add_agent(agent_request)
+
+    def test_add_agent_mcp_stdio_denied_when_not_in_allowlist(self):
+        """A configured allowlist still rejects any command not explicitly listed."""
+        from amsha.crew_forge.domain.models.mcp_data import McpServerConfig
+        from amsha.crew_forge.exceptions.crew_configuration_exception import CrewConfigurationException
+        from amsha.crew_forge.service.crew_builder_service import MCP_STDIO_ALLOWLIST_ENV
+        service = CrewBuilderService(self.crew_data)
+        agent_request = AgentRequest(
+            role="R", goal="G", backstory="S",
+            mcp_servers=[McpServerConfig(transport="stdio", command="bash", args=["-c", "echo pwned"])],
+        )
+        with patch.dict(os.environ, {MCP_STDIO_ALLOWLIST_ENV: "python"}):
+            with self.assertRaises(CrewConfigurationException):
+                service.add_agent(agent_request)
+
+    def test_add_agent_mcp_http_not_gated(self):
+        """http/sse transport is not subject to the stdio command allowlist --
+        it's a URL+headers connection, not a subprocess spawn."""
+        from amsha.crew_forge.domain.models.mcp_data import McpServerConfig
+        service = CrewBuilderService(self.crew_data)
+        agent_request = AgentRequest(
+            role="R", goal="G", backstory="S",
+            mcp_servers=[McpServerConfig(transport="http", url="https://example.com/mcp")],
+        )
+        service.add_agent(agent_request)
+        agent = service._agents[0]
+        self.assertEqual(len(agent.mcps), 1)
+
+    def test_add_agent_no_mcp_servers(self):
+        """Agent without MCP config has no mcps field set."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(role="R", goal="G", backstory="S"))
+        agent = service._agents[0]
+        self.assertIsNone(agent.mcps)
+
+    # ── Tracing tests ──
+
+    def test_build_crew_with_tracing_enabled(self):
+        """tracing=True on CrewData threads through to Crew(tracing=True)."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None, tracing=True
+        )).build()
+        self.assertTrue(crew.tracing)
+
+    def test_build_crew_tracing_default_none(self):
+        """tracing=None (default) does not pass tracing to Crew."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None
+        )).build()
+        # CrewAI's default is tracing=False; we don't override when None
+        self.assertFalse(crew.tracing)
+
 
 if __name__ == '__main__':
     unittest.main()

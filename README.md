@@ -1,167 +1,140 @@
 # Amsha
 
-**Amsha** is a powerful, lightweight library designed to streamline **CrewAI** orchestration. It serves as a foundational "Crew Forge," providing essential boilerplate, configuration management, and helper utilities to build scalable and maintainable AI agent systems.
-
-Whether you are managing agents via configuration files or orchestrating them dynamically from a MongoDB database, Amsha provides the tools to simplify your workflow.
+**Amsha** is a lightweight library for **CrewAI** orchestration. It provides configuration management, agent/task definition, knowledge integration, and monitoring utilities — letting you define crews in YAML (or MongoDB) and run them with minimal boilerplate.
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-### 🛠️ Crew Forge & Orchestration
-Amsha abstracts away the repetitive boilerplate code required to set up CrewAI agents and tasks.
-*   **Boilerplate Generation**: Quickly spin up crews with standardized structures.
-*   **Dual Orchestration Modes**:
-    *   **File-Based**: Define agents and tasks in YAML files for version-controlled, file-driven workflows.
-    *   **DB-Based**: Fetch agent and task definitions dynamically from MongoDB, allowing for centralized management and updates without code changes.
+### Crew Forge & Orchestration
+- **Dual Modes**: File-based (YAML) or DB-based (MongoDB) crew definitions.
+- **Flows**: Multi-crew pipelines via CrewAI `Flow` — ordered execution with shared state.
+- **Memory & Checkpointing**: Opt-in per crew (`memory: true`, `checkpoint:` config) — off by default.
+- **Tracing**: Opt-in CrewAI native tracing (`tracing: true`) — off by default, sends prompts to CrewAI's hosted dashboard.
 
-### 📚 Advanced Knowledge Management
-Amsha integrates powerful knowledge source management capabilities.
-*   **Multi-Format Support**: Uses `AmshaCrewDoclingSource` (powered by [Docling](https://github.com/DS4SD/docling)) to ingest knowledge. **(Currently tested with Markdown)**.
-*   **Markdown Conversion**: Automatically converts various document formats into Markdown for optimal LLM consumption.
-*   **Flexible Sources**: Supports both local file paths and URLs.
+### Tools & MCP
+- **Tool Registry**: Agents and tasks declare tools by name in YAML (`tools: [file_read, directory_read]`). Ships with built-in tools; extend with `register_tool()`.
+- **MCP Servers**: Agents connect to MCP servers via structured YAML (`mcp_servers:`) — stdio, HTTP, or SSE transports.
 
-### 🔄 Input & Data Handling
-*   **Flexible Inputs**: seamlessly handle inputs from multiple sources—direct configuration values, text files, or JSON data.
-*   **MongoDB Sync**: The `SyncCrewConfigManager` allows you to sync your local crew configurations to a MongoDB database, keeping your deployment environment up-to-date with your local development.
+### Knowledge Management
+- **Multi-Format**: Docling-powered sources for Markdown, PDF, DOCX, HTML, XLSX, PPTX, images.
+- **JSON Native**: CrewAI's `JSONKnowledgeSource` for structured JSON files.
+- **Auto-Routing**: `.json` paths route to JSON source; everything else to Docling.
 
-### 🔌 Core Integrations
-*   **MongoDB**: Native adapters for persisting and retrieving agent and task configurations.
+### Skills
+- **Runtime Skills**: Agents reference CrewAI skills by name in YAML (`skills: ["domain-skills"]`). Amsha resolves names to skill search paths.
 
-### 📊 Crew Monitor
-*   **Performance Tracking**: Monitor CPU, GPU, and memory usage of your agents.
-*   **Contribution Analysis**: Determine which LLMs contributed to specific features.
-*   **Automated Reporting**: Generate detailed Excel reports from execution logs.
-*   [Read the detailed docs](docs/crew_monitor/About.md)
+### Monitoring & Observability
+- **CrewPerformanceMonitor**: Real-time CPU/GPU/memory tracking during execution.
+- **AmshaEventListener**: Event-bus subscriber for per-task, per-LLM-call, per-tool-call lifecycle logs — local, no cloud dependency.
+- **Contribution Analysis & Reporting**: Feature attribution analysis and Excel report generation.
+
+### LLM Factory
+- **Unified Config**: One YAML for all LLM providers (Ollama, LM Studio, OpenRouter, Azure, Gemini).
+- **Purpose Profiles**: Creative (high temperature) vs. Evaluation (deterministic) modes.
 
 ---
 
-## 📦 Installation
-
-Amsha requires Python 3.10+ and can be installed via pip.
+## Installation
 
 ```bash
 pip install amsha
 ```
 
-**Note**: To use the advanced document processing features, ensure you have `docling` installed:
+Optional: for document processing features:
 ```bash
-uv add docling
-# or
 pip install docling
 ```
 
 ---
 
-## 📖 Usage
-
-### 1. Orchestration (File-Based)
-
-Use `AmshaCrewFileApplication` to run crews defined in YAML configuration files.
+## Quick Start
 
 ```python
 from nikhil.amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
 from nikhil.amsha.llm_factory.domain.llm_type import LLMType
 
-# Define paths to your configuration files
 config_paths = {
     "app": "config/app_config.yaml",
     "job": "config/job_config.yaml",
     "llm": "config/llm_config.yaml"
 }
 
-# Initialize and run
 app = AmshaCrewFileApplication(config_paths=config_paths, llm_type=LLMType.CREATIVE)
-# The application will automatically load agents/tasks from the YAMLs defined in job_config
 ```
 
-### 2. Orchestration (DB-Based)
+### Agent YAML with Tools, Skills, and MCP
 
-Use `AmshaCrewDBApplication` to run crews with definitions fetched from MongoDB.
-
-```python
-from nikhil.amsha.crew_forge.orchestrator.db.amsha_crew_db_application import AmshaCrewDBApplication
-from nikhil.amsha.llm_factory.domain.llm_type import LLMType
-
-# Initialize with DB-specific logic
-app = AmshaCrewDBApplication(config_paths=config_paths, llm_type=LLMType.CREATIVE)
+```yaml
+# agents/researcher_agent.yaml
+agent:
+  role: "Researcher"
+  goal: "Research topics thoroughly"
+  backstory: "Expert researcher with access to web and files"
+  tools: [file_read, directory_read]
+  skills: ["domain-skills"]
+  mcp_servers:
+    - transport: stdio
+      command: python
+      args: [servers/db_server.py]
+      env:
+        DB_HOST: localhost
 ```
 
-### 3. Knowledge Management
+### Crew Config with Memory, Checkpointing, Tracing
 
-Easily attach knowledge sources to your agents or crews using `AmshaCrewDoclingSource`.
-
-```python
-from nikhil.amsha.crew_forge.knowledge.amsha_crew_docling_source import AmshaCrewDoclingSource
-
-# Create a knowledge source from a Markdown file
-knowledge_source = AmshaCrewDoclingSource(
-    file_paths=[
-        "path/to/document.md"
-    ]
-)
-
-# This source can now be passed to your CrewAI agents
+```yaml
+# job_config.yaml
+crews:
+  research_crew:
+    memory: true
+    checkpoint:
+      enabled: true
+      provider: json
+      location: "./.Amsha/execution/checkpoints"
+    tracing: true      # opt-in: sends prompts to CrewAI dashboard
+    steps:
+      - task_key: research_task
+        agent_key: researcher_agent
 ```
 
-### 4. Syncing Configurations to MongoDB
+### Multi-Crew Pipeline
 
-Keep your database in sync with your local YAML configurations.
+```yaml
+pipeline:
+  - "research_crew"
+  - "writing_crew"
+```
 
 ```python
-from nikhil.amsha.crew_forge.sync.manager.sync_crew_config_manager import SyncCrewConfigManager
-
-sync_manager = SyncCrewConfigManager(
-    app_config_path="config/app_config.yaml",
-    job_config_path="config/job_config.yaml"
-)
-
-# Syncs the configurations to the output path specified in job_config
-sync_manager.sync()
+outputs = app.run_pipeline({"brief": "..."})
 ```
 
 ---
 
-## ⚙️ Configuration Structure
+## Configuration Structure
 
-Amsha relies on a structured configuration approach:
-
-*   **`app_config.yaml`**: Global application settings (directories, logging, etc.).
-*   **`job_config.yaml`**: Defines the pipeline, including which crews to run, their steps, and input/output handling.
-*   **`llm_config.yaml`**: Configuration for the LLM Factory (provider, model, API keys).
+- **`app_config.yaml`**: Global settings (directories, output paths).
+- **`job_config.yaml`**: Crew definitions, steps, pipelines, knowledge sources.
+- **`llm_config.yaml`**: LLM provider, model, API keys, creative/evaluation profiles.
 
 ---
 
-## 🧪 Testing
+## Testing
 
-Amsha uses `pytest` and `pytest-cov` for unit testing and coverage analysis.
-
-### Running Tests
-To run all unit tests:
 ```bash
 python -m pytest tests/unit/
 ```
 
-To run tests for a specific module:
-```bash
-python -m pytest tests/unit/crew_forge/test_amsha_crew_docling_source.py
-```
-
-### Running Coverage
-To run coverage for the entire project:
+With coverage:
 ```bash
 python -m pytest tests/unit/ --cov=amsha --cov-report=term-missing
 ```
 
-To run coverage for a specific module:
-```bash
-python -m pytest tests/unit/crew_forge/test_amsha_crew_docling_source.py --cov=amsha.crew_forge.knowledge --cov-report=term-missing
-```
-
 ---
 
-## 📚 Documentation
+## Documentation
 
-*   [Crew Forge](docs/crew_forge/About.md)
-*   [LLM Factory](docs/llm_factory/About.md)
-*   [Crew Monitor](docs/crew_monitor/About.md)
+- [Crew Forge](docs/feature/crew_forge/About.md) — orchestration, YAML schema, tools, MCP, flows
+- [Crew Monitor](docs/feature/crew_monitor/About.md) — performance monitoring, event observability
+- [LLM Factory](docs/feature/llm_factory/About.md) — LLM configuration and profiles

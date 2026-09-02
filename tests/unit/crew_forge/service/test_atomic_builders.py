@@ -21,6 +21,7 @@ class TestAtomicYamlBuilderService(unittest.TestCase):
         self.mock_data.output_dir_path = "/tmp"
         self.mock_data.memory = False
         self.mock_data.checkpoint = None
+        self.mock_data.tracing = None
         self.mock_parser = MagicMock(spec=CrewParser)
         with patch('amsha.crew_forge.service.crew_builder_service.CrewBuilderService') as mock_builder_class:
             self.service = AtomicYamlBuilderService(self.mock_data, self.mock_parser, "agent.yaml", "task.yaml")
@@ -78,6 +79,7 @@ class TestAtomicYamlBuilderServiceSkills(unittest.TestCase):
         self.mock_data.output_dir_path = "/tmp"
         self.mock_data.memory = False
         self.mock_data.checkpoint = None
+        self.mock_data.tracing = None
         self.mock_parser = MagicMock(spec=CrewParser)
 
     def tearDown(self):

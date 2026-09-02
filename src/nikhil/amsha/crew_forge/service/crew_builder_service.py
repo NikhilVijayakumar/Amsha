@@ -11,7 +11,49 @@ from crewai.state.provider.sqlite_provider import SqliteProvider
 
 from amsha.crew_forge.domain.models.agent_data import AgentRequest
 from amsha.crew_forge.domain.models.crew_data import CrewData
+from amsha.crew_forge.domain.models.mcp_data import McpServerConfig
 from amsha.crew_forge.domain.models.task_data import TaskRequest
+from amsha.crew_forge.exceptions.crew_configuration_exception import CrewConfigurationException
+from amsha.crew_forge.service.tool_registry import resolve_tools
+
+MCP_STDIO_ALLOWLIST_ENV = "AMSHA_MCP_STDIO_ALLOWLIST"
+
+
+def _stdio_command_allowed(command: Optional[str]) -> bool:
+    """Check a stdio MCP command against the application-owner-controlled allowlist.
+
+    Default-deny: AMSHA_MCP_STDIO_ALLOWLIST is unset or empty -> no stdio command
+    is permitted. This is intentional -- stdio MCP config (command/args/env) is a
+    real subprocess-execution surface, and Amsha's agent/task YAML is meant to be
+    author-editable, version-controlled config-as-code. Gating on an env var (set
+    by whoever deploys/runs Amsha, not by the YAML author) keeps that surface out
+    of the config-as-code trust boundary.
+    """
+    allowlist = {c.strip() for c in os.environ.get(MCP_STDIO_ALLOWLIST_ENV, "").split(",") if c.strip()}
+    return bool(command) and command in allowlist
+
+
+def _mcp_config_to_crewai(cfg: McpServerConfig):
+    """Convert an Amsha McpServerConfig to the corresponding CrewAI MCP object."""
+    if cfg.transport == "stdio":
+        if not _stdio_command_allowed(cfg.command):
+            raise CrewConfigurationException(
+                f"MCP stdio command {cfg.command!r} is not permitted. Stdio MCP servers "
+                f"launch a real subprocess, so they must be explicitly allowlisted by the "
+                f"application owner via the {MCP_STDIO_ALLOWLIST_ENV} environment variable "
+                f"(comma-separated exact command values) -- YAML config alone cannot enable it."
+            )
+        from crewai.mcp import MCPServerStdio
+        return MCPServerStdio(
+            command=cfg.command,
+            args=cfg.args or [],
+            env=cfg.env,
+        )
+    elif cfg.transport in ("http", "sse"):
+        from crewai.mcp import MCPServerHTTP
+        return MCPServerHTTP(url=cfg.url, headers=cfg.headers or {})
+    else:
+        raise ValueError(f"Unsupported MCP transport: {cfg.transport!r}")
 
 
 class CrewBuilderService:
@@ -22,6 +64,7 @@ class CrewBuilderService:
         self.module_name = data.module_name
         self.memory = data.memory
         self.checkpoint = data.checkpoint
+        self.tracing = data.tracing
         if data.output_dir_path:
             timestamp = time.strftime("%Y%m%d%H%M%S")
             self.output_dir_path = data.output_dir_path
@@ -44,13 +87,25 @@ class CrewBuilderService:
         if not agent_details:
             raise ValueError("Agent details must be provided.")
 
+        # Resolve tool names from registry, merge with any explicitly passed tools
+        resolved_tools = list(tools or [])
+        if agent_details.tools:
+            resolved_tools.extend(resolve_tools(agent_details.tools))
+
         agent_kwargs = {
             "role": agent_details.role,
             "goal": agent_details.goal,
             "backstory": agent_details.backstory,
             "llm": self.llm,
-            "tools": tools or []
+            "tools": resolved_tools
         }
+
+        # MCP server config → CrewAI MCP objects
+        if agent_details.mcp_servers:
+            agent_kwargs["mcps"] = [
+                _mcp_config_to_crewai(cfg) for cfg in agent_details.mcp_servers
+            ]
+
         for field in ("max_iter", "max_rpm", "max_execution_time", "max_retry_limit",
                       "respect_context_window", "allow_delegation", "reasoning",
                       "max_reasoning_attempts", "multimodal", "skills",
@@ -80,6 +135,11 @@ class CrewBuilderService:
             "expected_output": task_details.expected_output,
             "agent": agent
         }
+
+        # Task-level tools override agent-level tools
+        if task_details.tools:
+            task_kwargs["tools"] = resolve_tools(task_details.tools)
+
         for field in ("async_execution", "human_input", "markdown",
                       "guardrail", "guardrail_max_retries"):
             value = getattr(task_details, field, None)
@@ -158,15 +218,18 @@ class CrewBuilderService:
 
         # CrewAI 1.8.0: stream=True causes immediate return with streaming output object
         # Remove it to allow normal execution
-        crew= Crew(
-            agents=self._agents,
-            tasks=self._tasks,
-            process=process,
-            verbose=True,
-            stream=True,
-            memory=self.memory,
-            checkpoint=self._coerce_checkpoint(self.checkpoint)
-        )
+        crew_kwargs = {
+            "agents": self._agents,
+            "tasks": self._tasks,
+            "process": process,
+            "verbose": True,
+            "stream": True,
+            "memory": self.memory,
+            "checkpoint": self._coerce_checkpoint(self.checkpoint),
+        }
+        if self.tracing is not None:
+            crew_kwargs["tracing"] = self.tracing
+        crew = Crew(**crew_kwargs)
         if knowledge_sources:
             crew.knowledge_sources = knowledge_sources
         return crew
