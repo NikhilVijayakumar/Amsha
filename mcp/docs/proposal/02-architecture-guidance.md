@@ -21,9 +21,11 @@ Problem definition (00)
   → Goal & boundary (01)
   → Process decomposition (02)
   → Contracts & atomicity (03)
+  → Process validation & human review (04)
   → Flow & state planning (05)
   → Corner cases & failure planning (06)
-  → then capability selection: the least-powerful mechanism that suffices
+  → Capability selection (07): the least-powerful mechanism that suffices
+  → Architecture validation (08) → Handoff checklist (09)
 ```
 
 An LLM given only Phase 1 tools can *read* those docs, but nothing enforces the order. Phase 2 adds **sequencing**: a session has a position, each stage gates the next, and capability selection is deferred until the decomposition is validated.
@@ -39,7 +41,7 @@ Phase 2 maintains a per-conversation cursor (in-memory; no persistence needed in
 | `begin_architecture_session` | `problem_statement` (free text) | `session_id`, the FIRST prerequisite stage (`00`), and its checklist |
 | `submit_stage_artifact` | `session_id`, `stage` | Validates the filled artifact structurally; if valid, returns the NEXT stage + checklist; if not, returns which checklist items are unmet |
 | `current_stage` | `session_id` | Where in the methodology the session is, plus history of completed stages |
-| `get_least_powerful_capability` | `session_id` | After decomposition stages pass, returns the capability-selection guidance (Task-only → Agent wrapping → Crew orchestrator → Flow/CrewFlow) as a decision, not a menu |
+| `get_least_powerful_capability` | `session_id` | After decomposition stages pass, returns the capability-selection guidance (Deterministic Python → Task-only → Agent wrapping → Crew orchestrator → Flow/CrewFlow) as a decision, not a menu |
 
 The characteristic move: `submit_stage_artifact` **gates** — a session cannot advance to dependency selection before its Process decomposition and atomicity checks pass.
 

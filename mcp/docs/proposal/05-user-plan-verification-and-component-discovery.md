@@ -6,7 +6,7 @@
 | **Priority** | High — closes the loop the user described: "verify the user's prerequisite plan and find the right agent/task/crew/flow/skill/knowledge" |
 | **Risk** | Low—Medium — read/verify only; no execution |
 | **Effort** | Medium |
-| **Depends on** | 02 (artifact data model), 03 (verification engine) |
+| **Depends on** | 01 (tool surface), 02 (artifact data model), 03 (verification engine) |
 
 ## Goal
 
@@ -39,7 +39,7 @@ After a plan passes, the user needs "which piece of Amsha realizes *this* step."
 
 Rules:
 
-- **Least-powerful first.** Recommendations are ordered Task-only → Agent → Crew → Flow, exactly like the methodology's capability selection. A plain `Task` that can call a tool is recommended before an `Agent` wrapping it.
+- **Least-powerful first.** Recommendations are ordered Deterministic Python → Task-only → Agent → Crew → Flow, exactly like the methodology's capability selection (`prerequisite/07-capability-selection.md`). A deterministic function is recommended before a `Task`; a plain `Task` that can call a tool is recommended before an `Agent` wrapping it.
 - **Grounded in Amsha.** Recommendations reference real Amsha knowledge sources (`amsha_crew_docling_source`, `amsha_json_knowledge_source`), real tool registry entries (`tool_registry.py`), and real MCP config (`McpServerConfig`). No invented capabilities.
 - **Reference before methodology.** `implementation/11` distinguishes looking things up (reference) from embedding them (methodology). Discovery recommends *references* — pointers to the docs and the real schema — never silently memorizing a person or stuffing knowledge into the agent.
 

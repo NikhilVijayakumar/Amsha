@@ -77,9 +77,10 @@ This mirrors the division already laid out in `mcp/docs/implementation/00-amsha-
 | Phase | Name | Delivers | Status |
 |---|---|---|---|
 | 1 | [Knowledge Server](01-mcp-server-foundation.md) | stdio MCP exposing Amsha's own docs — modules, install, config, quickstart, prerequisite/implementation methodology | Proposed |
-| 2 | Architecture Guidance | Sequencing tools that drive the LLM through prerequisite→implementation stage-by-stage, tracking where in the methodology the session is | Not started |
-| 3 | Plan & Crew Verification | Given prerequisite artifacts and/or crew YAML, validate structure + Amsha conventions, including Agent/Task/Crew/Flow/Skill/Knowledge verification against the checklists | Not started |
-| 4 | Improve / Test / Evaluate Loop | Turn Phase 3 findings into concrete fix suggestions; smoke-test through the real `crew_forge` orchestrator; score the result | Not started |
+| 2 | [Architecture Guidance](02-architecture-guidance.md) | Sequencing tools that drive the LLM through prerequisite→implementation stage-by-stage, tracking where in the methodology the session is | Proposed |
+| 3 | [Plan & Crew Verification](03-plan-and-crew-verification.md) | Given prerequisite artifacts and/or crew YAML, validate structure + Amsha conventions, including Agent/Task/Crew/Flow/Skill/Knowledge verification against the checklists | Proposed |
+| 3b | [User Plan Verification & Component Discovery](05-user-plan-verification-and-component-discovery.md) | Extends Phase 3 from structural to semantic plan verification, plus least-powerful-first component recommendation grounded in real Amsha sources | Proposed |
+| 4 | [Improve / Test / Evaluate Loop](04-improve-test-evaluate-loop.md) | Turn Phase 3 findings into concrete fix suggestions; smoke-test through the real `crew_forge` orchestrator; score the result | Proposed |
 
 ## Sequencing
 
@@ -87,7 +88,8 @@ Strictly sequential — each phase's tools are built *from* the previous phase's
 
 - **1 before 2** — Phase 2's guidance tools are structured views over the same `mcp/docs/` content Phase 1 already knows how to load and serve.
 - **2 before 3** — Phase 3's validation rules are the checklists already embedded in the Phase 2 methodology docs. Don't invent a second rule set.
-- **3 before 4** — can't suggest a fix or score a run before there's a validator producing findings to act on.
+- **3 before 3b** — component discovery only runs against a plan Phase 3 has already validated; recommending against a broken decomposition is worse than not recommending at all.
+- **3 (+3b) before 4** — can't suggest a fix or score a run before there's a validator producing findings to act on.
 
 ## Non-negotiables
 

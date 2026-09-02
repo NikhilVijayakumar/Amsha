@@ -44,12 +44,12 @@ Each conceptual component is verified against the professional rules in the impl
 | Task | `implementation/02-task-engineering.md`, `03-atomic-task-design.md` — atomic, single deliverable, context complete, output contract explicit |
 | Agent–Task alignment | `implementation/04-agent-task-alignment.md` — the right agent owns the right task; no mismatch |
 | Validation | `implementation/05-agent-task-validation.md` — every agent/task validated before assembly |
-| Crew | `implementation/06-crew-engineering.md` — genuine collaboration, not a collection of isolatable tasks; correct process (sequential vs hierarchical) |
+| Crew | `implementation/06-crew-engineering.md` — genuine collaboration, not a collection of isolatable tasks; `process` param matches what `crew_forge`'s `CrewBuilderService.build()` actually accepts (defaults `Process.sequential` — don't recommend a process type `crew_forge` doesn't wire from YAML) |
 | Crew evaluation | `implementation/07-crew-evaluation.md` |
 | Flow / CrewFlow | `implementation/09-flow-engineering.md`, `10-crew-flow-architecture.md` — explicit orchestration, no implicit hidden wiring |
-| Context / Knowledge / Memory | `implementation/11-context-knowledge-memory.md` — reference vs methodology use; not stuffing knowledge into agent persona |
+| Context / Knowledge / Skills / Memory | `implementation/11-context-knowledge-memory.md` — reference (Knowledge) vs methodology (Skill) use; not stuffing knowledge into agent persona |
 | Reasoning & Planning | `implementation/12-reasoning-and-planning.md` |
-| Tools / MCP / Skills | `implementation/13-python-and-tools.md`, `14-mcp-integration.md` — tool selection least-powerful; MCP config correct |
+| Tools / MCP | `implementation/13-python-and-tools.md`, `14-mcp-integration.md` — tool selection least-powerful; MCP config correct |
 
 ## Design
 
