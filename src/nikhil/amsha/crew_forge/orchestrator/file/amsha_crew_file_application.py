@@ -4,6 +4,8 @@ from typing import Dict, Any, Optional
 
 from amsha.crew_forge.orchestrator.file.atomic_crew_file_manager import AtomicCrewFileManager
 from amsha.crew_forge.orchestrator.file.file_crew_orchestrator import FileCrewOrchestrator
+from amsha.crew_forge.orchestrator.flow.flow_crew_pipeline import FlowCrewOrchestrator
+from amsha.execution_runtime.domain.execution_mode import ExecutionMode
 from amsha.llm_factory.dependency.llm_container import LLMContainer
 from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.output_process.optimization.json_cleaner_utils import JsonCleanerUtils
@@ -69,6 +71,34 @@ class AmshaCrewFileApplication:
         self.model_name = build_llm.model_name
         return build_llm.provider.get_raw_llm()
 
+
+
+    def run_pipeline(
+        self,
+        inputs: Optional[Dict[str, Any]] = None,
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE,
+        filename_suffix: Optional[str] = None,
+    ) -> Any:
+        """Run the job_config ``pipeline`` (ordered crew names) as a CrewAI Flow.
+
+        Additive to ``self.orchestrator.run_crew()``: single-crew callers keep
+        using the orchestrator directly; this is the multi-crew path. Inputs
+        default to the union of every pipeline crew's declared ``input``
+        definitions (later crews win); pass ``inputs`` to override.
+        """
+        pipeline = self.job_config.get("pipeline") or []
+        if not pipeline:
+            print("⚠️  No pipeline declared in job_config; nothing to run.")
+            return None
+
+        base_inputs: Dict[str, Any] = {}
+        for crew_name in pipeline:
+            base_inputs.update(self._prepare_multiple_inputs_for(crew_name))
+        if inputs is not None:
+            base_inputs.update(inputs)
+
+        flow = FlowCrewOrchestrator(self.orchestrator, pipeline, filename_suffix)
+        return flow.kickoff(base_inputs, mode)
 
 
     def _prepare_multiple_inputs_for(self, crew_name: str) -> dict:

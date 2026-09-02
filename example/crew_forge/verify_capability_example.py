@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
+from amsha.crew_forge.orchestrator.flow import FlowCrewOrchestrator
 from amsha.llm_factory.domain.model.llm_type import LLMType
 
 
@@ -94,6 +95,19 @@ def main() -> int:
         str(ckpt_location).replace("\\", "/"),
         f"crew.checkpoint.location (YAML location) got={ckpt!r}",
     ))
+
+    print("\n== Flow pipeline (proposal 03) ==")
+    pipeline = app.job_config.get("pipeline") or []
+    if pipeline:
+        flow_orch = FlowCrewOrchestrator(app.orchestrator, pipeline)
+        step_name = f"run_{pipeline[0]}"
+        results.append(_verify(
+            True,
+            hasattr(flow_orch.flow, step_name),
+            f"flow step '{step_name}' builds from the pipeline without an LLM call",
+        ))
+    else:
+        results.append(_verify(True, False, "job_config declares a pipeline (expected ['copy_crew'])"))
 
     passed = all(results)
     print(f"\n== Build inspection: {'ALL PASS' if passed else 'SOME FAILED'} ({sum(results)}/{len(results)}) ==")

@@ -174,6 +174,25 @@ sync_manager = SyncCrewConfigManager(
 sync_manager.sync()
 ```
 
+### 7. Multi-Crew Pipelines (Flows)
+
+When a `job_config.yaml` declares a `pipeline` (an ordered list of crew names), it can be run as a CrewAI `Flow` instead of driving each crew manually. Every pipeline step delegates to the same `run_crew()` path, so each crew keeps its execution state, performance monitoring, and checkpoint recording — nothing is orphaned by the Flow split.
+
+```yaml
+pipeline:            # ordered: each runs only after the previous completes
+  - "copy_crew"
+  - "review_crew"
+```
+
+```python
+app = MyApp(config_paths, llm_type)
+outputs = app.run_pipeline({"brief": "..."})     # INTERACTIVE -> dict {crew_name: result}
+# or async submit:
+handle = app.run_pipeline({"brief": "..."}, mode=ExecutionMode.BACKGROUND)  # ExecutionHandle
+```
+
+`outputs` maps each crew name to its raw result (`PipelineState.outputs`). Inputs passed to `run_pipeline` are fed to every crew step; omitted, they default to the union of each pipeline crew's declared `input` definitions. Single-crew runs remain exactly as before via `orchestrator.run_crew()` — the Flow path is strictly additive, and branching (`@router`) is a future extension, not part of this version.
+
 ---
 
 ## ⚙️ Configuration Structure
