@@ -2,38 +2,9 @@
 
 ## Purpose
 
-The Process architecture defines **what meaningful work must happen**.
+The Process architecture defines **what meaningful work must happen**; the Flow and State Plan defines **how that work executes during the expected path**. This document defines how Amsha reasons about what happens when execution does **not** follow the expected path — covering invalid/missing/malformed inputs, empty or unexpected outputs, Process/validation/conditional failures, iteration exhaustion, human rejection/timeout, external system and tool failures, partial completion, state corruption, unavailable dependencies, duplicate execution, cancellation, recovery, and unrecoverable termination.
 
-The Flow and State Plan defines **how that work executes during the expected path**.
-
-This document defines how Amsha reasons about what happens when execution does **not** follow the expected path.
-
-The objective is to identify and explicitly plan for:
-
-- invalid inputs
-- missing inputs
-- malformed inputs
-- empty results
-- unexpected outputs
-- Process failures
-- validation failures
-- conditional failures
-- iteration exhaustion
-- human rejection
-- human timeout
-- external system failures
-- tool failures
-- partial completion
-- state corruption
-- unavailable dependencies
-- duplicate execution
-- cancellation
-- recovery
-- unrecoverable termination
-
-The goal is not to predict every imaginable failure.
-
-The goal is:
+The goal is not to predict every imaginable failure, but:
 
 > **Identify failures that can materially affect correctness, execution, state, cost, safety, or termination, and define what the workflow should do about them.**
 
@@ -41,1261 +12,183 @@ The goal is:
 
 # 1. Position in the Architecture Process
 
-The prerequisite sequence is:
+This stage consumes the approved Problem Definition, Goal and Boundary, Process Architecture, Process Contracts, Flow Structure, State Model, Transition Model, Human Gates, Iteration Model, and Termination Conditions. It then asks: **What happens when assumptions fail?**
 
-```text
-00 Problem Definition
-        ↓
-01 Goal & Boundary Definition
-        ↓
-02 Process Decomposition
-        ↓
-03 Process Contracts & Atomicity
-        ↓
-04 Process Validation & Human Review
-        ↓
-05 Flow & State Planning
-        ↓
-06 Corner Cases & Failure Planning
-        ↓
-07 Capability Selection
-        ↓
-08 Architecture Validation
-````
-
-This stage consumes the approved:
-
-* Problem Definition
-* Goal and Boundary Definition
-* Process Architecture
-* Process Contracts
-* Flow Structure
-* State Model
-* Transition Model
-* Human Gates
-* Iteration Model
-* Termination Conditions
-
-It then asks:
-
-> What happens when assumptions fail?
+**Prerequisite chain:** See `00-problem-definition.md` §2.
 
 ---
 
 # 2. Happy Path Is Not Enough
 
-A workflow designed only around successful execution is incomplete.
-
-Example:
-
-```text
-Input
-  ↓
-Analyze
-  ↓
-Generate
-  ↓
-Evaluate
-  ↓
-Approve
-  ↓
-Success
-```
-
-This describes only the happy path.
-
-A real workflow must also account for:
-
-```text
-Input
-  ├── invalid
-  ├── missing
-  └── incomplete
-
-Analyze
-  ├── fails
-  └── produces unusable output
-
-Generate
-  ├── fails
-  └── produces invalid output
-
-Evaluate
-  ├── fails
-  └── rejects output
-
-Approve
-  ├── approves
-  ├── requests revision
-  ├── rejects
-  └── does not respond
-```
-
-Therefore:
+A workflow designed only around successful execution is incomplete. A real workflow must also account for invalid/missing/incomplete inputs, Analyze failing or producing unusable output, Generate failing or producing invalid output, Evaluate failing or rejecting, and Approve approving / requesting revision / rejecting / not responding.
 
 > **Every meaningful Process boundary is also a potential failure boundary.**
 
----
-
 # 3. Failure Planning Is Not Failure Prediction
 
-Amsha should not attempt to predict every possible runtime failure.
-
-Instead distinguish:
-
-```text
-Failure Prediction
-        vs
-Failure Planning
-```
-
-Failure prediction asks:
-
-> What might happen?
-
-Failure planning asks:
-
-> If this happens, what should the architecture do?
-
-The second is the important architectural requirement.
+Amsha should not attempt to predict every possible runtime failure. **Failure prediction** asks "What might happen?"; **failure planning** asks "If this happens, what should the architecture do?" — the second is the important architectural requirement.
 
 ---
 
 # 4. Failure Categories
 
-Failures should be classified to make reasoning systematic.
-
-Recommended categories:
-
-```text
-Input
-Contract
-Process
-Output
-Validation
-Decision
-Iteration
-Human
-State
-External
-Tool
-Resource
-Timeout
-Concurrency
-Recovery
-System
-```
-
-These categories can overlap.
-
-For example:
-
-```text
-External API timeout
-```
-
-may be:
-
-```text
-External
-+
-Timeout
-+
-Recovery
-```
-
----
+Failures should be classified to make reasoning systematic: `Input`, `Contract`, `Process`, `Output`, `Validation`, `Decision`, `Iteration`, `Human`, `State`, `External`, `Tool`, `Resource`, `Timeout`, `Concurrency`, `Recovery`, `System`. Categories can overlap — e.g. "External API timeout" is `External + Timeout + Recovery`.
 
 # 5. Input Failures
 
-Input failures occur before or at the beginning of a Process.
-
-Examples:
-
-```text
-Missing required input
-Invalid format
-Malformed data
-Unsupported type
-Incomplete information
-Contradictory information
-Empty input
-Unexpected input size
-Invalid reference
-```
-
-The architecture should determine whether the input:
-
-```text
-Reject
-Repair
-Request clarification
-Use default
-Skip optional path
-Escalate
-```
-
-is appropriate.
-
-Do not silently invent critical missing information.
+Input failures occur before or at the beginning of a Process: missing required input, invalid format, malformed data, unsupported type, incomplete/contradictory information, empty input, unexpected input size, invalid reference. The architecture should determine whether Reject / Repair / Request clarification / Use default / Skip optional path / Escalate is appropriate. Do not silently invent critical missing information.
 
 ---
 
 # 6. Required vs Optional Input Failure
 
-Required and optional inputs must behave differently.
-
-Example:
-
-```yaml
-input:
-  required:
-    - source_document
-
-  optional:
-    - style_reference
-```
-
-If `source_document` is missing:
-
-```text
-Cannot execute Process
-```
-
-If `style_reference` is missing:
-
-```text
-Continue without style reference
-```
-
-unless the Process contract specifies another behavior.
-
-This distinction should be explicit.
-
----
+Required and optional inputs must behave differently. If `source_document` (required) is missing: cannot execute the Process. If `style_reference` (optional) is missing: continue without it, unless the Process contract specifies otherwise. This distinction should be explicit.
 
 # 7. Input Validation Boundary
 
-Input validation should happen before expensive downstream execution.
-
-Conceptually:
-
-```text
-START
-  ↓
-Validate Input
-  ↓
-Valid?
- ├── NO  → Input Error
- └── YES
-       ↓
-     Process
-```
-
-Do not allow malformed inputs to propagate through multiple Processes before discovering the problem.
-
-Where validation is deterministic, prefer deterministic validation.
-
-Examples:
-
-```text
-schema validation
-file existence
-required fields
-type checking
-range checking
-reference existence
-```
+Input validation should happen before expensive downstream execution (`START → Validate Input → Valid? NO→Input Error / YES→Process`). Do not allow malformed inputs to propagate through multiple Processes before discovering the problem. Where validation is deterministic (schema validation, file existence, required fields, type/range checking, reference existence), prefer deterministic validation.
 
 ---
 
 # 8. Process Failure
 
-A Process can fail even when its inputs are valid.
-
-Examples:
-
-```text
-runtime exception
-LLM failure
-invalid tool response
-external dependency failure
-resource exhaustion
-unexpected internal state
-```
-
-The Flow must distinguish:
-
-```text
-Process succeeded
-Process produced a valid negative result
-Process failed to execute
-```
-
-These are not the same.
-
----
+A Process can fail even when its inputs are valid: runtime exception, LLM failure, invalid tool response, external dependency failure, resource exhaustion, unexpected internal state. The Flow must distinguish `Process succeeded`, `Process produced a valid negative result`, and `Process failed to execute` — these are not the same.
 
 # 9. Failure vs Negative Result
 
-This distinction is critical.
-
-Example:
-
-```text
-Evaluate Chapter
-```
-
-may produce:
-
-```text
-Result A:
-evaluation_passed = false
-```
-
-This is a **valid Process result**.
-
-It should normally transition to:
-
-```text
-Improve Chapter
-```
-
-But:
-
-```text
-Evaluator crashed
-```
-
-is a **Process failure**.
-
-It should follow a failure path:
-
-```text
-Evaluator
-   ↓
-FAILED
-   ↓
-Recovery / Retry / Escalation
-```
-
-Do not treat runtime failure as a domain-level rejection.
-
----
+This distinction is critical. `Evaluate Chapter` producing `evaluation_passed = false` is a **valid Process result** that transitions to `Improve Chapter`. But an evaluator crash is a **Process failure** that follows a failure path (`Evaluator → FAILED → Recovery/Retry/Escalation`). Do not treat runtime failure as a domain-level rejection.
 
 # 10. Failure Taxonomy
 
-A useful model is:
-
-```text
-PROCESS OUTCOME
-├── SUCCESS
-├── VALID NEGATIVE RESULT
-├── RETRYABLE FAILURE
-├── RECOVERABLE FAILURE
-└── TERMINAL FAILURE
-```
-
-### SUCCESS
-
-Process completed and produced a valid successful result.
-
-### VALID NEGATIVE RESULT
-
-Process completed correctly but its result does not satisfy the desired condition.
-
-Example:
-
-```text
-Evaluation = failed
-```
-
-### RETRYABLE FAILURE
-
-Temporary failure may succeed if retried.
-
-Example:
-
-```text
-temporary network failure
-```
-
-### RECOVERABLE FAILURE
-
-The current execution cannot continue directly but can recover through another path.
-
-Example:
-
-```text
-invalid generated artifact
-```
-
-### TERMINAL FAILURE
-
-The workflow cannot continue meaningfully.
-
-Example:
-
-```text
-required source does not exist
-```
+A useful model of Process outcome: **SUCCESS** (completed with a valid successful result), **VALID NEGATIVE RESULT** (completed correctly but result does not satisfy the desired condition, e.g. `Evaluation = failed`), **RETRYABLE FAILURE** (temporary, may succeed on retry, e.g. temporary network failure), **RECOVERABLE FAILURE** (cannot continue directly but can recover through another path, e.g. invalid generated artifact), **TERMINAL FAILURE** (cannot continue meaningfully, e.g. required source does not exist).
 
 ---
 
 # 11. Retry Planning
 
-Retries should be intentional.
-
-Do not automatically retry every failure.
-
-A retry is appropriate when:
-
-* failure is likely transient
-* retry is safe
-* retry has a reasonable chance of success
-* retry cost is acceptable
-* repeated execution does not create harmful side effects
-
-Example:
-
-```text
-External Service
-     ↓
-Timeout
-     ↓
-Retry
-```
-
-But:
-
-```text
-Invalid input
-     ↓
-Retry same input
-```
-
-usually does not solve the problem.
-
----
+Retries should be intentional — do not automatically retry every failure. A retry is appropriate when the failure is likely transient, retry is safe, retry has a reasonable chance of success, retry cost is acceptable, and repeated execution does not create harmful side effects. (External Service → Timeout may warrant retry; invalid input retried identically usually does not help.)
 
 # 12. Retry Limits
 
-Every retryable failure should have bounded behavior.
-
-Example:
-
-```yaml
-retry:
-  max_attempts: 3
-```
-
-Conceptually:
-
-```text
-Attempt 1
-   ↓
-Failure
-   ↓
-Attempt 2
-   ↓
-Failure
-   ↓
-Attempt 3
-   ↓
-Failure
-   ↓
-Escalate / Terminal Failure
-```
-
-Avoid unbounded automatic retries.
-
----
+Every retryable failure should have bounded behavior (`retry: {max_attempts: 3}`): `Attempt 1…3 → Failure → Escalate / Terminal Failure`. Avoid unbounded automatic retries.
 
 # 13. Retry vs Iteration
 
-Retries and workflow iterations are different.
-
-## Retry
-
-The Process failed to execute correctly.
-
-```text
-Process
-  ↓
-Execution Failure
-  ↓
-Retry same Process
-```
-
-## Iteration
-
-The Process executed successfully but its result requires additional work.
-
-```text
-Generate
-  ↓
-Evaluate
-  ↓
-Not acceptable
-  ↓
-Improve
-  ↓
-Generate
-```
-
-Do not confuse:
-
-```text
-execution failure
-```
-
-with:
-
-```text
-valid domain-level rejection
-```
+**Retry**: the Process failed to execute correctly (`Process → Execution Failure → Retry same Process`). **Iteration**: the Process executed successfully but its result requires additional work (`Generate → Evaluate → Not acceptable → Improve → Generate`). Do not confuse execution failure with valid domain-level rejection.
 
 ---
 
 # 14. Output Failures
 
-A Process can execute successfully but produce an invalid output.
-
-Example:
-
-```text
-Generate Chapter
-       ↓
-Output
-       ↓
-Schema Validation
-       ↓
-Invalid
-```
-
-The Flow must determine whether to:
-
-* retry generation
-* repair output
-* return to an earlier Process
-* request human review
-* terminate
-
-Output validation should occur at the Process boundary when the contract requires it.
-
----
+A Process can execute successfully but produce an invalid output (`Generate Chapter → Output → Schema Validation → Invalid`). The Flow must determine whether to retry generation, repair output, return to an earlier Process, request human review, or terminate. Output validation should occur at the Process boundary when the contract requires it.
 
 # 15. Contract Violations
 
-A Process output violates its contract when:
-
-```text
-required field missing
-wrong structure
-wrong type
-invalid reference
-incomplete result
-unexpected semantic content
-```
-
-Example:
-
-```yaml
-expected:
-  chapter:
-    title: string
-    content: string
-```
-
-but the Process produces:
-
-```yaml
-chapter:
-  content: ""
-```
-
-This should be detected before downstream execution.
+A Process output violates its contract when a required field is missing, or the structure/type/reference is wrong, or the result is incomplete or semantically unexpected. E.g. expected `chapter: {title: string, content: string}` but the Process produces `chapter: {content: ""}`. This should be detected before downstream execution.
 
 ---
 
 # 16. Validation Layers
 
-Failure planning should distinguish:
-
-```text
-Structural Validation
-        ↓
-Semantic Validation
-        ↓
-Business / Domain Validation
-        ↓
-Human Acceptance
-```
-
-Example:
-
-```text
-Generated Artifact
-       ↓
-Schema Valid?
-       ↓
-Semantically Valid?
-       ↓
-Meets Domain Criteria?
-       ↓
-Human Approved?
-```
-
-Failure at each level can require a different response.
-
----
+Failure planning should distinguish `Structural → Semantic → Business/Domain → Human Acceptance` validation (Schema Valid? → Semantically Valid? → Meets Domain Criteria? → Human Approved?). Failure at each level can require a different response.
 
 # 17. Decision Failures
 
-A Flow decision may fail because its decision input is:
-
-* missing
-* invalid
-* ambiguous
-* contradictory
-* outside expected range
-
-Example:
-
-```text
-Evaluation Score
-```
-
-Expected:
-
-```text
-0–100
-```
-
-Received:
-
-```text
-null
-```
-
-The Flow should not silently choose a branch.
-
-Instead:
-
-```text
-Decision Failure
-      ↓
-Retry / Repair / Escalate
-```
-
----
+A Flow decision may fail because its decision input is missing, invalid, ambiguous, contradictory, or outside the expected range. E.g. an Evaluation Score expected 0–100 but received `null`. The Flow should not silently choose a branch — instead `Decision Failure → Retry / Repair / Escalate`.
 
 # 18. Ambiguous Decisions
 
-Some decisions cannot be safely determined automatically.
-
-Example:
-
-```text
-Two valid creative directions exist.
-```
-
-The architecture may require:
-
-```text
-Automated Evaluation
-        ↓
-Ambiguous
-        ↓
-Human Review
-```
-
-This creates a controlled fallback from automation to human judgment.
+Some decisions cannot be safely determined automatically (e.g. two valid creative directions exist). The architecture may route `Automated Evaluation → Ambiguous → Human Review`, creating a controlled fallback from automation to human judgment.
 
 ---
 
 # 19. Human Rejection
 
-Human rejection is not necessarily a failure.
-
-Example:
-
-```text
-Human Review
-     ↓
-REVISE
-```
-
-is a valid workflow outcome.
-
-Similarly:
-
-```text
-Human Review
-     ↓
-REJECT
-```
-
-may be a valid terminal state.
-
-The architecture must define the semantics.
-
-For example:
-
-```text
-APPROVE
-  → continue
-
-REVISE
-  → improvement loop
-
-REJECT
-  → terminal rejection
-```
-
----
+Human rejection is not necessarily a failure. `Human Review → REVISE` is a valid workflow outcome; `REJECT` may be a valid terminal state. The architecture must define the semantics: `APPROVE → continue`, `REVISE → improvement loop`, `REJECT → terminal rejection`.
 
 # 20. Human Timeout
 
-A human gate may remain unresolved.
-
-Example:
-
-```text
-WAITING_FOR_HUMAN
-        ↓
-No response
-```
-
-The architecture should define what happens.
-
-Possible policies:
-
-```text
-Wait indefinitely
-Timeout
-Escalate
-Cancel
-Return to queue
-Notify
-```
-
-Do not invent a default behavior when the business requirement is unknown.
-
-If human responsiveness is important to the workflow, it should be explicitly defined.
+A human gate may remain unresolved. The architecture should define what happens. Possible policies: wait indefinitely, timeout, escalate, cancel, return to queue, notify. Do not invent a default behavior when the business requirement is unknown; if human responsiveness matters, define it explicitly.
 
 ---
 
 # 21. External Dependency Failures
 
-External systems introduce additional failure modes.
-
-Examples:
-
-```text
-API unavailable
-MCP server unavailable
-Tool unavailable
-Authentication failure
-Rate limit
-Network timeout
-Invalid external response
-External operation partially completed
-```
-
-The Flow should distinguish:
-
-```text
-Request failed
-```
-
-from:
-
-```text
-Request succeeded but response was not received
-```
-
-The second case may create a duplicate-execution risk.
-
----
+External systems add failure modes: API/MCP server/Tool unavailable, authentication failure, rate limit, network timeout, invalid external response, partial completion. The Flow should distinguish "request failed" from "request succeeded but response was not received" — the second may create a duplicate-execution risk.
 
 # 22. Side Effects and Idempotency
 
-Before retrying an external operation, determine whether it is safe to execute again.
-
-Example:
-
-```text
-Create Asset
-```
-
-may create duplicate assets if blindly retried.
-
-Better:
-
-```text
-Check Operation Status
-        ↓
-Already Completed?
- ├── YES → Use Existing Result
- └── NO  → Retry
-```
-
-The architecture should identify Processes with side effects.
-
-Examples:
-
-```text
-create
-delete
-publish
-send
-charge
-deploy
-modify
-generate external artifact
-```
-
-These require stronger retry and recovery planning.
-
----
+Before retrying an external operation, determine whether it is safe to execute again. `Create Asset` may duplicate assets if blindly retried; better to `Check Operation Status → Already Completed? YES→Use Existing Result / NO→Retry`. Identify Processes with side effects (create, delete, publish, send, charge, deploy, modify, generate external artifact) — these require stronger retry and recovery planning.
 
 # 23. Idempotency
 
-A Process is idempotent when repeating it does not create an unintended additional effect.
-
-Example:
-
-```text
-Calculate Score
-```
-
-is usually naturally repeatable.
-
-Whereas:
-
-```text
-Publish Asset
-```
-
-may not be.
-
-Failure planning should therefore classify important Processes as:
-
-```yaml
-execution:
-  retryable: true
-  idempotent: true
-```
-
-or:
-
-```yaml
-execution:
-  retryable: false
-  idempotent: false
-```
-
-when known.
+A Process is idempotent when repeating it does not create an unintended additional effect. `Calculate Score` is naturally repeatable; `Publish Asset` may not be. Classify important Processes as `execution: {retryable: bool, idempotent: bool}` when known.
 
 ---
 
 # 24. Partial Completion
 
-A Process may perform part of its work before failing.
-
-Example:
-
-```text
-Generate Asset
-    ↓
-Asset created
-    ↓
-Metadata update fails
-```
-
-The system is now in a partial state.
-
-The architecture must determine whether to:
-
-```text
-Rollback
-Resume
-Repair
-Reuse partial result
-Mark incomplete
-Escalate
-```
-
-Partial completion is particularly important for external side effects.
-
----
+A Process may perform part of its work before failing (e.g. `Generate Asset → Asset created → Metadata update fails`), leaving the system in a partial state. The architecture must determine whether to Rollback / Resume / Repair / Reuse partial result / Mark incomplete / Escalate. Partial completion is particularly important for external side effects.
 
 # 25. State Failures
 
-State can become invalid or inconsistent.
-
-Examples:
-
-```text
-missing state field
-stale state
-contradictory state
-corrupted checkpoint
-unexpected state transition
-state from incompatible workflow version
-```
-
-The Flow should not continue blindly when critical state invariants are violated.
-
-Example:
-
-```text
-current_process = evaluate
-but chapter_draft does not exist
-```
-
-This is a state consistency failure.
-
----
+State can become invalid or inconsistent: missing/stale/contradictory state, corrupted checkpoint, unexpected state transition, or state from an incompatible workflow version. The Flow should not continue blindly when critical state invariants are violated — e.g. `current_process = evaluate` but `chapter_draft` does not exist is a state consistency failure.
 
 # 26. State Invariants
 
-Important state relationships should be defined as invariants.
-
-Example:
-
-```text
-If current_process = evaluate
-then chapter_draft must exist.
-```
-
-Another:
-
-```text
-If approval.status = approved
-then evaluation.status must be passed.
-```
-
-Another:
-
-```text
-If revision_count > 0
-then a previous evaluation must exist.
-```
-
-These invariants can often be validated deterministically.
+Important state relationships should be defined as invariants, e.g.: if `current_process = evaluate` then `chapter_draft` must exist; if `approval.status = approved` then `evaluation.status` must be passed; if `revision_count > 0` then a previous evaluation must exist. These can often be validated deterministically.
 
 ---
 
 # 27. State Recovery
 
-When state is invalid, recovery may require:
-
-```text
-Checkpoint Restore
-Reconstruct State
-Replay Process
-Restart Process
-Restart Workflow
-Human Intervention
-Terminal Failure
-```
-
-The correct option depends on the workflow.
-
-Do not assume that restarting the entire Flow is always safe.
-
----
+When state is invalid, recovery may require Checkpoint Restore, Reconstruct State, Replay Process, Restart Process, Restart Workflow, Human Intervention, or Terminal Failure. The correct option depends on the workflow; do not assume restarting the entire Flow is always safe.
 
 # 28. Checkpoint Planning
 
-Failure planning should identify where recovery checkpoints matter.
-
-Example:
-
-```text
-P1
- ↓
-Checkpoint
- ↓
-P2
- ↓
-Checkpoint
- ↓
-P3
-```
-
-If P3 fails:
-
-```text
-Restore checkpoint
-        ↓
-Resume from P3
-```
-
-rather than:
-
-```text
-Restart P1
-Restart P2
-Restart P3
-```
-
-This is especially valuable for:
-
-* expensive LLM operations
-* long-running Processes
-* external operations
-* human approval boundaries
-* large artifact generation
+Failure planning should identify where recovery checkpoints matter. If P3 fails after `P1 → Checkpoint → P2 → Checkpoint → P3`, restore the checkpoint and resume from P3 rather than restarting P1/P2/P3. This is especially valuable for expensive LLM operations, long-running Processes, external operations, human approval boundaries, and large artifact generation.
 
 ---
 
 # 29. Cancellation
 
-The workflow should distinguish failure from cancellation.
-
-```text
-RUNNING
-   ↓
-CANCELLED
-```
-
-Cancellation may be caused by:
-
-* user request
-* system shutdown
-* deadline
-* resource policy
-* external event
-
-The architecture should define whether cancellation:
-
-```text
-Stops immediately
-Finishes current Process
-Performs cleanup
-Persists state
-Allows resume
-```
-
----
+The workflow should distinguish failure from cancellation (`RUNNING → CANCELLED`). Cancellation may be caused by user request, system shutdown, deadline, resource policy, or external event. The architecture should define whether cancellation stops immediately, finishes the current Process, performs cleanup, persists state, and/or allows resume.
 
 # 30. Timeouts
 
-Every potentially long-running operation should be considered for timeout behavior.
-
-Examples:
-
-```text
-LLM call
-External API
-MCP operation
-Human review
-Asset generation
-Long-running Python operation
-```
-
-Timeout handling should define:
-
-```text
-timeout
-  ↓
-retry?
-  ↓
-fallback?
-  ↓
-escalate?
-  ↓
-terminate?
-```
-
-Avoid treating timeout as automatically equivalent to failure when the underlying operation may still have completed.
-
----
+Every potentially long-running operation (LLM call, External API, MCP operation, Human review, Asset generation, long-running Python operation) should be considered for timeout behavior. Timeout handling should define `timeout → retry? → fallback? → escalate? → terminate?`. Avoid treating timeout as automatically equivalent to failure when the underlying operation may still have completed.
 
 # 31. Resource Failures
 
-Resource failures include:
-
-```text
-Out of memory
-Disk unavailable
-GPU unavailable
-Token budget exceeded
-Rate limit
-Execution quota exceeded
-Concurrency limit
-Storage limit
-```
-
-The architecture should identify resource constraints that can materially affect the workflow.
-
-Possible responses:
-
-```text
-Retry later
-Reduce workload
-Use fallback
-Queue
-Pause
-Escalate
-Terminate
-```
+Resource failures include out of memory, disk/GPU unavailable, token budget exceeded, rate limit, execution quota exceeded, concurrency limit, storage limit. Identify resource constraints that can materially affect the workflow; possible responses: retry later, reduce workload, use fallback, queue, pause, escalate, terminate.
 
 ---
 
 # 32. Token and Cost Failure
 
-For LLM-based workflows, resource failure can include excessive token consumption.
-
-Example:
-
-```text
-Repeated revision loop
-        ↓
-Token budget exceeded
-```
-
-The architecture should have a bounded policy.
-
-Possible controls:
-
-```text
-maximum iterations
-maximum model calls
-maximum context size
-maximum workflow budget
-human escalation
-```
-
-Cost control should be part of architecture where repeated or autonomous execution can otherwise grow without bound.
-
----
+For LLM-based workflows, resource failure can include excessive token consumption — e.g. a repeated revision loop exceeding a token budget. The architecture should have a bounded policy: maximum iterations, maximum model calls, maximum context size, maximum workflow budget, human escalation. Cost control should be part of architecture where repeated/autonomous execution can otherwise grow without bound.
 
 # 33. Loop Exhaustion
 
-An iterative workflow must define what happens when the maximum iteration count is reached.
-
-Example:
-
-```text
-Generate
-  ↓
-Evaluate
-  ↓
-Fail
-  ↓
-Improve
-  ↓
-Generate
-  ↓
-...
-  ↓
-Max Iterations
-```
-
-Possible outcomes:
-
-```text
-Return best result
-Human review
-Escalate
-Terminal failure
-```
-
-Never leave the result undefined.
-
----
+An iterative workflow must define what happens when the maximum iteration count is reached. Possible outcomes: return best result, human review, escalate, terminal failure. Never leave the result undefined.
 
 # 34. Best-Result Preservation
 
-When an iterative workflow generates progressively different candidates, it may be useful to retain the best valid result.
-
-Example:
-
-```text
-Iteration 1 → score 72
-Iteration 2 → score 81
-Iteration 3 → score 77
-```
-
-At iteration limit:
-
-```text
-Best Result = Iteration 2
-```
-
-This is only appropriate when the Process contract defines a meaningful comparison criterion.
-
-Do not assume that the latest result is always the best result.
+When an iterative workflow generates progressively different candidates, it may be useful to retain the best valid result (e.g. Iteration scores 72/81/77 → best is Iteration 2). This is only appropriate when the Process contract defines a meaningful comparison criterion. Do not assume the latest result is always the best result.
 
 ---
 
 # 35. Failure Severity
 
-Failures should be classified by impact.
-
-Recommended levels:
-
-```text
-INFO
-WARNING
-RECOVERABLE
-ERROR
-CRITICAL
-```
-
-### WARNING
-
-Execution can continue safely.
-
-### RECOVERABLE
-
-Requires recovery before continuing.
-
-### ERROR
-
-Current Process cannot complete normally.
-
-### CRITICAL
-
-Workflow integrity or correctness is compromised.
-
-Severity should be based on workflow impact, not merely technical exception type.
-
----
+Failures should be classified by impact: `INFO`, `WARNING` (execution can continue safely), `RECOVERABLE` (requires recovery before continuing), `ERROR` (current Process cannot complete normally), `CRITICAL` (workflow integrity or correctness is compromised). Severity should be based on workflow impact, not merely technical exception type.
 
 # 36. Failure Response Types
 
-A failure plan can use a controlled set of responses:
-
-```text
-IGNORE
-RETRY
-REPAIR
-REPEAT_PROCESS
-RETURN_TO_PROCESS
-FALLBACK
-WAIT
-HUMAN_REVIEW
-ESCALATE
-ROLLBACK
-RESUME
-CANCEL
-TERMINATE
-```
-
-The actual response should be chosen according to failure semantics.
-
----
+A failure plan can use a controlled set of responses: `IGNORE`, `RETRY`, `REPAIR`, `REPEAT_PROCESS`, `RETURN_TO_PROCESS`, `FALLBACK`, `WAIT`, `HUMAN_REVIEW`, `ESCALATE`, `ROLLBACK`, `RESUME`, `CANCEL`, `TERMINATE`. Choose the actual response according to failure semantics.
 
 # 37. Failure Matrix
 
-A useful planning artifact is a failure matrix.
-
-Example:
+A useful planning artifact is a failure matrix making failure behavior explicit:
 
 ```yaml
 failure_cases:
@@ -1328,359 +221,63 @@ failure_cases:
     response: revise
 ```
 
-The exact schema can evolve.
-
-The important requirement is to make failure behavior explicit.
+The exact schema can evolve; the important requirement is that failure behavior is explicit.
 
 ---
 
 # 38. Failure Planning by Process
 
-Each important Process should be reviewed individually.
-
-For each Process ask:
-
-```text
-What can make this Process fail?
-What can make its output invalid?
-What can make its output unusable?
-What happens if it is unavailable?
-Can it be retried?
-Is retry safe?
-Can it partially complete?
-Can it be resumed?
-Does it require human intervention?
-What is the terminal failure?
-```
-
-Example:
-
-```text
-P3 Generate Chapter
-
-Potential failures:
-- model unavailable
-- invalid structured output
-- empty output
-- context missing
-- generation timeout
-- content fails validation
-- generation budget exhausted
-```
-
-Each relevant case should have a response.
-
----
+Each important Process should be reviewed individually: What can make this Process fail? What can make its output invalid or unusable? What happens if unavailable? Can it be retried? Is retry safe? Can it partially complete or be resumed? Does it require human intervention? What is the terminal failure? E.g. for P3 Generate Chapter, potential failures include model unavailable, invalid structured output, empty output, missing context, generation timeout, content failing validation, generation budget exhausted — each relevant case should have a response.
 
 # 39. Failure Planning by Transition
 
-Transitions also need failure analysis.
-
-Example:
-
-```text
-P4 Evaluate
-   ↓
-Pass?
-```
-
-Potential issues:
-
-```text
-evaluation missing
-evaluation ambiguous
-evaluation malformed
-score outside expected range
-condition cannot be determined
-```
-
-The Flow should define what happens when the transition decision cannot safely be made.
-
----
+Transitions also need failure analysis. E.g. for `P4 Evaluate → Pass?`, potential issues are evaluation missing/ambiguous/malformed, score outside expected range, or a condition that cannot be determined. The Flow should define what happens when the transition decision cannot safely be made.
 
 # 40. Failure Planning by State
 
-State should be reviewed for invalid combinations.
-
-Example:
-
-```text
-status = approved
-draft = missing
-```
-
-This should be impossible or explicitly recoverable.
-
-State invariants should therefore be included in failure planning.
+State should be reviewed for invalid combinations — e.g. `status = approved` but `draft = missing` should be impossible or explicitly recoverable. State invariants should therefore be included in failure planning.
 
 ---
 
 # 41. Failure Planning by External Boundary
 
-Every external boundary should be reviewed.
-
-```text
-Flow
- ↓
-External System
- ↓
-Result
-```
-
-Ask:
-
-* What if unavailable?
-* What if timeout occurs?
-* What if response is malformed?
-* What if operation succeeded but response was lost?
-* What if authentication fails?
-* What if rate-limited?
-* What if partial completion occurs?
-* Can operation be retried safely?
-
-This becomes particularly important for Tools and MCP integrations later.
-
----
+Every external boundary should be reviewed: What if unavailable, timeout, malformed response, operation succeeded but response lost, authentication fails, rate-limited, partial completion? Can the operation be retried safely? This becomes particularly important for Tools and MCP integrations later.
 
 # 42. Failure Planning Does Not Mean Overengineering
 
-Do not create elaborate recovery mechanisms for insignificant failures.
-
-Use proportionality.
-
-For example:
-
-```text
-Simple deterministic calculation
-```
-
-may only require:
-
-```text
-exception → terminal Process failure
-```
-
-Whereas:
-
-```text
-Expensive external asset generation
-```
-
-may require:
-
-```text
-timeout
-retry
-operation status check
-checkpoint
-resume
-partial-result handling
-```
-
-The recovery architecture should reflect the consequences of failure.
-
----
+Do not create elaborate recovery mechanisms for insignificant failures — use proportionality. A simple deterministic calculation may only require `exception → terminal Process failure`, whereas expensive external asset generation may require timeout, retry, operation status check, checkpoint, resume, and partial-result handling. The recovery architecture should reflect the consequences of failure.
 
 # 43. Failure Priority
 
-A useful priority model is:
-
-```text
-Impact × Likelihood × Recovery Difficulty
-```
-
-This does not need to be a literal numeric score.
-
-It is a reasoning heuristic.
-
-Prioritize failures that are:
-
-* likely
-* expensive
-* difficult to recover
-* destructive
-* capable of corrupting state
-* capable of producing incorrect final output
-* capable of causing unbounded execution
+A useful reasoning heuristic is `Impact × Likelihood × Recovery Difficulty` (not necessarily a literal numeric score). Prioritize failures that are likely, expensive, difficult to recover, destructive, capable of corrupting state, capable of producing incorrect final output, or capable of causing unbounded execution.
 
 ---
 
 # 44. Safety-Critical or High-Impact Decisions
 
-Some workflows require stronger failure handling around decisions that materially affect people, systems, assets, or irreversible actions.
-
-For such decisions:
-
-```text
-Automation
-    ↓
-Validation
-    ↓
-Human Review
-    ↓
-Explicit Approval
-    ↓
-Irreversible Action
-```
-
-may be preferable to fully autonomous execution.
-
-The appropriate level depends on the problem definition and requirements.
-
----
+Some workflows require stronger failure handling around decisions that materially affect people, systems, assets, or irreversible actions. For such decisions, `Automation → Validation → Human Review → Explicit Approval → Irreversible Action` may be preferable to fully autonomous execution. The appropriate level depends on the problem definition and requirements.
 
 # 45. Failure Containment
 
-A failure should affect the smallest appropriate scope.
-
-For example:
-
-```text
-P2 failure
-```
-
-should not necessarily terminate:
-
-```text
-entire workflow
-```
-
-if P2 can be independently retried or recovered.
-
-Prefer:
-
-```text
-Local Failure
-    ↓
-Local Recovery
-    ↓
-Continue
-```
-
-when safe.
-
-Escalate to larger scopes only when necessary.
-
----
+A failure should affect the smallest appropriate scope. A P2 failure should not necessarily terminate the entire workflow if P2 can be independently retried or recovered. Prefer `Local Failure → Local Recovery → Continue` when safe; escalate to larger scopes only when necessary.
 
 # 46. Failure Propagation
 
-A failure can propagate downstream.
-
-Example:
-
-```text
-P1
- ↓
-invalid output
- ↓
-P2
- ↓
-unexpected behavior
- ↓
-P3
-```
-
-The architecture should detect contract violations at the earliest boundary.
-
-Prefer:
-
-```text
-P1
- ↓
-Output Validation
- ↓
-FAIL
-```
-
-rather than allowing bad state to propagate.
+A failure can propagate downstream — e.g. P1's invalid output causes unexpected behavior in P2 then P3. The architecture should detect contract violations at the earliest boundary: prefer `P1 → Output Validation → FAIL` rather than allowing bad state to propagate.
 
 ---
 
 # 47. Graceful Degradation
 
-Some workflows can continue with reduced capability.
-
-Example:
-
-```text
-Optional enrichment service unavailable
-```
-
-may allow:
-
-```text
-Continue without enrichment
-```
-
-while:
-
-```text
-Required source unavailable
-```
-
-may require termination.
-
-Therefore classify dependencies as:
-
-```text
-Required
-Optional
-Fallback-capable
-```
-
-during failure planning.
-
----
+Some workflows can continue with reduced capability. An optional enrichment service unavailable may allow "continue without enrichment", while a required source unavailable may require termination. Classify dependencies as Required / Optional / Fallback-capable during failure planning.
 
 # 48. Fallbacks
 
-Fallback behavior must preserve the goal as much as possible.
-
-Example:
-
-```text
-Primary Process
-     ↓
-Failure
-     ↓
-Fallback Process
-```
-
-A fallback is valid only when its output satisfies the downstream contract or when the architecture explicitly accepts degraded output.
-
-Do not introduce a fallback simply because one exists.
-
----
+Fallback behavior must preserve the goal as much as possible (`Primary Process → Failure → Fallback Process`). A fallback is valid only when its output satisfies the downstream contract or the architecture explicitly accepts degraded output. Do not introduce a fallback simply because one exists.
 
 # 49. Failure Recovery Flow
 
-A generic recovery pattern is:
-
-```text
-Process
-   ↓
-Failure
-   ↓
-Classify
-   ↓
-Retryable?
- ├── YES → Retry
- │          ↓
- │        Success?
- │        ├── YES → Continue
- │        └── NO  → Escalate
- │
- └── NO
-       ↓
-Recoverable?
- ├── YES → Recovery
- └── NO  → Terminal Failure
-```
-
-This is a conceptual pattern.
-
-Each workflow should define only the branches it actually needs.
+A generic recovery pattern: `Process → Failure → Classify → Retryable? YES→Retry (Success?→Continue / NO→Escalate) / NO→Recoverable? YES→Recovery / NO→Terminal Failure`. This is conceptual — each workflow should define only the branches it actually needs.
 
 ---
 
@@ -1845,150 +442,19 @@ Before proceeding, validate:
 
 # 54. Anti-Patterns
 
-## 54.1 Happy-Path-Only Architecture
-
-```text
-Input
- ↓
-Process
- ↓
-Success
-```
-
-No failure paths are considered.
-
----
-
-## 54.2 Retry Everything
-
-```text
-Any failure
- ↓
-Retry forever
-```
-
-This causes:
-
-* infinite execution
-* unnecessary cost
-* duplicate side effects
-* resource exhaustion
-
----
-
-## 54.3 Treating Rejection as Failure
-
-```text
-Evaluation failed
-```
-
-may be a valid result.
-
-Do not automatically classify it as an execution error.
-
----
-
-## 54.4 Silent Recovery
-
-```text
-Something failed
- ↓
-System silently does something else
-```
-
-Recovery behavior should be explicit and traceable.
-
----
-
-## 54.5 Giant Error Handler
-
-Avoid:
-
-```text
-Any error
- ↓
-One generic recovery mechanism
-```
-
-Different failures require different responses.
-
----
-
-## 54.6 Failure Handling Inside Every Process
-
-Do not duplicate the entire recovery framework inside every Process.
-
-Separate:
-
-```text
-Process Contract
-```
-
-from:
-
-```text
-Flow-level failure policy
-```
-
-while retaining Process-specific recovery requirements.
-
----
-
-## 54.7 Overengineering
-
-Do not design distributed recovery infrastructure for a simple deterministic Process.
-
-Recovery complexity should be proportional to:
-
-```text
-Failure Impact
-+
-Failure Likelihood
-+
-Recovery Difficulty
-```
+- **Happy-Path-Only Architecture** — `Input → Process → Success` with no failure paths considered.
+- **Retry Everything** — any failure retried forever; causes infinite execution, unnecessary cost, duplicate side effects, resource exhaustion.
+- **Treating Rejection as Failure** — "Evaluation failed" may be a valid result; do not automatically classify it as an execution error.
+- **Silent Recovery** — something failed then the system silently does something else; recovery behavior should be explicit and traceable.
+- **Giant Error Handler** — any error funneled into one generic recovery mechanism; different failures require different responses.
+- **Failure Handling Inside Every Process** — don't duplicate the entire recovery framework inside every Process; separate `Process Contract` from `Flow-level failure policy` while retaining Process-specific recovery requirements.
+- **Overengineering** — don't design distributed recovery infrastructure for a simple deterministic Process; recovery complexity should be proportional to Failure Impact + Likelihood + Recovery Difficulty.
 
 ---
 
 # 55. Relationship to Later Capability Selection
 
-Failure planning helps determine which capabilities are actually required.
-
-For example:
-
-```text
-Need deterministic validation
-        ↓
-Python may be sufficient
-```
-
-or:
-
-```text
-Need external system recovery/status
-        ↓
-Tool / MCP may be required
-```
-
-or:
-
-```text
-Need human approval
-        ↓
-Human interaction mechanism required
-```
-
-or:
-
-```text
-Need persistent recovery
-        ↓
-Checkpointing / persistence required
-```
-
-However, this stage should identify the **requirement**, not prematurely choose the implementation.
-
-The next stage, `07-capability-selection.md`, makes those decisions.
+Failure planning helps determine which capabilities are actually required: need deterministic validation → Python may be sufficient; need external system recovery/status → Tool/MCP may be required; need human approval → human interaction mechanism required; need persistent recovery → checkpointing/persistence required. However, this stage should identify the **requirement**, not prematurely choose the implementation. The next stage, `07-capability-selection.md`, makes those decisions.
 
 ---
 
@@ -2100,67 +566,10 @@ This is a much more complete execution architecture.
 
 # 58. Final Architecture Boundary
 
-At the end of this stage, Amsha should understand not only:
+At the end of this stage, Amsha should understand not only "what happens when everything works?" but also what happens when input is invalid, Process fails, output is invalid, validation rejects, decision is ambiguous, iteration never succeeds, human rejects or does not respond, external system fails, operation partially completes, state becomes inconsistent, retry is unsafe, a checkpoint must be restored, or the workflow is cancelled.
 
-```text
-What happens when everything works?
-```
+The resulting architecture becomes: `Problem → Goal → Processes → Contracts → Validation → Flow → State → Corner Cases → Failure Paths → Recovery / Escalation / Termination`. Only after this should Amsha determine the minimum implementation capabilities required.
 
-but also:
-
-```text
-What happens when:
-    input is invalid?
-    Process fails?
-    output is invalid?
-    validation rejects?
-    decision is ambiguous?
-    iteration never succeeds?
-    human rejects?
-    human does not respond?
-    external system fails?
-    operation partially completes?
-    state becomes inconsistent?
-    retry is unsafe?
-    checkpoint must be restored?
-    workflow is cancelled?
-```
-
-The resulting architecture becomes:
-
-```text
-Problem
-   ↓
-Goal
-   ↓
-Processes
-   ↓
-Contracts
-   ↓
-Validation
-   ↓
-Flow
-   ↓
-State
-   ↓
-Corner Cases
-   ↓
-Failure Paths
-   ↓
-Recovery / Escalation / Termination
-```
-
-Only after this should Amsha determine the minimum implementation capabilities required.
-
-The next stage is:
-
-```text
-07-capability-selection.md
-```
-
-Its purpose is to answer:
+The next stage is **07-capability-selection.md**, which answers:
 
 > **Given the validated Process, Flow, State, and Failure architecture, what is the least powerful implementation mechanism required for each part?**
-
-```
-```
