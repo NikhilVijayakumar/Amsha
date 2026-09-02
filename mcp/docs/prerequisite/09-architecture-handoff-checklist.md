@@ -2,18 +2,11 @@
 
 ## Purpose
 
-This document bridges the prerequisite architecture layer and the implementation engineering layer.
-
-After completing stages 00–08, the approved architecture contract becomes the source of truth for implementation. This checklist verifies that the architecture is complete enough to begin building.
-
-This is not a new prerequisite stage. It is a handoff artifact.
+This document bridges the prerequisite architecture layer and the implementation engineering layer. After completing stages 00–08, the approved architecture contract becomes the source of truth for implementation. This checklist verifies the architecture is complete enough to begin building. It is not a new prerequisite stage — it is a handoff artifact.
 
 ## Handoff Artifact
 
-The source of truth is the architecture contract defined in
-`08-architecture-validation.md` section 54.
-
-The architecture YAML must include:
+The source of truth is the architecture contract defined in `08-architecture-validation.md` section 54. The architecture YAML must include:
 
 ```yaml
 architecture:
@@ -77,16 +70,9 @@ All 17 items must be checked before implementation begins.
 
 ## What to Hand the Implementation Team
 
-1. **Architecture YAML** (from 08 section 54) — the source of truth
-2. **This checklist** — all 17 items checked
-3. **Accepted assumptions** — any assumptions documented during prerequisite stages
-4. **WARNING findings** — any non-blocking issues that carry forward
+Hand: **Architecture YAML** (from 08 §54, the source of truth), **this checklist** (all 17 items checked), **accepted assumptions** (documented during prerequisite stages), **WARNING findings** (non-blocking issues that carry forward).
 
-Do not hand:
-
-- Draft or rejected architecture versions
-- Incomplete process contracts
-- Unresolved ERROR-severity findings
+Do not hand: draft or rejected architecture versions, incomplete process contracts, unresolved ERROR-severity findings.
 
 ---
 
