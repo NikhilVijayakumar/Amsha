@@ -328,6 +328,104 @@ class TestCrewBuilderService(unittest.TestCase):
         self.assertEqual(result, service)
         self.assertEqual(len(service._agents), 2)
 
+    def test_add_agent_with_capability_fields(self):
+        """Test agent execution/capability fields pass through to crewai Agent."""
+        service = CrewBuilderService(self.crew_data)
+        # A valid skill input is a search path containing a <name>/SKILL.md dir
+        # where the dir name (kebab-case) matches the frontmatter name.
+        skill_parent = tempfile.mkdtemp()
+        skill_dir = os.path.join(skill_parent, "my-skill")
+        os.makedirs(skill_dir)
+        with open(os.path.join(skill_dir, "SKILL.md"), "w", encoding="utf-8") as f:
+            f.write("---\nname: my-skill\ndescription: test skill\n---\n\n# instructions\n")
+        agent_request = AgentRequest(
+            role="Researcher",
+            goal="Research",
+            backstory="Expert",
+            max_iter=5,
+            max_rpm=10,
+            max_execution_time=300,
+            max_retry_limit=2,
+            respect_context_window=True,
+            allow_delegation=True,
+            reasoning=True,
+            max_reasoning_attempts=3,
+            multimodal=True,
+            skills=[skill_parent],
+        )
+        service.add_agent(agent_request)
+        agent = service._agents[0]
+        self.assertEqual(agent.max_iter, 5)
+        self.assertEqual(agent.max_rpm, 10)
+        self.assertEqual(agent.max_execution_time, 300)
+        self.assertEqual(agent.max_retry_limit, 2)
+        self.assertTrue(agent.respect_context_window)
+        self.assertTrue(agent.allow_delegation)
+        self.assertTrue(agent.reasoning)
+        self.assertEqual(agent.max_reasoning_attempts, 3)
+        self.assertTrue(agent.multimodal)
+        self.assertEqual([s.name for s in agent.skills], ["my-skill"])
+
+    def test_add_agent_does_not_override_crewai_defaults(self):
+        """Test unprovided optional fields leave crewai defaults untouched."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(role="Dev", goal="Code", backstory="Engineer"))
+        agent = service._agents[0]
+        # crewai defaults, not None, when field not provided:
+        self.assertEqual(agent.max_iter, 25)
+        self.assertEqual(agent.max_retry_limit, 2)
+        self.assertFalse(agent.allow_delegation)
+        self.assertFalse(agent.reasoning)
+        self.assertIsNone(agent.skills)
+
+    def test_add_task_with_execution_and_guardrail_fields(self):
+        """Test task execution/guardrail fields pass through to crewai Task."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(role="Dev", goal="Code", backstory="Engineer"))
+        agent = service.get_last_agent()
+        task_request = TaskRequest(
+            name="code_task",
+            description="Write code",
+            expected_output="Code",
+            async_execution=True,
+            human_input=True,
+            markdown=True,
+            guardrail="output must be a string",
+            guardrail_max_retries=3,
+        )
+        service.add_task(task_request, agent)
+        task = service._tasks[0]
+        self.assertTrue(task.async_execution)
+        self.assertTrue(task.human_input)
+        self.assertTrue(task.markdown)
+        self.assertEqual(task.guardrail, "output must be a string")
+        self.assertEqual(task.guardrail_max_retries, 3)
+
+    def test_add_task_with_context_resolves_names_to_tasks(self):
+        """Test prerequisite task names resolve to Task instances."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(role="A", goal="G", backstory="S"))
+        agent = service.get_last_agent()
+        service.add_task(TaskRequest(name="research", description="d", expected_output="o"), agent)
+        service.add_task(
+            TaskRequest(name="write", description="d", expected_output="o", context=["research"]),
+            agent,
+        )
+        write_task = service._tasks[1]
+        self.assertEqual(len(write_task.context), 1)
+        self.assertEqual(write_task.context[0].name, "research")
+
+    def test_add_task_with_unknown_context_raises(self):
+        """Test referencing a missing prerequisite task raises ValueError."""
+        service = CrewBuilderService(self.crew_data)
+        service.add_agent(AgentRequest(role="A", goal="G", backstory="S"))
+        agent = service.get_last_agent()
+        with self.assertRaises(ValueError):
+            service.add_task(
+                TaskRequest(name="write", description="d", expected_output="o", context=["missing"]),
+                agent,
+            )
+
 
 if __name__ == '__main__':
     unittest.main()

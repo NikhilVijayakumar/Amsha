@@ -38,15 +38,23 @@ class CrewBuilderService:
     def add_agent(self, agent_details: AgentRequest,knowledge_sources=None, tools: list = None) -> 'CrewBuilderService':
 
         if not agent_details:
-            self._agents.append(agent_details)
+            raise ValueError("Agent details must be provided.")
 
-        agent = Agent(
-            role=agent_details.role,
-            goal=agent_details.goal,
-            backstory=agent_details.backstory,
-            llm=self.llm,
-            tools=tools or []
-        )
+        agent_kwargs = {
+            "role": agent_details.role,
+            "goal": agent_details.goal,
+            "backstory": agent_details.backstory,
+            "llm": self.llm,
+            "tools": tools or []
+        }
+        for field in ("max_iter", "max_rpm", "max_execution_time", "max_retry_limit",
+                      "respect_context_window", "allow_delegation", "reasoning",
+                      "max_reasoning_attempts", "multimodal", "skills",
+                      "system_template", "prompt_template", "response_template"):
+            value = getattr(agent_details, field, None)
+            if value is not None:
+                agent_kwargs[field] = value
+        agent = Agent(**agent_kwargs)
         if knowledge_sources:
             agent.knowledge_sources = knowledge_sources
 
@@ -62,12 +70,20 @@ class CrewBuilderService:
         if not task_details:
             raise ValueError(f"Task with name '{task_details.name}' not found.")
 
-        task = Task(
-            name=task_details.name,
-            description=task_details.description,
-            expected_output=task_details.expected_output,
-            agent=agent
-        )
+        task_kwargs = {
+            "name": task_details.name,
+            "description": task_details.description,
+            "expected_output": task_details.expected_output,
+            "agent": agent
+        }
+        for field in ("async_execution", "human_input", "markdown",
+                      "guardrail", "guardrail_max_retries"):
+            value = getattr(task_details, field, None)
+            if value is not None:
+                task_kwargs[field] = value
+        if task_details.context:
+            task_kwargs["context"] = self._resolve_context(task_details.context)
+        task = Task(**task_kwargs)
         if output_filename:
             if validation:
                 output_file = output_filename
@@ -82,6 +98,23 @@ class CrewBuilderService:
 
         self._tasks.append(task)
         return self
+
+    def _resolve_context(self, context_names: list) -> list:
+        """
+        Resolve prerequisite task names to the actual Task instances previously
+        added to this builder (CrewAI's `Task(context=[...])` expects Task
+        objects, not names).
+        """
+        tasks_by_name = {task.name: task for task in self._tasks}
+        resolved = []
+        for name in context_names:
+            task = tasks_by_name.get(name)
+            if task is None:
+                raise ValueError(
+                    f"Context task '{name}' not found. Prerequisite tasks must be added before the task that references them."
+                )
+            resolved.append(task)
+        return resolved
 
     def build(self, process: Process = Process.sequential,knowledge_sources=None) -> Crew:
         if not self._agents or not self._tasks:

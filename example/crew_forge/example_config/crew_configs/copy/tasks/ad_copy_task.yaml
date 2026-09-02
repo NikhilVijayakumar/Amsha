@@ -2,3 +2,10 @@ task:
   name: "Ad Copy Generation"
   description: "Generate five unique pieces of ad copy for a new product."
   expected_output: "A JSON file containing five ad copy variations."
+  # Optional execution / guardrail fields (all default to CrewAI's own defaults when omitted):
+  # async_execution: false
+  # human_input: false
+  # markdown: false
+  # context: ["prerequisite_task_name"]   # names of earlier tasks whose output feeds this one
+  # guardrail: "output must be valid JSON"
+  # guardrail_max_retries: 2

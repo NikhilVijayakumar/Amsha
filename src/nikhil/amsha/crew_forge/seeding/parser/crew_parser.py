@@ -14,17 +14,35 @@ class CrewParser:
         return cleaned.strip()
 
     def parse_agent(self, agent_yaml_file: str) -> AgentRequest:
-        config = YamlUtils().yaml_safe_load(agent_yaml_file)
-        return AgentRequest(
-            role=config['agent']['role'],
-            goal=self.clean_multiline_string(config['agent']['goal']),
-            backstory=self.clean_multiline_string(config['agent']['backstory']),
-        )
+        config = YamlUtils.yaml_safe_load(agent_yaml_file)
+        data = config['agent']
+        kwargs = {
+            'role': data['role'],
+            'goal': self.clean_multiline_string(data['goal']),
+            'backstory': self.clean_multiline_string(data['backstory']),
+        }
+        kwargs.update(self._pass_through_fields(data, AgentRequest, {'role', 'goal', 'backstory'}))
+        return AgentRequest(**kwargs)
 
     def parse_task(self, task_yaml_file: str) -> TaskRequest:
         config = YamlUtils.yaml_safe_load(task_yaml_file)
-        return TaskRequest(
-            name=config['task']['name'],
-            description=self.clean_multiline_string(config['task']['description']),
-            expected_output=self.clean_multiline_string(config['task']['expected_output'])
-        )
+        data = config['task']
+        kwargs = {
+            'name': data['name'],
+            'description': self.clean_multiline_string(data['description']),
+            'expected_output': self.clean_multiline_string(data['expected_output']),
+        }
+        kwargs.update(self._pass_through_fields(data, TaskRequest, {'name', 'description', 'expected_output'}))
+        return TaskRequest(**kwargs)
+
+    @staticmethod
+    def _pass_through_fields(data: dict, model, handled: set) -> dict:
+        """Copy any YAML keys that match declared optional model fields, preserving truthy values."""
+        extras = {}
+        for field in model.model_fields:
+            if field in handled or field not in data:
+                continue
+            value = data[field]
+            if value is not None:
+                extras[field] = value
+        return extras

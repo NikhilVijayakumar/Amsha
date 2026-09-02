@@ -3,12 +3,24 @@
 | | |
 |---|---|
 | **Priority** | Phase 3 — this unblocks nearly everything else |
+| **Status** | ✅ Done (2026-09-02) |
 | **Risk** | Medium — touches core domain models, needs backward compatibility |
 | **Effort** | Medium |
 | **Depends on** | [02](02-crewai-version-migration.md) |
 | **Blocks** | [04](04-memory-adoption.md), [07](07-skills-adoption.md), and any use of reasoning/planning/guardrails |
 
 ## The core problem
+
+## Execution log
+
+- **Mongo path already gone** — this proposal's step 3 originally targeted `crew_parser.py`, `database_seeder.py`, and Mongo repo adapters. The Mongo adapters were deleted in [02](02-crewai-version-migration.md); the file-based flow now goes `job_config` → `CrewParser` → `AgentRequest`/`TaskRequest`. Only `crew_parser.py` remained to update.
+- **`CrewParser` was the silent-breaker** — `parse_agent`/`parse_task` enumerated exactly three fields (`role/goal/backstory`, `name/description/expected_output`), so new YAML fields would have been dropped silently. Replaced with a `_pass_through_fields` helper that forwards any declared optional model field present in the YAML. Legacy 3-field YAMLs parse unchanged.
+- **`CrewBuilderService` now passes through new fields conditionally** — a kwargs loop forwards only non-`None` values, so CrewAI's own defaults apply when a field is unset (verified defaults: `max_iter=25`, `max_retry_limit=2`, `allow_delegation=False`, `reasoning=False`).
+- **`TaskRequest.context` resolved name→Task** — CrewAI's `Task(context=[...])` requires `Task` instances, not names. `_resolve_context()` looks up already-added tasks by `TaskRequest.name` and raises `ValueError` for unknown names.
+- **`skills` gotcha (verified)**: CrewAI 1.15.18 treats a `skills` string as a skill **search path** (a directory whose children each contain `SKILL.md`), not a skill name. Passing a bare name raises `FileNotFoundError`. A valid input is a search-path dir whose subdirs are kebab-case `<name>/SKILL.md` with a matching frontmatter name; the dir name must match `^[a-z0-9]+(?:-[a-z0-9]+)*$` (no underscores). Documented in the test; full Skills wiring is [07](07-skills-adoption.md).
+- **Pre-existing `deprecation` noise, not ours**: constructing `crewai.Agent` triggers an internal `DeprecationWarning` about `function_calling_llm` even with zero new fields — a crewai 1.15.18-internal warning unrelated to this change.
+- **Tests**: `tests/unit/crew_forge/service/test_crew_builder_service.py` gained 5 tests (agent capability fields, crewai-default preservation, task execution/guardrail fields, context resolution, unknown-context error); new `tests/unit/crew_forge/seeding/test_crew_parser.py` covers legacy + new-field parsing. Baseline of `tests/unit/crew_forge`: 15 pre-existing failures (unchanged set, from proposal 02), **0 new failures**, all new tests pass.
+- Out of scope (left for later proposals): `OutputHandler`/`output_pydantic` (builder already accepts `output_json`), `function_calling_llm`, `inject_date`/`date_format`, `embedder` — add on demand per "What NOT to do".
 
 This is the real bottleneck, more than the version pin. Today:
 

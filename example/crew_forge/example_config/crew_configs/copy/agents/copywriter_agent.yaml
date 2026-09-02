@@ -2,3 +2,11 @@ agent:
   role: "Expert Copywriter"
   goal: "Write compelling ad copy"
   backstory: "A world-class marketer with a flair for words."
+  # Optional execution / capability / prompt fields (all default to CrewAI's own defaults when omitted):
+  max_iter: 25
+  # reasoning: true
+  # max_reasoning_attempts: 3
+  # allow_delegation: false
+  # respect_context_window: true
+  # system_template: "You are {{.Role}}..."
+  # skills: ["path/to/skill_search_dir"]   # a dir whose subdirs each contain SKILL.md
