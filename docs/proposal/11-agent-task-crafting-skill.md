@@ -6,6 +6,7 @@
 | **Risk** | None — it's a documentation/tooling skill, not a code change |
 | **Effort** | Small |
 | **Depends on** | Nothing required; richer once [08](08-agent-task-capability-expansion.md) exists |
+| **Status** | ✅ Done (2026-09-02) |
 
 ## The ask
 
@@ -34,3 +35,13 @@ Create `.claude/skills/craft-amsha-agent/SKILL.md` (or extend the existing `docs
 ## What NOT to do
 
 - Don't make this skill auto-generate and commit files without developer review — per this session's own operating principles, generation should produce a draft the developer inspects before it's treated as final, especially since "assigning tasks you haven't done yourself" is literally one of the pitfalls this skill is meant to catch — the skill should ask the developer whether *they've* done the task manually, not assume its own output is correct because it followed a template.
+
+## Execution log
+
+- **`.claude/skills/craft-amsha-agent/SKILL.md`** created (Claude Code / development-time skill, not a CrewAI runtime skill — the SKILL.md carries an explicit note against confusing the two, per proposal item "check for naming collision").
+- Modes (proposal item 1): **quick** draft by default from a use case (discipline applied post-hoc), `--interview` opts into the three clarifying questions, `review [path]` lints an existing draft against the pitfalls table instead of generating.
+- Drafting rules pull CrewAI's guide wholesale: 80/20 (task over persona), specific role titles, outcome-focused goals with success criteria, credibility-coherent backstories, single-output tasks with explicit input/process/format, and the 8-row pitfalls checklist reused as the lint table for review mode.
+- Generation (proposal items 2 + 5): inline `agents/*_agent.yaml` / `tasks/*_task.yaml` templates matching Amsha's file conventions (verified against `atomic_crew_file_manager.py`'s `<domain_root_path>/<module_name>/<agents|tasks>/<stem>.yaml` discovery and `job_config.yaml`'s `steps[].{task_key, agent_key}` wiring), plus the optional CrewAI-native `<module>/skills/<name>/SKILL.md` step.
+- 08-era field recommendations (proposal item 4): trigger mapping table — `guardrail` for strict formats, `context` by task stem, `human_input` for high-stakes, `reasoning` for run-before-say problems, `allow_delegation` off by default, `skills` for injected domain instructions.
+- "Rules of engagement" enforces the NOT-TO-DO: drafts only, never auto-commit, never invent YAML keys outside what `CrewParser`/`CrewBuilderService` accept, and always surface the 2–3 highest-risk choices for developer review.
+- No Amsha runtime code changed (skill is documentation/tooling, as scoped).
