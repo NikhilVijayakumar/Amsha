@@ -22,6 +22,17 @@ The `CrewPerformanceMonitor` is responsible for tracking the runtime behavior of
     *   `utilization_percent`: GPU core utilization.
     *   `memory_change_mb`: VRAM usage change.
 
+### Event-Bus Observability (AmshaEventListener)
+*   Subscribes to CrewAI's event bus (a `BaseEventListener` subclass, instantiated automatically by `amsha.crew_monitor` at import time).
+*   Logs lifecycle events through the Amsha logger (`Amsha.crew_monitor.events`):
+    *   **Crew**: kickoff started/completed/failed — completed carries `duration_seconds` + `total_tokens`.
+    *   **Task**: started/completed/failed — per-task `duration_seconds`.
+    *   **LLM call**: started/completed/failed — per-call `duration_seconds`, `model`, `call_type`, and provider-normalized token usage (`prompt_tokens`/`completion_tokens`/`total_tokens`).
+    *   **Tool usage**: started/finished/error — `tool_name`, `from_cache`, `duration_seconds`; a finished call that reported `failure` logs at warning level.
+    *   **Flow / flow method**: started/finished/failed — `flow_name`, `method_name`, `duration_seconds`.
+*   Durations come from CrewAI's event-scope pairing (`started_event_id`) rather than whole-run snapshots, giving per-entity timing that `CrewPerformanceMonitor` cannot.
+*   Complements rather than replaces `CrewPerformanceMonitor`: OS-level CPU/GPU/RAM sampling has no event-bus equivalent and stays where it is.
+
 ---
 
 ## 2. Contribution Analysis
