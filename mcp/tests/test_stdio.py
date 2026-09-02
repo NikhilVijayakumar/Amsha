@@ -46,6 +46,29 @@ def _invoke(name: str, args: dict | None = None) -> str:
     return asyncio.run(_go())
 
 
+async def _call_in(session, name: str, args: dict | None = None) -> dict:
+    """Call a tool on an already-open session and parse the JSON response."""
+    import json
+
+    result = await session.call_tool(name, arguments=args or {})
+    text = "".join(c.text for c in result.content if getattr(c, "type", None) == "text")
+    return json.loads(text)
+
+
+async def _with_server(handler):
+    """Open one stdio server process, run handler(session) on it, tear down.
+    Mirrors a real client holding one connection across a session so the server's
+    in-memory Phase-2 session state persists across tool calls."""
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+
+    params = StdioServerParameters(command=sys.executable, args=_server_cmd()[1:], env=None)
+    async with stdio_client(params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            return await handler(session)
+
+
 def _list_tools() -> set[str]:
     from mcp import ClientSession, StdioServerParameters
     from mcp.client.stdio import stdio_client
@@ -99,3 +122,86 @@ def test_unknown_stage_returns_helpful_error():
 def test_search_over_stdio():
     out = _invoke("search_amsha_docs", {"query": "Docling"})
     assert "count" in out
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 — Architecture Guidance (proposal 02)
+# ---------------------------------------------------------------------------
+
+def test_phase2_tools_registered():
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+
+    async def _go():
+        params = StdioServerParameters(command=sys.executable, args=_server_cmd()[1:], env=None)
+        async with stdio_client(params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                tools = await session.list_tools()
+                return {t.name for t in tools.tools}
+
+    names = asyncio.run(_go())
+    for tool in ("begin_architecture_session", "submit_stage_artifact",
+                 "current_stage", "get_least_powerful_capability"):
+        assert tool in names, f"missing Phase2 tool {tool}"
+
+
+def test_phase2_full_sequence_over_stdio():
+    """Walk a session through stages 00-06 within ONE server process, then capability opens."""
+    async def handler(session):
+        begin = await _call_in(session, "begin_architecture_session",
+                               {"problem_statement": "Produce a validated chapter development package"})
+        sid = begin["session_id"]
+        assert begin["current_stage"] == "00"
+
+        gate = await _call_in(session, "get_least_powerful_capability", {"session_id": sid})
+        assert "error" in gate and "deferred" in gate["error"]
+        assert "Deterministic Python" not in gate
+
+        submit = {
+            "00": {"problem", "start_condition", "desired_end_condition", "primary_objective", "constraints", "success_definition"},
+            "01": {"start_boundary", "end_boundary", "scope", "completion_definition"},
+            "02": {"start_state", "end_state", "processes", "relationships"},
+            "03": {"contracts"},
+            "04": {"validation"},
+            "05": {"flow_order", "transitions", "state_requirements", "checkpoints"},
+            "06": {"failures", "recovery", "unrecoverable_definition"},
+        }
+        for stage, fields in sorted(submit.items()):
+            artifact = {f: "v" for f in fields}
+            out = await _call_in(session, "submit_stage_artifact",
+                                 {"session_id": sid, "stage": stage, "artifact": artifact, "checklist": ["ok"]})
+            assert out["accepted"] is True, f"stage {stage} not accepted: {out}"
+
+        cap = await _call_in(session, "get_least_powerful_capability", {"session_id": sid})
+        assert "error" not in cap
+        assert "Deterministic Python" in cap["capability_ladder"]
+
+        cur = await _call_in(session, "current_stage", {"session_id": sid})
+        assert cur["current_stage"] == "07"
+
+    asyncio.run(_with_server(handler))
+
+
+def test_phase2_out_of_order_is_blocked():
+    async def handler(session):
+        begin = await _call_in(session, "begin_architecture_session", {"problem_statement": "x"})
+        sid = begin["session_id"]
+        out = await _call_in(session, "submit_stage_artifact",
+                             {"session_id": sid, "stage": "03", "artifact": {"contracts": "v"}})
+        assert out["error"].startswith("Stage '03' blocked")
+        assert "01" in out["error"] and "02" in out["error"]
+
+    asyncio.run(_with_server(handler))
+
+
+def test_phase2_missing_fields_reported():
+    async def handler(session):
+        begin = await _call_in(session, "begin_architecture_session", {"problem_statement": "x"})
+        sid = begin["session_id"]
+        out = await _call_in(session, "submit_stage_artifact",
+                             {"session_id": sid, "stage": "00", "artifact": {"problem": "only"}})
+        assert out["accepted"] is False
+        assert "start_condition" in out["missing_fields"]
+
+    asyncio.run(_with_server(handler))
