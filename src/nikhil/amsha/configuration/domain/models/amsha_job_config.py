@@ -9,6 +9,17 @@ class CrewDefinition(BaseModel):
     steps: List[CrewStep] = Field(..., description="List of steps executed by the crew")
     knowledge_sources: Optional[List[str]] = Field(None, description="List of knowledge source paths")
     input: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = Field(None, description="Input definitions for the crew")
+    memory: bool = Field(
+        False,
+        description="Whether the crew uses CrewAI's unified memory",
+    )
+    checkpoint: Optional[Union[bool, Dict[str, Any]]] = Field(
+        None,
+        description=(
+            "Checkpoint configuration: a bool to enable/disable CrewAI checkpointing, "
+            "or a dict with keys enabled/on_events/provider/location/max_checkpoints."
+        ),
+    )
 
 class AmshaJobConfig(BaseModel):
     """

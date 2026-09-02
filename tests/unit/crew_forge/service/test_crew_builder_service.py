@@ -10,6 +10,18 @@ from amsha.crew_forge.service.crew_builder_service import CrewBuilderService
 from amsha.crew_forge.domain.models.crew_data import CrewData
 from amsha.crew_forge.domain.models.agent_data import AgentRequest
 from amsha.crew_forge.domain.models.task_data import TaskRequest
+from crewai import CheckpointConfig
+from crewai.state.provider.json_provider import JsonProvider
+from crewai.state.provider.sqlite_provider import SqliteProvider
+
+
+def _build_minimal_service(crew_data) -> CrewBuilderService:
+    """Return a builder with one agent + one task so build() can run."""
+    service = CrewBuilderService(crew_data)
+    service.add_agent(AgentRequest(role="Agent", goal="Goal", backstory="Story"))
+    agent = service.get_last_agent()
+    service.add_task(TaskRequest(name="task", description="Description", expected_output="Output"), agent)
+    return service
 
 
 class TestCrewBuilderService(unittest.TestCase):
@@ -425,6 +437,71 @@ class TestCrewBuilderService(unittest.TestCase):
                 TaskRequest(name="write", description="d", expected_output="o", context=["missing"]),
                 agent,
             )
+
+    def test_build_default_memory_and_checkpoint_off(self):
+        """Default CrewData leaves CrewAI memory/checkpoint off (no behavior change)."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None
+        )).build()
+        self.assertFalse(crew.memory)
+        self.assertIsNone(crew.checkpoint)
+
+    def test_build_crew_with_memory_enabled(self):
+        """memory=True on CrewData threads through to Crew(memory=True)."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None, memory=True
+        )).build()
+        self.assertIs(crew.memory, True)
+
+    def test_build_crew_with_checkpoint_bool_true(self):
+        """checkpoint=True yields a default CheckpointConfig on the crew."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None, checkpoint=True
+        )).build()
+        self.assertIsInstance(crew.checkpoint, CheckpointConfig)
+        self.assertEqual(crew.checkpoint.on_events, ["task_completed"])
+
+    def test_build_crew_with_checkpoint_dict(self):
+        """checkpoint dict maps provider/location/on_events/max_checkpoints to CheckpointConfig."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None,
+            checkpoint={
+                "enabled": True,
+                "provider": "json",
+                "location": "./ck",
+                "on_events": ["task_started", "task_completed"],
+                "max_checkpoints": 5,
+            },
+        )).build()
+        self.assertIsInstance(crew.checkpoint, CheckpointConfig)
+        self.assertEqual(crew.checkpoint.location, "./ck")
+        self.assertEqual(crew.checkpoint.on_events, ["task_started", "task_completed"])
+        self.assertEqual(crew.checkpoint.max_checkpoints, 5)
+        self.assertIsInstance(crew.checkpoint.provider, JsonProvider)
+
+    def test_build_crew_with_checkpoint_sqlite_provider(self):
+        """checkpoint provider 'sqlite' resolves to a SqliteProvider instance."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None,
+            checkpoint={"enabled": True, "provider": "sqlite"},
+        )).build()
+        self.assertIsInstance(crew.checkpoint.provider, SqliteProvider)
+
+    def test_build_crew_with_checkpoint_enabled_false(self):
+        """checkpoint.enabled: false maps to checkpoint=None (today's behavior)."""
+        crew = _build_minimal_service(CrewData(
+            llm=self.mock_llm, module_name="m", output_dir_path=None,
+            checkpoint={"enabled": False, "location": "./ignored"},
+        )).build()
+        self.assertIsNone(crew.checkpoint)
+
+    def test_build_crew_with_checkpoint_unknown_provider(self):
+        """Unknown checkpoint provider raises a ValueError."""
+        with self.assertRaises(ValueError):
+            _build_minimal_service(CrewData(
+                llm=self.mock_llm, module_name="m", output_dir_path=None,
+                checkpoint={"enabled": True, "provider": "dynamodb"},
+            )).build()
 
 
 if __name__ == '__main__':

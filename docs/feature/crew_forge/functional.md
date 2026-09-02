@@ -79,6 +79,8 @@ The library will expose its functionality through a single, cohesive service int
 
 -   **FR-CREW-01: Automatic Crew Creation:** The system must automatically create and maintain a single 'Crew' configuration in persistent storage for each 'use case' directory.
 -   **FR-CREW-02: Crew Composition:** The 'Crew' configuration must be linked to the complete set of agent and task entities defined within its corresponding 'use case' directory.
+-   **FR-CREW-03: Crew Memory Opt-In:** A crew definition in `job_config.yaml` *may* set `memory: true` to enable CrewAI's unified memory on the built `Crew` (default off — existing configs are unchanged). Memory is stored by CrewAI at its default LanceDB path `./.crewai/memory`. **Gotcha:** each memory write triggers an LLM analysis call (unless the query is short), so enabling memory adds LLM-call cost to every run.
+-   **FR-CREW-04: Crew Checkpointing:** A crew definition *may* set `checkpoint:` to a bool or a dict (`enabled`, `provider` `json`|`sqlite`, `location`, `on_events`, `max_checkpoints`) to enable CrewAI native checkpointing on the built `Crew`. `enabled: false` or the key being absent keeps `checkpoint=None` (today's behavior). After a successful kickoff, `BaseCrewOrchestrator` records the checkpoint `location` on the execution state (`StateManager.attach_checkpoint`); `BaseCrewOrchestrator.resume_crew(<crew>, <inputs>, <execution_id>, <restore_from>)` resumes from that checkpoint via CrewAI's `kickoff(from_checkpoint=...)` restore path.
 
 #### 4.4. Operational Constraints (`FR-OP`)
 

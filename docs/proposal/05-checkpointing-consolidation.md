@@ -6,6 +6,7 @@
 | **Risk** | Medium — overlapping responsibility with existing code, needs a clear decision, not just addition |
 | **Effort** | Medium |
 | **Depends on** | [02](02-crewai-version-migration.md) |
+| **Status** | ✅ Done (2026-09-02) |
 
 ## What CrewAI's checkpointing does
 
@@ -60,3 +61,14 @@ crew:
 ## What NOT to do
 
 - Don't build a second checkpoint/resume mechanism from scratch now that CrewAI has one natively — that's the exact duplication this proposal exists to stop.
+
+## Execution log
+
+- `CrewData.checkpoint: Optional[bool | dict] = None` added (domain layer stays free of crewai imports); `CrewBuilderService` coerces it for `Crew(checkpoint=...)`: `None`/`False`/`enabled: false` → `None`, `True` → `True` (CrewAI defaults), dict → `CheckpointConfig` with `provider` resolved to `JsonProvider`/`SqliteProvider`; an unknown provider raises a clear `ValueError`.
+- `AmshaJobConfig.CrewDefinition` gained `checkpoint`, so the crew-level YAML key survives validation + `model_dump()` (this was the actual wiring trap — the manager's `crew_def` is the validated model's dump, which silently dropped unknown keys).
+- Proposal item 3 done: `BaseCrewOrchestrator.run_crew()` now passes an optional `from_checkpoint` through to `kickoff(...)` and, after a successful run on a checkpoint-enabled crew, records the checkpoint `location` via new `StateManager.attach_checkpoint(execution_id, ref)`.
+- Proposal item 5 done: `BaseCrewOrchestrator.resume_crew(crew_name, inputs, execution_id, restore_from)` looks up the stored checkpoint ref and forwards `CheckpointConfig(location=ref, restore_from=...)` into `run_crew`, delegating resume to CrewAI's native restore. A run with no recorded checkpoint raises `CrewExecutionException`.
+- Proposal item 4 (**durable `IStateRepository`**, e.g. Mongo/SQLite/flat-file) remains an open follow-up — `InMemoryStateRepository` is still the only implementation, so `ExecutionState` (including the recorded checkpoint ref) does not survive a process restart. Not blocking: resume within a process works today.
+- Example: `job_config.yaml` `copy_crew` opts into `json` checkpointing; `verify_capability_example.py` asserts the built crew's `CheckpointConfig.location` matches the YAML.
+- Unit tests: builder coercion (bool/dict/provider/enabled-false/unknown-provider) in `test_crew_builder_service.py`; `attach_checkpoint` in `test_state_manager.py`; recording + `resume_crew` (+ error paths) in `test_base_crew_orchestrator.py`; config schema in `tests/unit/configuration/domain/test_amsha_job_config.py`.
+- Docs updated: `functional.md` (FR-CREW-04), `About.md` §5, `00-overview-and-roadmap.md §4`.

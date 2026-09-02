@@ -53,3 +53,15 @@ class StateManager:
         state.update_status(status, metadata)
         self.repository.save(state)
         return state
+
+    def attach_checkpoint(self, execution_id: str, checkpoint_ref: str) -> Optional[ExecutionState]:
+        """
+        Records the CrewAI checkpoint reference (e.g. its storage location) on an
+        execution state, so a later resume can restore from it.
+        """
+        state = self.repository.get(execution_id)
+        if not state:
+            return None
+        state.add_metadata("checkpoint", checkpoint_ref)
+        self.repository.save(state)
+        return state

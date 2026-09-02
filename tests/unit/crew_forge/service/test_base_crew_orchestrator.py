@@ -7,7 +7,9 @@ from amsha.crew_forge.service.base_crew_orchestrator import BaseCrewOrchestrator
 from amsha.execution_runtime.domain.execution_mode import ExecutionMode
 from amsha.execution_runtime.domain.execution_handle import ExecutionHandle
 from amsha.execution_state.domain.enums import ExecutionStatus
+from amsha.execution_state.service.state_manager import StateManager, InMemoryStateRepository
 from amsha.crew_forge.exceptions import CrewManagerException, CrewExecutionException
+from crewai import CheckpointConfig
 
 
 class TestBaseCrewOrchestrator(unittest.TestCase):
@@ -161,6 +163,102 @@ class TestBaseCrewOrchestrator(unittest.TestCase):
         self.assertEqual(self.orchestrator.get_last_output_file(), "output.json")
         self.assertEqual(self.orchestrator.get_last_execution_id(), "exec-123")
         self.assertIsNone(self.orchestrator.get_last_performance_stats())
+
+    @patch('amsha.crew_forge.service.base_crew_orchestrator.CrewPerformanceMonitor')
+    def test_run_crew_records_checkpoint_ref(self, mock_monitor_class):
+        """A crew with checkpointing enabled has its location recorded on the execution state."""
+        crew_name = "test_crew"
+        inputs = {"topic": "AI"}
+
+        mock_state = MagicMock()
+        mock_state.execution_id = "exec-123"
+        self.mock_state_manager.create_execution.return_value = mock_state
+
+        mock_crew = MagicMock()
+        mock_crew.kickoff.return_value = "Success result"
+        mock_crew.checkpoint = CheckpointConfig(location="./execution/checkpoints")
+        self.mock_manager.build_atomic_crew.return_value = mock_crew
+
+        mock_handle = MagicMock(spec=ExecutionHandle)
+        mock_handle.result.return_value = "Success result"
+        self.mock_runtime.submit.side_effect = lambda func, mode: mock_handle
+
+        self.orchestrator.run_crew(crew_name, inputs, mode=ExecutionMode.INTERACTIVE)
+
+        exec_func = self.mock_runtime.submit.call_args[0][0]
+        exec_func()
+        self.mock_state_manager.attach_checkpoint.assert_called_once_with(
+            "exec-123", "./execution/checkpoints"
+        )
+
+    @patch('amsha.crew_forge.service.base_crew_orchestrator.CrewPerformanceMonitor')
+    def test_run_crew_skips_attach_when_no_checkpoint(self, mock_monitor_class):
+        """A crew without checkpointing does not call attach_checkpoint."""
+        crew_name = "test_crew"
+        inputs = {"topic": "AI"}
+
+        mock_state = MagicMock()
+        mock_state.execution_id = "exec-123"
+        self.mock_state_manager.create_execution.return_value = mock_state
+
+        mock_crew = MagicMock()
+        mock_crew.kickoff.return_value = "Success result"
+        mock_crew.checkpoint = None
+        self.mock_manager.build_atomic_crew.return_value = mock_crew
+
+        mock_handle = MagicMock(spec=ExecutionHandle)
+        mock_handle.result.return_value = "Success result"
+        self.mock_runtime.submit.side_effect = lambda func, mode: mock_handle
+
+        self.orchestrator.run_crew(crew_name, inputs, mode=ExecutionMode.INTERACTIVE)
+        exec_func = self.mock_runtime.submit.call_args[0][0]
+        exec_func()
+
+        self.mock_state_manager.attach_checkpoint.assert_not_called()
+
+    @patch('amsha.crew_forge.service.base_crew_orchestrator.CrewPerformanceMonitor')
+    def test_resume_crew_forwards_restore(self, mock_monitor_class):
+        """resume_crew looks up the stored checkpoint ref and passes it to run_crew."""
+        state_manager = StateManager(repository=InMemoryStateRepository())
+        state = state_manager.create_execution(inputs={"topic": "AI"})
+        state_manager.attach_checkpoint(state.execution_id, "./execution/checkpoints")
+
+        orch = BaseCrewOrchestrator(
+            manager=self.mock_manager,
+            runtime=self.mock_runtime,
+            state_manager=state_manager,
+        )
+        with patch.object(orch, "run_crew", return_value="resumed") as mocked_run:
+            result = orch.resume_crew("test_crew", {"topic": "AI"}, state.execution_id, restore_from="1712345678_abc12345")
+
+        self.assertEqual(result, "resumed")
+        ckpt = mocked_run.call_args.kwargs["from_checkpoint"]
+        self.assertIsInstance(ckpt, CheckpointConfig)
+        self.assertEqual(ckpt.location, "./execution/checkpoints")
+        self.assertEqual(ckpt.restore_from, "1712345678_abc12345")
+
+    def test_resume_crew_without_checkpoint_raises(self):
+        """resume_crew on an execution with no recorded checkpoint raises CrewExecutionException."""
+        state_manager = StateManager(repository=InMemoryStateRepository())
+        state = state_manager.create_execution(inputs={})
+
+        orch = BaseCrewOrchestrator(
+            manager=self.mock_manager,
+            runtime=self.mock_runtime,
+            state_manager=state_manager,
+        )
+        with self.assertRaises(CrewExecutionException):
+            orch.resume_crew("test_crew", {}, state.execution_id, restore_from="id")
+
+    def test_resume_crew_unknown_execution_raises(self):
+        """resume_crew on an unknown execution raises CrewExecutionException."""
+        orch = BaseCrewOrchestrator(
+            manager=self.mock_manager,
+            runtime=self.mock_runtime,
+            state_manager=StateManager(repository=InMemoryStateRepository()),
+        )
+        with self.assertRaises(CrewExecutionException):
+            orch.resume_crew("test_crew", {}, "missing-exec", restore_from="id")
 
 if __name__ == '__main__':
     unittest.main()

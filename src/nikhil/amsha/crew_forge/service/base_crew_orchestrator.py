@@ -8,6 +8,7 @@ from amsha.execution_state.service.state_manager import StateManager
 from amsha.execution_state.domain.enums import ExecutionStatus
 from amsha.crew_monitor.service.crew_performance_monitor import CrewPerformanceMonitor
 from amsha.crew_forge.protocols.crew_manager import CrewManager
+from crewai import CheckpointConfig
 from crewai.crews.crew_output import CrewOutput
 from amsha.crew_forge.exceptions import (
     CrewExecutionException,
@@ -55,7 +56,8 @@ class BaseCrewOrchestrator:
         inputs: Dict[str, Any],
         filename_suffix: Optional[str] = None,
         mode: ExecutionMode = ExecutionMode.INTERACTIVE,
-            output_json: Any = None
+            output_json: Any = None,
+            from_checkpoint: Optional[CheckpointConfig] = None
     ) -> Union[Any, ExecutionHandle]:
         """
         Shared crew execution logic that works with any CrewManager implementation.
@@ -66,6 +68,8 @@ class BaseCrewOrchestrator:
             filename_suffix: Optional suffix for output files
             mode: Execution mode (INTERACTIVE or BACKGROUND)
               output_json: Any
+            from_checkpoint: Optional CrewAI checkpoint config whose ``restore_from``
+                resumes the crew from a stored checkpoint instead of starting fresh.
             
         Returns:
             Execution result (direct result for INTERACTIVE, ExecutionHandle for BACKGROUND)
@@ -137,7 +141,10 @@ class BaseCrewOrchestrator:
             self.last_monitor.start_monitoring()
             
             try:
-                result = crew_to_run.kickoff(inputs=inputs)
+                kickoff_kwargs = {"inputs": inputs}
+                if from_checkpoint is not None:
+                    kickoff_kwargs["from_checkpoint"] = from_checkpoint
+                result = crew_to_run.kickoff(**kickoff_kwargs)
 
                 # Handle streaming response (CrewAI 1.8.0+)
                 if hasattr(result, '__iter__') and not isinstance(result, (str, dict, list, CrewOutput)):
@@ -208,6 +215,11 @@ class BaseCrewOrchestrator:
                      if current_state:
                          current_state.set_output("result", result.raw)
                          self.state_manager.repository.save(current_state)
+
+                checkpoint_config = getattr(crew_to_run, "checkpoint", None)
+                checkpoint_ref = getattr(checkpoint_config, "location", None)
+                if isinstance(checkpoint_ref, str):
+                    self.state_manager.attach_checkpoint(state.execution_id, checkpoint_ref)
                 
                 return result
             except Exception as e:
@@ -258,3 +270,53 @@ class BaseCrewOrchestrator:
     def get_last_execution_id(self) -> Optional[str]:
         """Get the execution ID of the last run."""
         return self.last_execution_id
+
+    def resume_crew(
+        self,
+        crew_name: str,
+        inputs: Dict[str, Any],
+        execution_id: str,
+        restore_from: str,
+        filename_suffix: Optional[str] = None,
+        mode: ExecutionMode = ExecutionMode.INTERACTIVE,
+        output_json: Any = None,
+    ) -> Union[Any, ExecutionHandle]:
+        """
+        Resume a previously checkpointed crew run from CrewAI's stored checkpoint.
+
+        Args:
+            crew_name: Name of the crew whose run is being resumed
+            inputs: Input parameters for the resumed run
+            execution_id: Amsha execution state that recorded the checkpoint reference
+            restore_from: CrewAI checkpoint ID to restore from
+            filename_suffix: Optional suffix for output files
+            mode: Execution mode (INTERACTIVE or BACKGROUND)
+            output_json: Any
+
+        Returns:
+            Execution result (direct result for INTERACTIVE, ExecutionHandle for BACKGROUND)
+
+        Raises:
+            CrewExecutionException: If the execution has no recorded checkpoint
+        """
+        state = self.state_manager.get_execution(execution_id)
+        if not state:
+            raise CrewExecutionException(
+                f"No execution state found for '{execution_id}'",
+                crew_name=crew_name,
+            )
+        checkpoint_ref = (state.metadata or {}).get("checkpoint")
+        if not checkpoint_ref:
+            raise CrewExecutionException(
+                f"Execution '{execution_id}' has no recorded checkpoint to resume from; "
+                "run the crew with checkpointing enabled first.",
+                crew_name=crew_name,
+            )
+        return self.run_crew(
+            crew_name,
+            inputs,
+            filename_suffix=filename_suffix,
+            mode=mode,
+            output_json=output_json,
+            from_checkpoint=CheckpointConfig(location=checkpoint_ref, restore_from=restore_from),
+        )

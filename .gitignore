@@ -105,6 +105,8 @@ Thumbs.db
 /.Nibandha/
 /output/
 /final/
+/.crewai/
+/.Amsha/execution/
 /.Nibandha/config/rotation_config.yaml
 /.Nibandha/Amsha/final/The Science Minute/generate_scientific_knowledge/gpt-4o-mini.json
 /.Nibandha/Amsha/final/The Science Minute/generate_scientific_knowledge/gpt-4o-mini_1.json

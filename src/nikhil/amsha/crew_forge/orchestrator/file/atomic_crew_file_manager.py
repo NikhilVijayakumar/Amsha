@@ -55,7 +55,9 @@ class AtomicCrewFileManager:
 
         crew_data = CrewData( llm= self.llm,
             module_name= self.job_config.get("module_name", ""),
-            output_dir_path = self.app_config.get("output_dir_path", f"output/{crew_name}"))
+            output_dir_path = self.app_config.get("output_dir_path", f"output/{crew_name}"),
+            memory= crew_def.get("memory", False),
+            checkpoint= crew_def.get("checkpoint"))
 
         crew_builder: Optional[AtomicYamlBuilderService] = None
         for step in crew_def['steps']:

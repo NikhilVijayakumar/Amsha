@@ -127,7 +127,38 @@ copy/
 
 Amsha resolves the bare name to the `skills/<name>` path before passing it to CrewAI. This is a runtime **agent/crew Skill** — unrelated to the Claude Code project-development skills under `docs/reference/agent/skills/` that are used to work *on* Amsha's own codebase.
 
-### 5. Syncing Configurations to MongoDB
+### 5. Memory & Checkpointing
+
+Crew-level execution features are opted in per crew in `job_config.yaml`. Both are **off by default**, preserving existing behavior.
+
+```yaml
+crews:
+  copy_crew:
+    memory: true
+    checkpoint:
+      enabled: true
+      provider: json        # or "sqlite"
+      location: "./.Amsha/execution/checkpoints"
+      on_events: ["task_completed"]
+      max_checkpoints: 5
+    steps: [...]
+```
+
+-   **Memory** (`memory: true`) enables CrewAI's unified memory (`Crew(memory=True)`). Storage stays at CrewAI's default LanceDB path `./.crewai/memory`. **Gotcha:** memory's write-time LLM analysis means every memory write costs an extra LLM call (short queries <200 chars skip it) — see the token-usage spike in `CrewPerformanceMonitor` if you enable memory.
+-   **Checkpointing** (`checkpoint:`) maps `enabled`/`provider`/`location`/`on_events`/`max_checkpoints` onto CrewAI's `CheckpointConfig`. `enabled: false` (or omitting the block) keeps checkpointing off. After a run, `BaseCrewOrchestrator` records the checkpoint `location` on its `ExecutionState`; resume any previously checkpointed run with:
+
+```python
+app.orchestrator.resume_crew(
+    crew_name="copy_crew",
+    inputs={},
+    execution_id="<previous execution id>",
+    restore_from="<crewai checkpoint id>",   # e.g. 20260902_123456_abcd1234
+)
+```
+
+`resume_crew` builds a fresh crew and calls CrewAI's `kickoff(from_checkpoint=...)`, which skips already-completed tasks.
+
+### 6. Syncing Configurations to MongoDB
 
 Keep your database in sync with your local YAML configurations.
 

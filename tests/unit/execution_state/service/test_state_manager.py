@@ -89,5 +89,21 @@ class TestStateManager(unittest.TestCase):
         mock_state.update_status.assert_called_with(ExecutionStatus.COMPLETED, None)
         self.assertTrue(mock_repo.save.called)
 
+    def test_attach_checkpoint(self):
+        """Attaching a checkpoint ref records it in execution metadata."""
+        state = self.manager.create_execution(inputs={})
+        updated = self.manager.attach_checkpoint(state.execution_id, "./.Amsha/execution/checkpoints")
+
+        self.assertIsNotNone(updated)
+        self.assertEqual(updated.metadata["checkpoint"], "./.Amsha/execution/checkpoints")
+        # Verify persistence
+        retrieved = self.repo.get(state.execution_id)
+        self.assertEqual(retrieved.metadata["checkpoint"], "./.Amsha/execution/checkpoints")
+
+    def test_attach_checkpoint_non_existent(self):
+        """Attaching to a missing execution returns None."""
+        result = self.manager.attach_checkpoint("missing", "./ck")
+        self.assertIsNone(result)
+
 if __name__ == '__main__':
     unittest.main()

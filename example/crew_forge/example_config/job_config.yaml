@@ -5,6 +5,13 @@ output_filepath: ".Amsha/output/intermediate/crew/crew_configurations.json"
 
 crews:
   copy_crew:
+    memory: true
+    checkpoint:
+      enabled: true
+      provider: json
+      location: "./.Amsha/execution/checkpoints"
+      on_events: ["task_completed"]
+      max_checkpoints: 5
     knowledge_sources:
       - "./example/crew_forge/example_config/crew_configs/copy/knowledge/products.json"
 #    knowledge_sources:

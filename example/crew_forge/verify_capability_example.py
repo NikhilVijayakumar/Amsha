@@ -83,6 +83,18 @@ def main() -> int:
     json_sources = [s for s in sources if s is not None and getattr(s, "source_type", None) == "json"]
     results.append(_verify(True, len(json_sources) == 1, f"crew has a JSON knowledge source (found {len(json_sources)})"))
 
+    print("\n== Memory & checkpointing (proposals 04/05) ==")
+    # memory: true in YAML -> Crew(memory=True)
+    results.append(_verify(True, crew.memory is True, f"crew.memory (YAML: true, default False)"))
+    # checkpoint dict -> resolved CheckpointConfig carrying the YAML location
+    ckpt = crew.checkpoint
+    ckpt_location = getattr(ckpt, "location", None)
+    results.append(_verify(
+        "./.Amsha/execution/checkpoints",
+        str(ckpt_location).replace("\\", "/"),
+        f"crew.checkpoint.location (YAML location) got={ckpt!r}",
+    ))
+
     passed = all(results)
     print(f"\n== Build inspection: {'ALL PASS' if passed else 'SOME FAILED'} ({sum(results)}/{len(results)}) ==")
 

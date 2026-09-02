@@ -5,7 +5,9 @@ import typing
 from typing import Optional
 from amsha.common.logger import get_logger
 
-from crewai import Crew, Agent, Process, Task
+from crewai import Crew, Agent, Process, Task, CheckpointConfig
+from crewai.state.provider.json_provider import JsonProvider
+from crewai.state.provider.sqlite_provider import SqliteProvider
 
 from amsha.crew_forge.domain.models.agent_data import AgentRequest
 from amsha.crew_forge.domain.models.crew_data import CrewData
@@ -18,6 +20,8 @@ class CrewBuilderService:
         self.logger = get_logger("crew_forge.builder")
         self.llm = data.llm
         self.module_name = data.module_name
+        self.memory = data.memory
+        self.checkpoint = data.checkpoint
         if data.output_dir_path:
             timestamp = time.strftime("%Y%m%d%H%M%S")
             self.output_dir_path = data.output_dir_path
@@ -116,6 +120,38 @@ class CrewBuilderService:
             resolved.append(task)
         return resolved
 
+    def _coerce_checkpoint(self, raw) -> typing.Optional[typing.Union[bool, CheckpointConfig]]:
+        """Map a YAML checkpoint block (bool or dict) to what Crew accepts.
+
+        - ``None``/``False`` -> ``None`` (checkpointing off, today's behavior)
+        - ``True`` -> ``True`` (CrewAI defaults)
+        - dict -> ``enabled: false`` yields ``None``; otherwise the remaining
+          keys map onto ``CheckpointConfig(on_events, provider, location,
+          max_checkpoints)``, with the provider name resolved to a Json/Sqlite
+          provider instance.
+        """
+        if raw is None or raw is False:
+            return None
+        if raw is True:
+            return True
+        config = dict(raw)
+        if config.get("enabled", True) is False:
+            return None
+        config.pop("enabled", None)
+        provider = config.pop("provider", None)
+        if provider is not None:
+            provider_instance = {
+                "json": JsonProvider(),
+                "sqlite": SqliteProvider(),
+            }.get(provider.lower() if isinstance(provider, str) else "")
+            if provider_instance is None:
+                raise ValueError(
+                    f"Unknown checkpoint provider '{provider}'. "
+                    "Expected 'json' or 'sqlite'."
+                )
+            config["provider"] = provider_instance
+        return CheckpointConfig(**config)
+
     def build(self, process: Process = Process.sequential,knowledge_sources=None) -> Crew:
         if not self._agents or not self._tasks:
             raise ValueError("A crew must have at least one agent and one task.")
@@ -127,7 +163,9 @@ class CrewBuilderService:
             tasks=self._tasks,
             process=process,
             verbose=True,
-            stream=True
+            stream=True,
+            memory=self.memory,
+            checkpoint=self._coerce_checkpoint(self.checkpoint)
         )
         if knowledge_sources:
             crew.knowledge_sources = knowledge_sources

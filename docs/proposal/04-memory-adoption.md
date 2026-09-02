@@ -6,6 +6,7 @@
 | **Risk** | Low (pure adoption, nothing to migrate away from) |
 | **Effort** | Small-Medium |
 | **Depends on** | [02](02-crewai-version-migration.md), [08](08-agent-task-capability-expansion.md) |
+| **Status** | ✅ Done (2026-09-02) |
 
 ## What changed in CrewAI
 
@@ -26,3 +27,11 @@
 
 - Don't wire memory on by default — it changes cost and latency characteristics; existing Amsha consumers upgrading CrewAI shouldn't get a surprise bill.
 - Don't attempt to bridge old-style `ShortTermMemory`/`EntityMemory` APIs — there's no old code in Amsha using them, so there's nothing to bridge.
+
+## Execution log
+
+- `CrewData.memory: bool = False` added; threaded through `CrewBuilderService.build()` to `Crew(memory=data.memory)`. The manager reads per-crew `memory` from `crew_def` in `job_config.yaml`, and `AmshaJobConfig.CrewDefinition` gained the `memory` field so the key survives config validation + `model_dump()`.
+- **Storage location (proposal item 3):** left at CrewAI's default `./.crewai/memory`, *not* namespaced per-module. Namespacing would require passing a custom `Memory` instance with a `StorageBackend` targeting a per-module directory — real machinery worth adding only when a concrete cross-crew memory-bleed case appears. Documented in `About.md` and `functional.md` (FR-CREW-03) instead, including the extra-LLM-call-per-write cost gotcha.
+- Example: `job_config.yaml` `copy_crew` sets `memory: true`; `verify_capability_example.py` asserts `crew.memory is True`.
+- Unit tests: `tests/unit/crew_forge/service/test_crew_builder_service.py` (memory on/off), `tests/unit/configuration/domain/test_amsha_job_config.py` (config schema round-trip).
+- Docs updated: `functional.md` (FR-CREW-03), `About.md` §5, `00-overview-and-roadmap.md §4`.
