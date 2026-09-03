@@ -81,6 +81,7 @@ This mirrors the division already laid out in `mcp/docs/implementation/00-amsha-
 | 3 | [Plan & Crew Verification](03-plan-and-crew-verification.md) | Given prerequisite artifacts and/or crew YAML, validate structure + Amsha conventions, including Agent/Task/Crew/Flow/Skill/Knowledge verification against the checklists | Proposed |
 | 3b | [User Plan Verification & Component Discovery](05-user-plan-verification-and-component-discovery.md) | Extends Phase 3 from structural to semantic plan verification, plus least-powerful-first component recommendation grounded in real Amsha sources | Proposed |
 | 4 | [Improve / Test / Evaluate Loop](04-improve-test-evaluate-loop.md) | Turn Phase 3 findings into concrete fix suggestions; smoke-test through the real `crew_forge` orchestrator; score the result | Proposed |
+| 6 | [Project Scaffolding](06-project-scaffolding.md) | New-project generation and existing-project detection/wiring — the "get Amsha into a project" step none of the other phases cover | Proposed |
 
 ## Sequencing
 
@@ -90,6 +91,7 @@ Strictly sequential — each phase's tools are built *from* the previous phase's
 - **2 before 3** — Phase 3's validation rules are the checklists already embedded in the Phase 2 methodology docs. Don't invent a second rule set.
 - **3 before 3b** — component discovery only runs against a plan Phase 3 has already validated; recommending against a broken decomposition is worse than not recommending at all.
 - **3 (+3b) before 4** — can't suggest a fix or score a run before there's a validator producing findings to act on.
+- **1 and 3 before 6** — scaffolding reads Amsha's real conventions the same way Phase 1 does, and every scaffold self-verifies through Phase 3/4's `dry_run_parse` before being reported as done.
 
 ## Non-negotiables
 

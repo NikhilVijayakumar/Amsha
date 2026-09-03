@@ -9,6 +9,7 @@ from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.llm_factory.domain.model.llm_use_case_config import LLMUseCaseConfig
 from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
 from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
+from amsha.llm_factory.domain.model.lmstudio_lifecycle_config import LMStudioLifecycleConfig
 
 
 class TestLLMBuilderEnhanced(unittest.TestCase):
@@ -191,6 +192,113 @@ class TestLLMBuilderEnhanced(unittest.TestCase):
         # Verify extract_model_name was called
         mock_extract.assert_called_once_with("lm_studio/extracted-model")
         
+        self.assertIsNotNone(result.provider)
+
+    @patch('amsha.llm_factory.service.llm_builder.LMStudioLifecycleClient')
+    @patch('amsha.llm_factory.service.llm_builder.LLM')
+    @patch('amsha.llm_factory.service.llm_builder.LLMUtils.extract_model_name')
+    def test_build_lmstudio_lifecycle_disabled_no_call(self, mock_extract, mock_llm_class, mock_client_class):
+        """lmstudio_lifecycle absent/disabled -> zero calls to the lifecycle client."""
+        mock_extract.return_value = "gpt-4"
+        self.mock_settings.get_model_config.return_value = self.model_config_no_base
+
+        self.builder.build(LLMType.CREATIVE)
+
+        mock_client_class.assert_not_called()
+
+    @patch('amsha.llm_factory.service.llm_builder.LMStudioLifecycleClient')
+    @patch('amsha.llm_factory.service.llm_builder.LLM')
+    @patch('amsha.llm_factory.service.llm_builder.LLMUtils.extract_model_name')
+    def test_build_lmstudio_lifecycle_enabled_calls_ensure_loaded(self, mock_extract, mock_llm_class, mock_client_class):
+        """lmstudio_lifecycle.enabled=True -> ensure_loaded runs before the LLM is built."""
+        mock_extract.return_value = "gpt-oss-20b"
+        config = MagicMock()
+        config.model = "lm_studio/openai/gpt-oss-20b"
+        config.base_url = "http://localhost:1234/v1"
+        config.api_key = "lm_studio"
+        config.api_version = None
+        config.lmstudio_lifecycle = LMStudioLifecycleConfig(
+            enabled=True, model_id="openai/gpt-oss-20b", context_length=16384
+        )
+        self.mock_settings.get_model_config.return_value = config
+
+        self.builder.build(LLMType.CREATIVE)
+
+        mock_client_class.assert_called_once_with("http://localhost:1234/v1")
+        mock_client_class.return_value.ensure_loaded.assert_called_once_with(config.lmstudio_lifecycle)
+
+    @patch('amsha.llm_factory.service.llm_builder.LMStudioLifecycleClient')
+    @patch('amsha.llm_factory.service.llm_builder.LLM')
+    @patch('amsha.llm_factory.service.llm_builder.LLMUtils.extract_model_name')
+    def test_build_lmstudio_lifecycle_enabled_requires_base_url(self, mock_extract, mock_llm_class, mock_client_class):
+        """lmstudio_lifecycle.enabled=True with no base_url -> raises before calling the client."""
+        mock_extract.return_value = "gpt-oss-20b"
+        config = MagicMock()
+        config.model = "lm_studio/openai/gpt-oss-20b"
+        config.base_url = None
+        config.api_key = "lm_studio"
+        config.api_version = None
+        config.lmstudio_lifecycle = LMStudioLifecycleConfig(enabled=True, model_id="openai/gpt-oss-20b")
+        self.mock_settings.get_model_config.return_value = config
+
+        with self.assertRaises(ValueError):
+            self.builder.build(LLMType.CREATIVE)
+
+        mock_client_class.assert_not_called()
+
+    @patch('amsha.llm_factory.service.llm_builder.LMStudioLifecycleClient')
+    @patch('amsha.llm_factory.service.llm_builder.LLM')
+    @patch('amsha.llm_factory.service.llm_builder.LLMUtils.extract_model_name')
+    def test_build_lmstudio_lifecycle_uses_global_context_default(self, mock_extract, mock_llm_class, mock_client_class):
+        """context_length unset on the model -> falls back to settings.lmstudio_context_length_default."""
+        mock_extract.return_value = "gpt-oss-20b"
+        config = MagicMock()
+        config.model = "lm_studio/openai/gpt-oss-20b"
+        config.base_url = "http://localhost:1234/v1"
+        config.api_key = "lm_studio"
+        config.api_version = None
+        config.lmstudio_lifecycle = LMStudioLifecycleConfig(enabled=True, model_id="openai/gpt-oss-20b")
+        self.mock_settings.get_model_config.return_value = config
+        self.mock_settings.lmstudio_context_length_default = 32768
+
+        self.builder.build(LLMType.CREATIVE)
+
+        called_with = mock_client_class.return_value.ensure_loaded.call_args[0][0]
+        self.assertEqual(called_with.context_length, 32768)
+
+    @patch('amsha.llm_factory.service.llm_builder.LMStudioLifecycleClient')
+    @patch('amsha.llm_factory.service.llm_builder.LLM')
+    @patch('amsha.llm_factory.service.llm_builder.LLMUtils.extract_model_name')
+    def test_build_lmstudio_lifecycle_own_context_length_wins_over_global(self, mock_extract, mock_llm_class, mock_client_class):
+        """Per-model context_length always beats the global default when both are set."""
+        mock_extract.return_value = "gpt-oss-20b"
+        config = MagicMock()
+        config.model = "lm_studio/openai/gpt-oss-20b"
+        config.base_url = "http://localhost:1234/v1"
+        config.api_key = "lm_studio"
+        config.api_version = None
+        config.lmstudio_lifecycle = LMStudioLifecycleConfig(
+            enabled=True, model_id="openai/gpt-oss-20b", context_length=4096)
+        self.mock_settings.get_model_config.return_value = config
+        self.mock_settings.lmstudio_context_length_default = 32768
+
+        self.builder.build(LLMType.CREATIVE)
+
+        called_with = mock_client_class.return_value.ensure_loaded.call_args[0][0]
+        self.assertEqual(called_with.context_length, 4096)
+
+    @patch('amsha.llm_factory.service.llm_builder.LLM')
+    @patch('amsha.llm_factory.service.llm_builder.LLMUtils.extract_model_name')
+    def test_build_for_capability_resolves_and_builds(self, mock_extract, mock_llm_class):
+        mock_extract.return_value = "gpt-4-vision"
+        self.mock_settings.get_model_key_for_capability.return_value = "vision_model"
+        self.mock_settings.get_model_config.return_value = self.model_config_no_base
+
+        result = self.builder.build_for_capability(LLMType.CREATIVE, "vision")
+
+        self.mock_settings.get_model_key_for_capability.assert_called_once_with(
+            LLMType.CREATIVE.value, "vision", None)
+        self.mock_settings.get_model_config.assert_called_with(LLMType.CREATIVE.value, "vision_model")
         self.assertIsNotNone(result.provider)
 
 

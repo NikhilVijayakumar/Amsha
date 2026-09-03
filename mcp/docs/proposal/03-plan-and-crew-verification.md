@@ -63,7 +63,7 @@ The absolute rule (mirrors the methodology's own "No Silent Architecture Changes
 |---|---|---|
 | `verify_prerequisite_artifacts` | artifacts (dict or file paths) | Findings per artifact, severity, rule reference |
 | `verify_crew_yaml` | crew YAML path or content | Findings vs real `crew_forge` schemas + Crew structure checks |
-| `verify_component` | `component_type` (agent/task/crew/flow/skill/knowledge/tool/mcp), `definition` | Findings vs the matching implementation doc's checklist |
+| `verify_component` | `component_type` (agent/task/crew/flow/skill/knowledge/tool/mcp/llm_model), `definition` | Findings vs the matching implementation doc's checklist |
 | `verify_alignment` | agent(s) + task(s) | Agent–Task alignment findings (`04-agent-task-alignment`) |
 
 All return a shared `FindingsReport` shape: list of `{severity, rule_id, rule_source, message, suggested_fix}`.
@@ -71,6 +71,8 @@ All return a shared `FindingsReport` shape: list of `{severity, rule_id, rule_so
 ### Findings are grounded in doc references
 
 Every finding cites its rule source (e.g. "violates `implementation/03-atomic-task-design.md` §composite-task"), so the caller — human or LLM — can read the rule and decide. Findings never stand alone as bare verdicts.
+
+`llm_model` is the one component type sourced from a root `docs/proposal/` doc rather than `mcp/docs/implementation/` — it checks the opt-in `LLMModelConfig.lmstudio_lifecycle` fields against [proposal 14](../../../docs/proposal/14-llm-lifecycle-management.md) (missing `base_url`, a non-local `base_url`, `model_id`/`model` confusion, unset `context_length`). Added after 14 shipped in `llm_factory`, not part of the original Phase 3 scope.
 
 ## Testing bar
 

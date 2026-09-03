@@ -6,6 +6,7 @@ from amsha.llm_factory.settings.llm_settings import LLMSettings
 from amsha.llm_factory.domain.model.llm_use_case_config import LLMUseCaseConfig
 from amsha.llm_factory.domain.model.llm_parameters import LLMParameters
 from amsha.llm_factory.domain.model.llm_model_config import LLMModelConfig
+from amsha.llm_factory.domain.model.llm_model_capabilities import LLMModelCapabilities
 
 
 class TestLLMSettings(unittest.TestCase):
@@ -141,6 +142,51 @@ class TestLLMSettings(unittest.TestCase):
         self.assertEqual(default_config.model, "gpt-4")
         self.assertEqual(alt_config.model, "gpt-3.5-turbo")
         self.assertNotEqual(default_config.api_key, alt_config.api_key)
+
+    def test_lmstudio_context_length_default_absent_is_none(self):
+        """Global default field exists and defaults to None."""
+        self.assertIsNone(self.settings.lmstudio_context_length_default)
+
+    def test_get_model_key_for_capability_finds_tagged_model(self):
+        settings = LLMSettings(
+            llm={"creative": LLMUseCaseConfig(
+                default="plain",
+                models={
+                    "plain": LLMModelConfig(model="gpt-4"),
+                    "vision_model": LLMModelConfig(model="gpt-4-vision",
+                                                    capabilities=LLMModelCapabilities(vision=True)),
+                },
+            )},
+            llm_parameters={},
+        )
+        self.assertEqual(settings.get_model_key_for_capability("creative", "vision"), "vision_model")
+
+    def test_get_model_key_for_capability_prefers_already_matching_model_key(self):
+        settings = LLMSettings(
+            llm={"creative": LLMUseCaseConfig(
+                default="plain",
+                models={
+                    "a": LLMModelConfig(model="m-a", capabilities=LLMModelCapabilities(reasoning=True)),
+                    "b": LLMModelConfig(model="m-b", capabilities=LLMModelCapabilities(reasoning=True)),
+                },
+            )},
+            llm_parameters={},
+        )
+        self.assertEqual(settings.get_model_key_for_capability("creative", "reasoning", model_key="b"), "b")
+
+    def test_get_model_key_for_capability_no_match_raises(self):
+        settings = LLMSettings(
+            llm={"creative": LLMUseCaseConfig(default="plain", models={"plain": LLMModelConfig(model="gpt-4")})},
+            llm_parameters={},
+        )
+        with self.assertRaises(ValueError) as ctx:
+            settings.get_model_key_for_capability("creative", "vision")
+        self.assertIn("No model tagged", str(ctx.exception))
+
+    def test_get_model_key_for_capability_unknown_capability_raises(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.settings.get_model_key_for_capability("creative", "telepathy")
+        self.assertIn("Unknown capability", str(ctx.exception))
 
 
 if __name__ == '__main__':
