@@ -1,31 +1,58 @@
 """Read Amsha documentation and source metadata from disk at query time.
 
+Two distinct sources:
+
+1. **Bundled methodology docs** — `amsha_mcp`'s own prerequisite/implementation
+   proposal material, shipped inside the package (`amsha_mcp/docs/`). These never
+   depend on an outer-repo layout; a standalone wheel carries them.
+2. **The target repo** — the Amsha-shaped repo this server instance was pointed
+   at (an env var or `register_repo()`), from which we serve live README/docs and
+   import the real crew schemas. `None` means "no repo registered": docs-serving
+   tools return empty and schema tools report they cannot verify.
+
 No content is copied into Python source: docs stay the single source of truth.
 If a doc changes, the server's answers change on the next call.
 """
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
-PACKAGE_ROOT = Path(__file__).resolve().parent  # mcp/src/amsha_mcp
-MCP_ROOT = PACKAGE_ROOT.parent.parent            # mcp/
-REPO_ROOT = MCP_ROOT.parent                      # the Amsha repo root
+PACKAGE_ROOT = Path(__file__).resolve().parent  # the installed amsha_mcp package dir
 
-# Resolved in __init__ so tests can point REPO at a fixture if needed.
-_REPO_ROOT: Path = REPO_ROOT
-_MCP_ROOT: Path = MCP_ROOT
+# Bundled methodology/preoposal docs ship with the package (see pyproject package-data).
+_DOCS = PACKAGE_ROOT / "docs"
 
-
-def configure_repo_root(root: Path) -> None:
-    """Point the loader at an alternative repo root (used by tests)."""
-    global _REPO_ROOT, _MCP_ROOT
-    _REPO_ROOT = root
-    _MCP_ROOT = root / "mcp"
+# Process-global target repo. Set at startup from AMSHA_MCP_TARGET_REPO (or a
+# source-checkout default), and re-set by the register_repo tool. `None` = no repo.
+_REPO_ROOT: Path | None = None
 
 
-def repo_root() -> Path:
+def configure_repo_root(root: str | Path | None) -> None:
+    """Point the loader at a (different) target repo root, or clear it (None)."""
+    global _REPO_ROOT
+    _REPO_ROOT = None if root is None else Path(root)
+
+
+def repo_root() -> Path | None:
     return _REPO_ROOT
+
+
+def resolve_default_repo() -> Path | None:
+    """Set the target repo at startup and return it: AMSHA_MCP_TARGET_REPO env
+    var, else the enclosing Amsha checkout when running from a source tree
+    (dev loop), else None (standalone install, no repo registered)."""
+    env = os.environ.get("AMSHA_MCP_TARGET_REPO")
+    if env:
+        configure_repo_root(Path(env).expanduser())
+        return _REPO_ROOT
+    checkout = PACKAGE_ROOT.parent.parent.parent  # mcp/src/amsha_mcp -> repo root
+    if (checkout / "src" / "nikhil" / "amsha").is_dir():
+        configure_repo_root(checkout)
+        return _REPO_ROOT
+    configure_repo_root(None)
+    return None
 
 
 def _read(path: Path) -> str | None:
@@ -36,34 +63,38 @@ def _read(path: Path) -> str | None:
 
 
 def _docs_under(relative_dir: str, pattern: str = "*.md") -> dict[str, Path]:
-    """Return {filename: path} for direct children of an mcp/docs subdir."""
-    base = _MCP_ROOT / "docs" / relative_dir
+    """Return {filename: path} for direct children of a bundled docs/ subdir."""
+    base = _DOCS / relative_dir
     return {p.name: p for p in sorted(base.glob(pattern))} if base.is_dir() else {}
 
 
 def read_prerequisite() -> dict[str, Path]:
-    """mcp/docs/prerequisite/*.md keyed by filename (00-problem-definition.md ...)."""
+    """Bundled prerequisite/*.md keyed by filename (00-problem-definition.md ...)."""
     return _docs_under("prerequisite")
 
 
 def read_implementation() -> dict[str, Path]:
-    """mcp/docs/implementation/*.md keyed by filename."""
+    """Bundled implementation/*.md keyed by filename."""
     return _docs_under("implementation")
 
 
 def read_proposal() -> dict[str, Path]:
-    """mcp/docs/proposal/*.md keyed by filename."""
+    """Bundled proposal/*.md keyed by filename."""
     return _docs_under("proposal")
 
 
 def read_top_level_markdown() -> dict[str, Path]:
-    """Repo-root markdown we serve: README, USER_GUIDE, AGENTS."""
+    """Target-repo root markdown we serve: README, USER_GUIDE, AGENTS."""
+    if not _REPO_ROOT:
+        return {}
     names = ["README.md", "USER_GUIDE.md", "AGENTS.md", "DEPENDENCIES.md"]
     return {n: _REPO_ROOT / n for n in names if (_REPO_ROOT / n).is_file()}
 
 
 def read_features_docs() -> dict[str, Path]:
-    """docs/feature/*/About.md keyed by module name (turn the tree flat)."""
+    """Target-repo docs/feature/*/About.md keyed by module name (flat)."""
+    if not _REPO_ROOT:
+        return {}
     base = _REPO_ROOT / "docs" / "feature"
     if not base.is_dir():
         return {}
@@ -102,6 +133,8 @@ _MODULE_PURPOSE = {
 
 def runtime_modules() -> dict[str, str]:
     """{module_name: one-line purpose} from the real src dir + README purposes."""
+    if not _REPO_ROOT:
+        return {}
     src = _REPO_ROOT / "src" / "nikhil" / "amsha"
     present = {
         d.name
@@ -114,6 +147,8 @@ def runtime_modules() -> dict[str, str]:
 
 def source_files_for(module: str) -> list[str]:
     """Relative paths of every non-pyc .py file under a module's src dir."""
+    if not _REPO_ROOT:
+        return []
     root = _REPO_ROOT / "src" / "nikhil" / "amsha" / module
     if not root.is_dir():
         return []
@@ -143,7 +178,9 @@ def get_preview(path: Path, max_lines: int = 15) -> str:
 
 
 def extract_quickstart() -> str:
-    """Return the `## Quick Start` code block from README, if present."""
+    """Return the `## Quick Start` code block from the target repo's README."""
+    if not _REPO_ROOT:
+        return ""
     text = _read(_REPO_ROOT / "README.md")
     if not text:
         return ""
@@ -152,7 +189,9 @@ def extract_quickstart() -> str:
 
 
 def extract_installation() -> str:
-    """Return the `## Installation` section from README, if present."""
+    """Return the `## Installation` section from the target repo's README."""
+    if not _REPO_ROOT:
+        return ""
     text = _read(_REPO_ROOT / "README.md")
     if not text:
         return ""

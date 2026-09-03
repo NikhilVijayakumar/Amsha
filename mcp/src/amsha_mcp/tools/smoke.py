@@ -7,20 +7,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from crewai.llms.base_llm import BaseLLM
-
 _SMOKE_TIMEOUT_SECONDS = 30.0
-
-
-class _StubLLM(BaseLLM):
-    """Offline stand-in for a CrewAI LLM. Build never calls kickoff(), so the
-    no-op call/acall are never reached; they exist only to satisfy the ABC."""
-
-    def call(self, *args, **kwargs):
-        raise RuntimeError("smoke_test stub LLM cannot actually generate; build is offline by design")
-
-    async def acall(self, *args, **kwargs):
-        return self.call(*args, **kwargs)
 
 
 def _parse_one(model_cls, data: dict) -> Optional[str]:
@@ -42,6 +29,10 @@ def dry_run_parse(crew_dir: str | Path) -> dict:
         dict with {'ok', 'parsed': [files], 'errors': [{file, error}], 'summary'}.
     """
     import yaml
+    from .. import repo_schemas
+    if not repo_schemas.ensure_imported():
+        return {"ok": False, "parsed": [], "errors": [{"file": "", "error": "no Amsha repo registered — cannot verify against real schemas"}],
+                "summary": "no Amsha repo registered"}
     from amsha.crew_forge.domain.models.agent_data import AgentRequest
     from amsha.crew_forge.domain.models.task_data import TaskRequest
 
@@ -78,9 +69,20 @@ def _build_crew(crew_dir: str | Path, module_name: str, output_dir: str) -> dict
         return {"ok": False, "agents": 0, "tasks": 0,
                 "summary": f"crew directory not found: {root}", "traceback": ""}
     try:
+        from crewai.llms.base_llm import BaseLLM
         from amsha.crew_forge.domain.models.crew_data import CrewData
         from amsha.crew_forge.seeding.parser.crew_parser import CrewParser
         from amsha.crew_forge.service.atomic_yaml_builder import AtomicYamlBuilderService
+
+        class _StubLLM(BaseLLM):
+            """Offline stand-in for a CrewAI LLM. Build never calls kickoff(), so
+            the no-op call/acall are never reached; they satisfy the ABC only."""
+
+            def call(self, *args, **kwargs):
+                raise RuntimeError("smoke_test stub LLM cannot generate; build is offline by design")
+
+            async def acall(self, *args, **kwargs):
+                return self.call(*args, **kwargs)
     except Exception:
         return {"ok": False, "agents": 0, "tasks": 0,
                 "summary": f"could not import builders: {traceback.format_exc().splitlines()[-1]}",
@@ -148,10 +150,12 @@ def smoke_test(crew_dir: str | Path, module_name: str = "module",
     import tempfile
 
     src = str(Path(__file__).resolve().parent.parent.parent)
-    code = (
-        "import sys; sys.path.insert(0, {src!r}); "
-        "from amsha_mcp.tools.smoke import _worker_main; sys.exit(_worker_main())"
-    ).format(src=src)
+    from .. import docs_loader as _dl
+    repo = _dl.repo_root()
+    repo_src = str(repo / "src" / "nikhil") if repo and (repo / "src" / "nikhil" / "amsha").is_dir() else None
+    path_parts = (f"sys.path.insert(0, {repo_src!r}); " if repo_src else "") + f"sys.path.insert(0, {src!r}); "
+    code = ("import sys; " + path_parts +
+            "from amsha_mcp.tools.smoke import _worker_main; sys.exit(_worker_main())")
     env = dict(os.environ)
     env.setdefault("PYTHONIOENCODING", "utf-8")
     try:

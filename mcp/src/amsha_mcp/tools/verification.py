@@ -1608,6 +1608,12 @@ def verify_crew_yaml(crew_dir: str | Path) -> VerificationResult:
     Returns:
         VerificationResult aggregating findings across the crew.
     """
+    from .. import repo_schemas
+    if not repo_schemas.ensure_imported():
+        return VerificationResult(
+            findings=[_finding("error", "crew.no_amsha_repo", "verification",
+                               f"No importable Amsha at the registered repo — cannot verify against the real schemas.")],
+            component_type="Crew")
     from amsha.crew_forge.domain.models.agent_data import AgentRequest
     from amsha.crew_forge.domain.models.task_data import TaskRequest
 
@@ -1685,7 +1691,7 @@ def _write_yaml_doc(artifact: dict, stage: str) -> str:
     body = yaml.safe_dump(artifact, sort_keys=False, allow_unicode=True,
                           default_flow_style=False).strip()
     return (f"# Prerequisite {stage} - {title}\n\n"
-            f"Authoring-guidance: see mcp/docs/prerequisite/{_STAGE_DOC_FILE[stage]}\n\n"
+            f"Authoring-guidance: see amsha_mcp/docs/prerequisite/{_STAGE_DOC_FILE[stage]}\n\n"
             f"```yaml\n{body}\n```\n")
 
 

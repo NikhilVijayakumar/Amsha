@@ -9,6 +9,8 @@ description = "MCP server exposing Amsha's features, modules, and crew-design me
 requires-python = ">=3.12,<3.14"
 dependencies = [
     "mcp>=1.0.0,<2",
+    "PyYAML>=6.0,<7",
+    "pydantic>=2,<3",
 ]
 
 [project.scripts]
@@ -16,3 +18,6 @@ amsha-mcp = "amsha_mcp.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+amsha_mcp = ["docs/**/*.md"]

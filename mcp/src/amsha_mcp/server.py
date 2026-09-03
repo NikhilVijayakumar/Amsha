@@ -1,18 +1,24 @@
 """Amsha MCP stdio server — tool registration and entrypoint."""
 from __future__ import annotations
 
+from pathlib import Path
+
 import mcp.server.stdio
 from mcp.server.fastmcp import FastMCP
 
+from . import docs_loader as dl
+from . import repo_schemas
 from .tools import architecture, evaluate, improve, install, methodology, modules, plan, search, smoke, verification
 
-# Import the heavy crew_forge domain models in the MAIN thread at startup.
-# Lazily importing CrewAI's models (transitively CrewAI) from inside a FastMCP
-# worker thread deadlocks this stdio server; importing once here, before the
-# event loop runs, completes the CrewAI import so verify/smoke tools never hit
-# the lazy-import-in-thread path.
-import amsha.crew_forge.domain.models.agent_data  # noqa: E402,F401  (deadlock guard)
-import amsha.crew_forge.domain.models.task_data  # noqa: E402,F401
+# Resolve the target repo (env var, else a source checkout, else none) and eager-
+# import the real crew schema modules in the MAIN thread at startup. Lazily
+# importing CrewAI's models (transitively CrewAI) from inside a FastMCP worker
+# thread deadlocks this stdio server; importing once here, before the event loop
+# runs, completes the CrewAI import so verify/smoke tools never hit the lazy-
+# import-in-thread path. repo_schemas.ensure_imported() is repo-parameterized so
+# a standalone install (no Amsha) still boots and reports "cannot verify".
+dl.resolve_default_repo()
+repo_schemas.ensure_imported()
 
 mcp = FastMCP(
     "amsha-mcp",
@@ -65,6 +71,16 @@ def get_implementation_guide(topic: str, summarize: bool = False) -> dict:
 def search_amsha_docs(query: str) -> dict:
     """Keyword search across mcp/docs/ + docs/ + top-level markdown, with file and line references. Should not be used for Boolean/search-engine operators. Should not be used to fetch whole pages."""
     return search.search_amsha_docs(query)
+
+
+@mcp.tool()
+def register_repo(path: str) -> dict:
+    """Point this server instance at an Amsha-shaped target repo (a path containing src/nikhil/amsha). Records the path only — it never imports Amsha. Doc/file-inspection tools use it immediately; schema-verification tools (verify_crew_yaml, dry_run_parse, smoke_test) load real schemas from the repo registered at SOFTWARE STARTUP (AMSHA_MCP_TARGET_REPO env var) and reflect a mid-session change only after a restart."""
+    p = Path(path).expanduser()
+    if not p.is_dir() or not (p / "src" / "nikhil" / "amsha").is_dir():
+        return {"error": f"No Amsha checkout at '{p}' (expected src/nikhil/amsha under it)."}
+    dl.configure_repo_root(p)
+    return {"registered": str(p), "note": "Recorded for doc/inspection tools now; schema tools re-read it on next restart (see verify_crew_yaml)."}
 
 
 @mcp.tool()
