@@ -1,0 +1,4 @@
+task:
+  name: "Produce chapter package"
+  description: "Research source material, write the chapter, evaluate quality, revise content, validate the output schema, calculate the score, and publish."
+  expected_output: "A research report and a revised chapter and a production schedule."

@@ -1,0 +1,4 @@
+task:
+  name: "Check continuity"
+  description: "Compare the current scene against the story bible and report discrepancies."
+  expected_output: "A list of continuity discrepancies with suggested fixes."

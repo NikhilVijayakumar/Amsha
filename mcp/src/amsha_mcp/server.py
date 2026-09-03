@@ -4,7 +4,7 @@ from __future__ import annotations
 import mcp.server.stdio
 from mcp.server.fastmcp import FastMCP
 
-from .tools import architecture, install, methodology, modules, search
+from .tools import architecture, install, methodology, modules, search, verification
 
 mcp = FastMCP(
     "amsha-mcp",
@@ -81,6 +81,37 @@ def current_stage(session_id: str) -> dict:
 def get_least_powerful_capability(session_id: str) -> dict:
     """After decomposition stages (00-06) pass for a session, present the least-powerful capability ladder as a decision, not a menu. Refuses until earlier stages are validated."""
     return architecture.get_least_powerful_capability(session_id)
+
+
+def _result_dict(res):
+    return {"passed": res.passed, "summary": res.summary,
+            "findings": [{"severity": f.severity, "rule_id": f.rule_id,
+                           "rule_source": f.rule_source, "message": f.message,
+                           "suggested_fix": f.suggested_fix} for f in res.findings]}
+
+
+@mcp.tool()
+def verify_component(component_type: str, definition: dict) -> dict:
+    """Verify a single component (agent/task/crew/flow/knowledge/skill/tool/mcp) against Amsha methodology rules. Returns a FindingsReport (severity/rule_id/rule_source/message/suggested_fix). Never rewrites — a judge, not a generator."""
+    return _result_dict(verification.verify_component(component_type, definition))
+
+
+@mcp.tool()
+def verify_crew_yaml(crew_dir: str) -> dict:
+    """Verify a full crew configuration directory (agents/*_agent.yaml, tasks/*_task.yaml) against the real crew_forge Pydantic schemas and methodology rules. Validates, never rewrites. Expects the standard Amsha crew_forge layout."""
+    return _result_dict(verification.verify_crew_yaml(crew_dir))
+
+
+@mcp.tool()
+def verify_prerequisite_artifacts(artifacts: dict) -> dict:
+    """Verify filled prerequisite design artifacts (stage keys '00'-'09') for completeness and cross-stage consistency (process<->contract<->flow agreement)."""
+    return _result_dict(verification.verify_prerequisite_artifacts(artifacts))
+
+
+@mcp.tool()
+def verify_alignment(agents: list[dict], tasks: list[dict]) -> dict:
+    """Verify agent-task alignment: unassigned tasks, unused agents, domain mismatch, capability gaps, overlap."""
+    return _result_dict(verification.verify_alignment(agents, tasks))
 
 
 def main() -> None:

@@ -205,3 +205,62 @@ def test_phase2_missing_fields_reported():
         assert "start_condition" in out["missing_fields"]
 
     asyncio.run(_with_server(handler))
+FIXTURES = MCP_ROOT / "tests" / "fixtures"
+
+
+def _verify_crew_engine(crew):
+    from amsha_mcp.tools.verification import verify_crew_yaml
+    return verify_crew_yaml(crew)
+
+
+def test_phase3_valid_crew_passes_inprocess():
+    res = _verify_crew_engine(FIXTURES / "valid_crew")
+    assert res.passed is True
+    assert not any(f.severity == "error" for f in res.findings)
+
+
+def test_phase3_bad_crew_reports_god_agent_and_god_task():
+    res = _verify_crew_engine(FIXTURES / "bad_crew")
+    ids = {f.rule_id for f in res.findings}
+    assert "agent.god_scope" in ids
+    assert "task.god_lifecycle" in ids
+    assert res.passed is False
+
+
+def test_phase3_no_mutation():
+    """A verify call must never modify the YAML it reports on."""
+    target = FIXTURES / "bad_crew" / "agents" / "god_agent.yaml"
+    before = target.read_text(encoding="utf-8")
+    _verify_crew_engine(FIXTURES / "bad_crew")
+    after = target.read_text(encoding="utf-8")
+    assert before == after
+
+
+def test_phase3_verify_component_over_stdio():
+    async def handler(session):
+        out = await _call_in(session, "verify_component", {
+            "component_type": "agent",
+            "definition": {"role": "Universal Master Genius AI",
+                           "goal": "do research write publish manage database sql audio legal",
+                           "backstory": "survived seven continents python sql api image deployment"},
+        })
+        assert out["passed"] is False
+        ids = {f["rule_id"] for f in out["findings"]}
+        assert "agent.god_scope" in ids
+
+    asyncio.run(_with_server(handler))
+
+
+def test_phase3_verify_prerequisite_artifacts_over_stdio():
+    async def handler(session):
+        out = await _call_in(session, "verify_prerequisite_artifacts", {
+            "artifacts": {
+                "00": {"problem": "p"},
+                "03": {"contracts": [{"id": "c1", "name": "C1", "purpose": "x"}]},
+                "02": {"processes": [{"id": "p1"}]},
+            },
+        })
+        assert any(f["rule_id"] == "prereq.00_incomplete" for f in out["findings"])
+        assert any(f["rule_id"] == "prereq.process_without_contract" for f in out["findings"])
+
+    asyncio.run(_with_server(handler))
