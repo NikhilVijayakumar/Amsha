@@ -4,7 +4,15 @@ from __future__ import annotations
 import mcp.server.stdio
 from mcp.server.fastmcp import FastMCP
 
-from .tools import architecture, install, methodology, modules, search, verification
+from .tools import architecture, evaluate, improve, install, methodology, modules, search, smoke, verification
+
+# Import the heavy crew_forge domain models in the MAIN thread at startup.
+# Lazily importing CrewAI's models (transitively CrewAI) from inside a FastMCP
+# worker thread deadlocks this stdio server; importing once here, before the
+# event loop runs, completes the CrewAI import so verify/smoke tools never hit
+# the lazy-import-in-thread path.
+import amsha.crew_forge.domain.models.agent_data  # noqa: E402,F401  (deadlock guard)
+import amsha.crew_forge.domain.models.task_data  # noqa: E402,F401
 
 mcp = FastMCP(
     "amsha-mcp",
@@ -112,6 +120,42 @@ def verify_prerequisite_artifacts(artifacts: dict) -> dict:
 def verify_alignment(agents: list[dict], tasks: list[dict]) -> dict:
     """Verify agent-task alignment: unassigned tasks, unused agents, domain mismatch, capability gaps, overlap."""
     return _result_dict(verification.verify_alignment(agents, tasks))
+
+
+@mcp.tool()
+def suggest_fixes(findings: list[dict], component_type: str = "") -> dict:
+    """Turn a Phase-3 FindingsReport into concrete, draft fix suggestions (one per finding). Drafts are proposed, never applied."""
+    return improve.suggest_fixes(findings, component_type)
+
+
+@mcp.tool()
+def apply_fixes(suggestions: list[dict], approved_indices: list[int], target_files: list[str]) -> dict:
+    """Apply ONLY the explicitly approved fix suggestions (by index). Produces a git-visible diff per applied fix. Unapproved indices are skipped, never applied."""
+    return improve.apply_fixes(suggestions, approved_indices, target_files)
+
+
+@mcp.tool()
+def dry_run_parse(crew_dir: str) -> dict:
+    """Fastest gate: parse every agent/task YAML against the real crew_forge Pydantic schemas with NO execution. Returns ok/parsed/errors."""
+    return smoke.dry_run_parse(crew_dir)
+
+
+@mcp.tool()
+def smoke_test(crew_dir: str, module_name: str = "module", output_dir: str = ".Amsha/smoke") -> dict:
+    """Bounded offline smoke test: parse AND assemble the crew graph through the real CrewParser + builder under a hard timeout (stub LLM, no network, no kickoff). Proves plumbing, not design."""
+    return smoke.smoke_test(crew_dir, module_name, output_dir)
+
+
+@mcp.tool()
+def score_crew(crew_dir: str, smoke_output: dict | None = None) -> dict:
+    """Score a crew against the methodology rubric (Phase 3 checks rolled into 0-100 component scores). Optionally blends in a smoke_test outcome."""
+    return evaluate.score_crew(crew_dir, smoke_output)
+
+
+@mcp.tool()
+def evaluate_design(prerequisite_artifacts: dict, crew_dir: str) -> dict:
+    """Score whether the assembled crew faithfully realizes the validated design: prerequisite completeness (design) + crew checks (realization)."""
+    return evaluate.evaluate_design(prerequisite_artifacts, crew_dir)
 
 
 def main() -> None:

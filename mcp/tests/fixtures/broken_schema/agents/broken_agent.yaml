@@ -1,0 +1,4 @@
+agent:
+  role: "Narrative Continuity Editor"
+  backstory: "An editor who checks narrative coherence across scenes and revisions."
+  allow_delegation: false

@@ -264,3 +264,124 @@ def test_phase3_verify_prerequisite_artifacts_over_stdio():
         assert any(f["rule_id"] == "prereq.process_without_contract" for f in out["findings"])
 
     asyncio.run(_with_server(handler))
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 — Improve / Test / Evaluate loop (proposal 04)
+# ---------------------------------------------------------------------------
+
+PHASE4_TOOLS = {"suggest_fixes", "apply_fixes", "dry_run_parse",
+                "smoke_test", "score_crew", "evaluate_design"}
+
+
+def test_phase4_tools_registered():
+    assert PHASE4_TOOLS <= _list_tools(), f"missing {PHASE4_TOOLS - _list_tools()}"
+
+
+def test_dry_run_parse_catches_broken_schema():
+    from amsha_mcp.tools.smoke import dry_run_parse
+    out = dry_run_parse(FIXTURES / "broken_schema")
+    assert out["ok"] is False
+    assert any("goal" in e["error"] for e in out["errors"])
+
+
+def test_smoke_test_reads_build_not_design():
+    """bad_crew is badly DESIGNED, not broken — it must parse AND build."""
+    from amsha_mcp.tools.smoke import dry_run_parse, smoke_test
+    assert dry_run_parse(FIXTURES / "bad_crew")["ok"] is True
+    assert smoke_test(FIXTURES / "bad_crew")["ok"] is True
+
+
+def test_smoke_test_surfaces_structural_break():
+    """broken_build parses but cannot assemble a crew (agent with no task)."""
+    from amsha_mcp.tools.smoke import dry_run_parse, smoke_test
+    assert dry_run_parse(FIXTURES / "broken_build")["ok"] is True
+    assert smoke_test(FIXTURES / "broken_build")["ok"] is False
+
+
+def test_smoke_test_offline_stub_never_generates():
+    """The stub LLM must never be reached — build is offline by construction."""
+    from amsha_mcp.tools.smoke import smoke_test
+    out = smoke_test(FIXTURES / "valid_crew")
+    assert out["ok"] is True
+    assert "stub" not in out.get("traceback", "")
+
+
+def test_suggest_fixes_god_agent_draft():
+    from amsha_mcp.tools.verification import verify_crew_yaml
+    from amsha_mcp.tools.improve import suggest_fixes
+    res = verify_crew_yaml(FIXTURES / "bad_crew")
+    findings = [{"severity": f.severity, "rule_id": f.rule_id,
+                 "rule_source": f.rule_source, "message": f.message,
+                 "suggested_fix": f.suggested_fix} for f in res.findings]
+    sug = suggest_fixes(findings, "crew")
+    god = [s for s in sug["suggestions"] if s["rule_id"] == "agent.god_scope"]
+    assert god, "god_scope finding should yield a suggestion"
+    assert god[0]["draft"].strip()
+    assert sug["count"] == len(findings)
+
+
+def test_apply_fixes_unapproved_is_noop(tmp_path):
+    """apply_fixes on a suggestion that is NOT approved must be a no-op."""
+    from amsha_mcp.tools.improve import suggest_fixes, apply_fixes
+    target = tmp_path / "agent.yaml"
+    original = "agent:\n  role: Universal Master Genius\n  goal: do everything anywhere\n"
+    target.write_text(original, encoding="utf-8")
+    sug = suggest_fixes([{"rule_id": "agent.god_scope", "rule_source": "x",
+                          "message": "m", "suggested_fix": "split it"}], "agent")
+    sulist = [dict(s, target=str(target)) for s in sug["suggestions"]]
+    out = apply_fixes(sulist, approved_indices=[], target_files=[])
+    assert out["applied"] == []
+    assert len(out["skipped"]) == 1
+    assert target.read_text(encoding="utf-8") == original
+
+
+def test_apply_fixes_approved_applies_and_diffs(tmp_path):
+    from amsha_mcp.tools.improve import suggest_fixes, apply_fixes
+    target = tmp_path / "agent.yaml"
+    original = "agent:\n  role: Universal Master Genius\n  goal: do everything\n"
+    target.write_text(original, encoding="utf-8")
+    sug = suggest_fixes([{"rule_id": "agent.god_scope", "rule_source": "x",
+                          "message": "m", "suggested_fix": "re-scope"}], "agent")
+    sulist = [dict(s, target=str(target)) for s in sug["suggestions"]]
+    out = apply_fixes(sulist, approved_indices=[0], target_files=[])
+    assert len(out["applied"]) == 1
+    assert out["applied"][0]["diff"]
+    assert target.read_text(encoding="utf-8") != original
+
+
+def test_score_crew_separates_runs_from_right():
+    """bad_crew builds (smoke ok) yet scores worse than valid_crew (design)."""
+    from amsha_mcp.tools.smoke import smoke_test
+    from amsha_mcp.tools.evaluate import score_crew
+    assert smoke_test(FIXTURES / "bad_crew")["ok"] is True
+    bad = score_crew(FIXTURES / "bad_crew")["overall"]
+    good = score_crew(FIXTURES / "valid_crew")["overall"]
+    assert bad["score"] < good["score"]
+    assert good["verdict"] == "pass"
+
+
+def test_evaluate_design_over_stdio():
+    async def handler(session):
+        artifacts = {
+            "00": {"problem": "p", "start_condition": "a", "desired_end_condition": "b",
+                   "primary_objective": "c", "constraints": [], "success_definition": "d"},
+            "02": {"processes": [{"id": "p1"}]},
+            "03": {"contracts": [{"id": "c1", "name": "C1", "purpose": "x"}]},
+        }
+        out = await _call_in(session, "evaluate_design",
+                             {"prerequisite_artifacts": artifacts,
+                              "crew_dir": str(FIXTURES / "valid_crew")})
+        assert "design" in out and "realization" in out
+        assert "score" in out["design"] and "score" in out["realization"]
+
+    asyncio.run(_with_server(handler))
+
+
+def test_phase4_smoke_over_stdio():
+    async def handler(session):
+        out = await _call_in(session, "smoke_test", {"crew_dir": str(FIXTURES / "bad_crew")})
+        assert out["ok"] is True
+        assert out["agents"] == 1 and out["tasks"] == 1
+
+    asyncio.run(_with_server(handler))
