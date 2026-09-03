@@ -363,6 +363,34 @@ def _check_delegation_no_crew(a):
     return []
 
 
+def _check_multimodal_unjustified(a):
+    if a.get("multimodal") is True:
+        text = f"{a.get('role', '')} {a.get('goal', '')} {a.get('backstory', '')}"
+        if not re.search(r"\b(image|audio|video|visual|photo|diagram|screenshot|voice|multimodal)\b", text, re.IGNORECASE):
+            return [_finding("warning", "agent.multimodal_unjustified", "implementation/01-agent-engineering.md §26",
+                             "multimodal is enabled but nothing in role/goal/backstory suggests image/audio/document input.",
+                             "Disable multimodal unless this agent's tasks genuinely consume non-text input.")]
+    return []
+
+
+def _check_execution_tuning_extreme(a):
+    max_iter = a.get("max_iter")
+    max_retry = a.get("max_retry_limit")
+    if (isinstance(max_iter, int) and max_iter > 100) or (isinstance(max_retry, int) and max_retry > 10):
+        return [_finding("warning", "agent.execution_tuning_extreme", "implementation/01-agent-engineering.md §26",
+                         f"max_iter={max_iter!r}/max_retry_limit={max_retry!r} far exceeds CrewAI's defaults (25/2) — runaway cost/latency risk.",
+                         "Justify the higher limit explicitly, or return to CrewAI's default.")]
+    return []
+
+
+def _check_prompt_template_override(a):
+    if any(a.get(f) for f in ("system_template", "prompt_template", "response_template")):
+        return [_finding("advisory", "agent.prompt_template_override", "implementation/01-agent-engineering.md §26",
+                         "Custom prompt template(s) set — CrewAI requires specific placeholders in an overridden template; a missing placeholder degrades or breaks the agent silently.",
+                         "Verify the override includes every placeholder CrewAI's default template provides before shipping.")]
+    return []
+
+
 def _check_god_task(t):
     text = f"{t.get('purpose', '')} {t.get('description', '')}"
     if _has_lifecycle_verbs(text, threshold=3) or _is_composite_task(t):
@@ -489,6 +517,43 @@ def _check_state_context_confusion(t):
                          "Inject only task-relevant context, never wholesale flow state.")]
     return []
 
+
+_STRICT_OUTPUT_SIGNALS = re.compile(
+    r"\b(valid json|json schema|matching the schema|structured output|"
+    r"must be json|strictly formatted|schema-compliant|exact format)\b",
+    re.IGNORECASE,
+)
+_VAGUE_GUARDRAILS = {"must be good", "must be correct", "be accurate", "good output", "output must be good"}
+
+
+def _check_guardrail_missing(t):
+    text = f"{t.get('expected_output', '')} {t.get('description', '')}"
+    if _STRICT_OUTPUT_SIGNALS.search(text) and not t.get("guardrail"):
+        return [_finding("warning", "task.guardrail_missing_for_strict_output", "implementation/02-task-engineering.md §32",
+                         f"Task '{t.get('name', '')}' demands a strict output format but sets no guardrail to enforce it.",
+                         "Add a guardrail describing the required format so CrewAI retries on violation instead of passing it through.")]
+    return []
+
+
+def _check_guardrail_vague(t):
+    guardrail = (t.get("guardrail") or "").strip()
+    if guardrail and (len(guardrail) < 15 or guardrail.lower() in _VAGUE_GUARDRAILS):
+        return [_finding("warning", "task.guardrail_too_vague", "implementation/02-task-engineering.md §32",
+                         f"Guardrail '{guardrail}' is too vague to reliably validate against.",
+                         "State the concrete, checkable condition the output must satisfy.")]
+    return []
+
+
+def _check_markdown_output_contradiction(t):
+    if t.get("markdown") is True:
+        text = t.get("expected_output", "")
+        if re.search(r"\b(valid json|json schema|json object|json array)\b", text, re.IGNORECASE):
+            return [_finding("error", "task.markdown_output_contradiction", "implementation/02-task-engineering.md §25, §26",
+                             f"Task '{t.get('name', '')}' sets markdown=true but expected_output demands JSON — contradictory output contract.",
+                             "Pick one: markdown rendering or structured JSON, not both.")]
+    return []
+
+
 def _crew_agents(c):
     agents = c.get("agents") or []
     if isinstance(agents, dict):
@@ -613,6 +678,83 @@ def _check_hierarchical_no_manager(c):
         return [_finding("warning", "crew.process_hierarchical_no_manager", "06 §16.4",
                          "process is hierarchical/delegated but no manager agent is defined.",
                          "Define a manager/lead agent, or switch to a bounded collaboration model.")]
+    return []
+
+
+_TRACING_PRIVACY_ACK = re.compile(
+    r"\b(privacy|privacy-preserving|sensitive|consent|opt-in|opt in|data exit|"
+    r"cloud (cost|transfer|exposure)|exposure|acknowledg|llm endpoint|private prompt|saniti[sz])\b",
+    re.IGNORECASE,
+)
+_MEMORY_RETENTION_NEED = re.compile(
+    r"\b(across (runs|executions|iterations)|previous (run|execution|revision)|remember|retain|historical|"
+    r"lessons? (from|learned)|reject(ed)? feedback|iterate (over|across) runs|prior (result|finding|decision)|"
+    r"user correction|long-running|multi-run|memory of)\b",
+    re.IGNORECASE,
+)
+
+
+def _crew_def_fields(cf) -> dict:
+    """Return the lifecycle-relevant, schema-relevant subset of a crew definition."""
+    known = {
+        "name", "description", "goal", "usecase", "module_name",
+        "process", "collaboration", "manager_agent", "memory", "tracing",
+        "checkpoint", "knowledge_sources", "steps", "agents", "tasks",
+    }
+    return {k: v for k, v in (cf or {}).items() if k in known}
+
+
+def _crew_def_prose(cf) -> str:
+    def _text(v):
+        if isinstance(v, str):
+            return v
+        if isinstance(v, (list, tuple)):
+            return " ".join(str(x) for x in v)
+        if isinstance(v, dict):
+            return " ".join(str(x) for x in v.values())
+        return ""
+
+    return " ".join(_text(cf[k]) for k in ("description", "goal", "usecase") if cf.get(k))
+
+
+def _check_tracing_no_warning(cf):
+    if cf.get("tracing") is not True:
+        return []
+    if not _TRACING_PRIVACY_ACK.search(_crew_def_prose(cf)):
+        return [_finding("warning", "crew.tracing_enabled_no_warning",
+                         "implementation/19-observability-and-tracing.md §177",
+                         "Crew enables tracing (sends full prompt/response content to the LLM provider) but nothing in the crew definition acknowledges the privacy/cloud cost.",
+                         "Acknowledge the exposure (e.g. note privacy/consent and that prompts exit to the model provider), or leave tracing off for sensitive executions.")]
+    return []
+
+
+def _check_memory_unjustified(cf):
+    if not cf.get("memory"):
+        return []
+    if not _MEMORY_RETENTION_NEED.search(_crew_def_prose(cf)):
+        return [_finding("warning", "crew.memory_unjustified",
+                         "implementation/11-context-knowledge-memory.md (Memory Practice)",
+                         "Crew enables memory (retains historical information) but no cross-execution retention need is evident in the crew definition.",
+                         "Justify why history must be retained across runs, or set memory=false for a single-shot crew that never re-consumes history.")]
+    return []
+
+
+def _check_checkpoint_no_events(cf):
+    cp = cf.get("checkpoint")
+    if not cp:
+        return []
+    if isinstance(cp, dict):
+        enabled = cp.get("enabled", True)
+        if not enabled:
+            return []
+        on_events = cp.get("on_events")
+    else:
+        on_events = None
+    if not on_events:
+        return [_finding("warning", "crew.checkpoint_no_events",
+                         "implementation/17-checkpointing-and-recovery.md §4",
+                         "Crew enables checkpointing but declares no on_events (recovery triggers), so no checkpoint is ever captured and recovery cannot resume.",
+                         "Declare on_events at real recovery boundaries (e.g. [\"task_completed\"]), or disable checkpointing if no durable resume point is needed.")]
     return []
 
 
@@ -817,6 +959,60 @@ def _check_mcp_secrets(m):
                          "Inject credentials from a secure source at runtime.")]
     return []
 
+_LOCAL_HOST_MARKERS = ("localhost", "127.0.0.1", "0.0.0.0", "::1")
+
+
+def _lmstudio_lifecycle_enabled(m: dict):
+    lifecycle = m.get("lmstudio_lifecycle")
+    if isinstance(lifecycle, dict) and lifecycle.get("enabled"):
+        return lifecycle
+    return None
+
+
+def _check_lmstudio_missing_base_url(m):
+    lifecycle = _lmstudio_lifecycle_enabled(m)
+    if lifecycle and not m.get("base_url"):
+        return [_finding("error", "llm.lmstudio_lifecycle_missing_base_url",
+                         "docs/proposal/14-llm-lifecycle-management.md",
+                         "lmstudio_lifecycle.enabled is true but base_url is not set.",
+                         "Set base_url to the LM Studio server (e.g. http://localhost:1234/v1) — LLMBuilder.build() raises ValueError at runtime without it.")]
+    return []
+
+
+def _check_lmstudio_non_local_base_url(m):
+    lifecycle = _lmstudio_lifecycle_enabled(m)
+    base_url = m.get("base_url") or ""
+    if lifecycle and base_url and not any(marker in base_url for marker in _LOCAL_HOST_MARKERS):
+        return [_finding("warning", "llm.lmstudio_lifecycle_non_local_base_url",
+                         "docs/proposal/14-llm-lifecycle-management.md",
+                         f"lmstudio_lifecycle is enabled against a base_url ('{base_url}') that doesn't look local.",
+                         "This feature is scoped to a local LM Studio server only — confirm this isn't a shared/remote instance other processes also depend on.")]
+    return []
+
+
+def _check_lmstudio_model_id_mismatch(m):
+    lifecycle = _lmstudio_lifecycle_enabled(m)
+    model = m.get("model") or ""
+    if lifecycle:
+        model_id = lifecycle.get("model_id") or ""
+        if model_id and model.startswith("lm_studio/") and model_id == model:
+            return [_finding("warning", "llm.lmstudio_lifecycle_model_id_mismatch",
+                             "docs/proposal/14-llm-lifecycle-management.md",
+                             "lmstudio_lifecycle.model_id is identical to the litellm-prefixed 'model' field, including the 'lm_studio/' prefix.",
+                             "model_id must be LM Studio's own model key (from GET /api/v1/models 'key' field), not the litellm-prefixed model string — strip the 'lm_studio/' prefix.")]
+    return []
+
+
+def _check_lmstudio_context_length_unset(m):
+    lifecycle = _lmstudio_lifecycle_enabled(m)
+    if lifecycle and lifecycle.get("context_length") is None:
+        return [_finding("advisory", "llm.lmstudio_lifecycle_context_length_unset",
+                         "docs/proposal/14-llm-lifecycle-management.md",
+                         "lmstudio_lifecycle.context_length is unset — an already-loaded model is reused as-is, whatever context it happens to be loaded with.",
+                         "Set context_length explicitly if the crew depends on a specific context window; leave unset only when any resident context length is acceptable.")]
+    return []
+
+
 ComponentCheck = Callable[[dict], list[Finding]]
 
 _COMPONENT_CHECKS: dict[str, list[tuple[str, str, str, str, ComponentCheck]]] = {
@@ -839,6 +1035,9 @@ _COMPONENT_CHECKS: dict[str, list[tuple[str, str, str, str, ComponentCheck]]] = 
         ("agent.backstory_contains_knowledge", "error", "implementation/01-agent-engineering.md §15; 11 §175", "Knowledge in backstory", _check_knowledge_in_backstory),
         ("agent.knowledge_duplicated_in_backstory", "warning", "11 §65; 01 §38", "Redundant knowledge/backstory", _check_knowledge_backstory_dup),
         ("agent.delegation_enabled_no_crew", "warning", "06 §16.4; 23 §5.5", "Delegation without crew context", _check_delegation_no_crew),
+        ("agent.multimodal_unjustified", "warning", "implementation/01-agent-engineering.md §26", "Unjustified multimodal", _check_multimodal_unjustified),
+        ("agent.execution_tuning_extreme", "warning", "implementation/01-agent-engineering.md §26", "Extreme execution tuning", _check_execution_tuning_extreme),
+        ("agent.prompt_template_override", "advisory", "implementation/01-agent-engineering.md §26", "Prompt template override", _check_prompt_template_override),
     ],
     "task": [
         ("task.god_lifecycle", "error", "implementation/02-task-engineering.md §7, §57; 03 §10", "God Task lifecycle", _check_god_task),
@@ -855,6 +1054,9 @@ _COMPONENT_CHECKS: dict[str, list[tuple[str, str, str, str, ComponentCheck]]] = 
         ("task.context_over_propagation", "warning", "implementation/02-task-engineering.md §21, §22; 11 §53", "Context dump", _check_context_propagation),
         ("task.hidden_flow_decision", "error", "implementation/02-task-engineering.md §48; 09", "Hidden workflow in task", _check_hidden_flow_in_task),
         ("task.state_versus_context_confusion", "warning", "11 §27; 09 §36; 23 §7.2", "State vs context confusion", _check_state_context_confusion),
+        ("task.guardrail_missing_for_strict_output", "warning", "implementation/02-task-engineering.md §32", "Guardrail missing for strict output", _check_guardrail_missing),
+        ("task.guardrail_too_vague", "warning", "implementation/02-task-engineering.md §32", "Guardrail too vague", _check_guardrail_vague),
+        ("task.markdown_output_contradiction", "error", "implementation/02-task-engineering.md §25, §26", "Markdown/JSON contradiction", _check_markdown_output_contradiction),
     ],
     "crew": [
         ("crew.single_agent_crew", "warning", "23 §5.1; 06 §49", "Single agent crew", _check_single_agent_crew),
@@ -899,6 +1101,12 @@ _COMPONENT_CHECKS: dict[str, list[tuple[str, str, str, str, ComponentCheck]]] = 
         ("mcp.everywhere", "warning", "14 §135; 23 §9.2", "MCP everywhere", _check_mcp_everywhere),
         ("mcp.credentials_in_context", "error", "14 §57; 13 §90", "Secrets in MCP", _check_mcp_secrets),
     ],
+    "llm_model": [
+        ("llm.lmstudio_lifecycle_missing_base_url", "error", "docs/proposal/14-llm-lifecycle-management.md", "Missing base_url", _check_lmstudio_missing_base_url),
+        ("llm.lmstudio_lifecycle_non_local_base_url", "warning", "docs/proposal/14-llm-lifecycle-management.md", "Non-local base_url", _check_lmstudio_non_local_base_url),
+        ("llm.lmstudio_lifecycle_model_id_mismatch", "warning", "docs/proposal/14-llm-lifecycle-management.md", "model_id/model confusion", _check_lmstudio_model_id_mismatch),
+        ("llm.lmstudio_lifecycle_context_length_unset", "advisory", "docs/proposal/14-llm-lifecycle-management.md", "Context length unset", _check_lmstudio_context_length_unset),
+    ],
 }
 
 _VALID_COMPONENTS = set(_COMPONENT_CHECKS.keys())
@@ -906,6 +1114,7 @@ _VALID_COMPONENTS = set(_COMPONENT_CHECKS.keys())
 _COMPONENT_LABELS = {
     "agent": "Agent", "task": "Task", "crew": "Crew", "flow": "Flow",
     "knowledge": "Knowledge", "skill": "Skill", "tool": "Tool", "mcp": "MCP",
+    "llm_model": "LLM Model",
 }
 
 
@@ -935,6 +1144,107 @@ def verify_component(component_type: str, definition: dict) -> VerificationResul
         except Exception:
             continue
     return VerificationResult(findings=findings, component_type=_COMPONENT_LABELS[component_type])
+
+
+_CREW_DEF_CHECKS: list[tuple[str, str, str, str, ComponentCheck]] = [
+    ("crew.tracing_enabled_no_warning", "warning", "implementation/19-observability-and-tracing.md §177",
+     "Tracing privacy unacknowledged", _check_tracing_no_warning),
+    ("crew.memory_unjustified", "warning", "implementation/11-context-knowledge-memory.md (Memory Practice)",
+     "Memory unjustified", _check_memory_unjustified),
+    ("crew.checkpoint_no_events", "warning", "implementation/17-checkpointing-and-recovery.md §4",
+     "Checkpoint with no events", _check_checkpoint_no_events),
+]
+
+
+def _check_lifecycle_conformance(fields: dict, findings: list[Finding]) -> list[Finding]:
+    """Shape-check the crew lifecycle fields against CrewData's rules.
+
+    Validated inline against the real `crew_data.py` field rules (verified directly):
+    memory: bool; tracing: Optional[bool]; checkpoint: Optional[bool | dict] with
+    keys enabled/on_events/provider/location/max_checkpoints.
+    """
+    source = "crew_forge/domain/models/crew_data.py (CrewData)"
+    for key in ("memory", "tracing"):
+        if key in fields and not isinstance(fields[key], bool):
+            findings.append(_finding("error", "crew.lifecycle_field_type", source,
+                                     f"Crew lifecycle field '{key}' must be a boolean, got {type(fields[key]).__name__}.",
+                                     f"Set '{key}' to true/false."))
+    cp = fields.get("checkpoint")
+    if cp is not None and not isinstance(cp, (bool, dict)):
+        findings.append(_finding("error", "crew.checkpoint_shape", source,
+                                 f"'checkpoint' must be a bool or a dict with enabled/on_events/provider/location/max_checkpoints, got {type(cp).__name__}.",
+                                 "Use `checkpoint: true`/`false`, or `checkpoint: {enabled: true, on_events: [...]}`."))
+    elif isinstance(cp, dict):
+        allowed = {"enabled", "on_events", "provider", "location", "max_checkpoints"}
+        unknown = set(cp) - allowed
+        if unknown:
+            findings.append(_finding("error", "crew.checkpoint_unknown_keys", source,
+                                     f"'checkpoint' dict has unknown keys: {sorted(unknown)}.",
+                                     f"Allowed keys: {sorted(allowed)}."))
+    return findings
+
+
+def verify_crew_def(crew_def: dict) -> VerificationResult:
+    """Verify a single crew definition's lifecycle settings (memory/tracing/checkpoint).
+
+    The crew lifecycle fields live on the `crews[<name>]` block of a `job_config.yaml`
+    (see `atomic_crew_file_manager.py`), not the `agents/ tasks/` directory that
+    `verify_crew_yaml` reads — this is the faithful surface for them.
+
+    Args:
+        crew_def: the crew block (name, memory, tracing, checkpoint, description/goal, steps).
+
+    Returns:
+        VerificationResult with lifecycle conformance + design findings.
+    """
+    cf = _crew_def_fields(crew_def)
+    findings: list[Finding] = []
+    _check_lifecycle_conformance(cf, findings)
+    for rule_id, severity, source, _label, check in _CREW_DEF_CHECKS:
+        try:
+            findings.extend(check(cf))
+        except Exception:
+            continue
+    if not findings:
+        findings.append(_finding(
+            "advisory", "crew.lifecycle_all_valid", "verification",
+            "Crew lifecycle settings conform to Amsha methodology (no errors or warnings raised).", ""))
+    return VerificationResult(findings=findings, component_type="Crew")
+
+
+def verify_job_config(job_config_path: str | Path) -> VerificationResult:
+    """Verify every crew block in a `job_config.yaml` (memory/tracing/checkpoint).
+
+    Args:
+        job_config_path: path to a job_config.yaml with a `crews:` map.
+
+    Returns:
+        VerificationResult aggregating per-crew lifecycle findings.
+    """
+    root = Path(job_config_path)
+    if not root.exists():
+        return VerificationResult(
+            findings=[_finding("error", "crew.job_config_missing", "verification",
+                               f"Job config '{root}' does not exist.")],
+            component_type="Crew")
+    raw = yaml.safe_load(root.read_text(encoding="utf-8")) or {}
+    crews = raw.get("crews")
+    if not isinstance(crews, dict):
+        return VerificationResult(
+            findings=[_finding("error", "crew.job_config_no_crews", "verification",
+                               f"Job config '{root}' has no 'crews:' mapping to verify.")],
+            component_type="Crew")
+    findings: list[Finding] = []
+    for name, block in crews.items():
+        if not isinstance(block, dict):
+            block = {}
+        named = {**(block or {}), "name": name}
+        findings.extend(verify_crew_def(named).findings)
+    if not findings:
+        findings.append(_finding(
+            "advisory", "crew.lifecycle_all_valid", "verification",
+            "All crew lifecycle settings conform to Amsha methodology.", ""))
+    return VerificationResult(findings=findings, component_type="Crew")
 
 _PREREQ_REQUIRED_FIELDS = {
     "00": {"problem", "start_condition", "desired_end_condition", "primary_objective", "constraints", "success_definition"},
@@ -1034,6 +1344,149 @@ def verify_prerequisite_artifacts(artifacts: dict[str, dict]) -> VerificationRes
         findings.append(_finding(
             "info" if False else "advisory", "prereq.complete", "prerequisite",
             "All provided prerequisite artifacts are well-formed and internally consistent.", ""))
+    return VerificationResult(findings=findings, component_type="Prerequisite artifacts")
+
+
+_YAML_FENCE = re.compile(r"```ya?ml\s*\n(.*?)\n```", re.DOTALL | re.IGNORECASE)
+
+# Map a YAML block's top-level key to the prerequisite stage whose required
+# fields it most plausibly fills. Keyed by any representative top-level key a
+# user is likely to write in their markdown, grounding in the docs' own YAML.
+_STAGE_KEY_HINTS: dict[str, str] = {
+    "problem": "00", "problem_definition": "00",
+    "goal": "01", "boundary": "01", "goal_boundary": "01",
+    "process": "02", "processes": "02", "process_decomposition": "02",
+    "contract": "03", "contracts": "03",
+    "validation": "04",
+    "flow": "05", "flow_order": "05", "transitions": "05", "state": "05",
+    "failure": "06", "failures": "06", "recovery": "06",
+    "capability": "07", "capabilities": "07",
+    "architecture": "08", "architecture_yaml": "08", "validation_outcome": "08",
+    "handoff": "09", "checklist": "09",
+}
+
+
+def _attribute_stage(block: dict) -> str | None:
+    """Attribute a parsed YAML block to a prerequisite stage (00-09), or None.
+
+    Uses the block's top-level key against `_STAGE_KEY_HINTS` first, then falls
+    back to the stage whose required-field set the block overlaps most with.
+    """
+    keys = set(block)
+    for k in keys:
+        if k in _STAGE_KEY_HINTS:
+            return _STAGE_KEY_HINTS[k]
+    best, best_score = None, 0
+    for stage, required in _PREREQ_REQUIRED_FIELDS.items():
+        score = len(keys & required)
+        if score > best_score:
+            best, best_score = stage, score
+    return best if best_score >= 1 else None
+
+
+def _extract_yaml_blocks(text: str) -> list[dict]:
+    """Return all YAML mappings embedded in a markdown doc's fenced blocks."""
+    blocks: list[dict] = []
+    for m in _YAML_FENCE.finditer(text or ""):
+        try:
+            parsed = yaml.safe_load(m.group(1))
+        except (yaml.YAMLError, Exception):
+            continue
+        if isinstance(parsed, dict):
+            blocks.append(parsed)
+    return blocks
+
+
+def _attribute_block(block: dict) -> tuple[str | None, dict]:
+    """Attribute a block to a stage and return the effective artifact mapping.
+
+    If a block is a single mapping wrapper (e.g. `problem_definition: {...}` or
+    `goal: {...}`), the wrapped inner dict is the effective artifact for that
+    stage and the wrapper key drives attribution. A list-valued key such as
+    `contracts: [...]` stays a top-level list (stage 03 expects that shape).
+    Returns (stage, artifact).
+    """
+    keys = set(block)
+    if len(keys) == 1:
+        key = next(iter(keys))
+        val = block[key]
+        if isinstance(val, dict) and key in _STAGE_KEY_HINTS:
+            return _STAGE_KEY_HINTS[key], val
+    stage = _attribute_stage(block)
+    return stage, block
+
+
+def verify_prerequisite_files(doc_dir: str | Path, pattern: str = "*.md") -> VerificationResult:
+    """Verify a user's prerequisite documentation written as markdown/YAML.
+
+    Scans `doc_dir` for markdown files, extracts the YAML code blocks each file
+    embeds (the form the prerequisite methodology docs prescribe), attributes
+    every block to a prerequisite stage (00-09), then runs the same
+    `verify_prerequisite_artifacts` engine that the JSON path uses.
+
+    Unlike the JSON path, this reports *what is absent*: a stage with no file
+    or no attributable YAML block is surfaced as incomplete, so a user who has
+    not (yet) written a stage sees exactly which stage to create, instead of a
+    silent pass.
+
+    Args:
+        doc_dir: folder containing the user's prerequisite markdown documents.
+        pattern: glob for markdown files (default `*.md`).
+
+    Returns:
+        VerificationResult with per-stage presence/absence + structural findings.
+    """
+    root = Path(doc_dir)
+    if not root.is_dir():
+        return VerificationResult(
+            findings=[_finding("error", "prereq.doc_dir_missing", "prerequisite",
+                               f"Documentation folder '{root}' does not exist.",
+                               "Create the folder (and your prerequisite markdown files) or pass an existing path.")],
+            component_type="Prerequisite artifacts")
+
+    files = sorted(root.glob(pattern))
+    if not files:
+        return VerificationResult(
+            findings=[_finding("error", "prereq.no_doc_files", "prerequisite",
+                               f"Folder '{root}' contains no {pattern} files to verify.",
+                               "Create prerequisite documents following the methodology (see get_prerequisite_stage for the required fields per stage).")],
+            component_type="Prerequisite artifacts")
+
+    artifacts: dict[str, dict] = {}
+    unattributed: list[str] = []
+    for fp in files:
+        text = (fp.read_text(encoding="utf-8", errors="replace") or "")
+        blocks = _extract_yaml_blocks(text)
+        if not blocks:
+            unattributed.append(fp.name)
+            continue
+        for block in blocks:
+            stage, effective = _attribute_block(block)
+            if stage is None:
+                unattributed.append(fp.name)
+                continue
+            # Merge multiple blocks for the same stage; last write wins per key.
+            artifacts.setdefault(stage, {}).update(effective)
+
+    findings = verify_prerequisite_artifacts(artifacts).findings
+    covered = set(artifacts)
+    for stage in sorted(_PREREQ_REQUIRED_FIELDS):
+        if stage not in covered:
+            label = _PREREQ_LABELS.get(stage, f"stage {stage}")
+            findings.append(_finding(
+                "warning", f"prereq.{stage}_missing_doc", f"prerequisite/{label}",
+                f"No attributable document found for prerequisite stage {stage} ({label}).",
+                "Create the document with the required fields — see get_prerequisite_stage for the checklist."))
+    if unattributed:
+        findings.insert(0, _finding(
+            "warning", "prereq.unattributed_docs", "prerequisite",
+            f"These files/blocks had no recognizable prerequisite stage and were ignored: {sorted(set(unattributed))}.",
+            "Use a top-level YAML key the methodology recognizes (e.g. problem_definition, goal, contracts,"
+            " failures, capabilities) so each block can be attributed to a stage."))
+    if not findings:
+        findings.append(_finding(
+            "advisory", "prereq.files_complete", "prerequisite",
+            "All prerequisite stages have attributable, well-formed, consistent documents.", ""))
     return VerificationResult(findings=findings, component_type="Prerequisite artifacts")
 
 

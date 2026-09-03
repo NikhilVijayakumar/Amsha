@@ -111,9 +111,27 @@ def verify_crew_yaml(crew_dir: str) -> dict:
 
 
 @mcp.tool()
+def verify_crew_def(crew_def: dict) -> dict:
+    """Verify a single crew definition's lifecycle settings (memory/tracing/checkpoint) from a job_config.yaml crew block. Validates the field shapes against CrewData's rules and flags tracing-without-privacy-ack, memory-without-retention-need, and checkpoint-without-on_events. Validates, never rewrites."""
+    return _result_dict(verification.verify_crew_def(crew_def))
+
+
+@mcp.tool()
+def verify_job_config(job_config_path: str) -> dict:
+    """Verify every crew block (memory/tracing/checkpoint) in a job_config.yaml. Validates, never rewrites."""
+    return _result_dict(verification.verify_job_config(job_config_path))
+
+
+@mcp.tool()
 def verify_prerequisite_artifacts(artifacts: dict) -> dict:
     """Verify filled prerequisite design artifacts (stage keys '00'-'09') for completeness and cross-stage consistency (process<->contract<->flow agreement)."""
     return _result_dict(verification.verify_prerequisite_artifacts(artifacts))
+
+
+@mcp.tool()
+def verify_prerequisite_files(doc_dir: str, pattern: str = "*.md") -> dict:
+    """Verify a user's prerequisite documentation as markdown files: scans doc_dir, extracts the YAML blocks each .md embeds, attributes them to stages 00-09, and reports which stages are present, missing, or unattributable. Lets a user document in markdown (not JSON) and still get the same prerequisite verification. Validates, never rewrites."""
+    return _result_dict(verification.verify_prerequisite_files(doc_dir, pattern))
 
 
 @mcp.tool()

@@ -251,6 +251,63 @@ def test_phase3_verify_component_over_stdio():
     asyncio.run(_with_server(handler))
 
 
+def test_lmstudio_lifecycle_verify_component_over_stdio():
+    async def handler(session):
+        # missing base_url -> error
+        out = await _call_in(session, "verify_component", {
+            "component_type": "llm_model",
+            "definition": {
+                "model": "lm_studio/openai/gpt-oss-20b",
+                "lmstudio_lifecycle": {"enabled": True, "model_id": "openai/gpt-oss-20b"},
+            },
+        })
+        assert out["passed"] is False
+        ids = {f["rule_id"] for f in out["findings"]}
+        assert "llm.lmstudio_lifecycle_missing_base_url" in ids
+        assert "llm.lmstudio_lifecycle_context_length_unset" in ids
+
+        # non-local base_url + model_id/model confusion -> both flagged
+        out = await _call_in(session, "verify_component", {
+            "component_type": "llm_model",
+            "definition": {
+                "base_url": "https://shared-gpu-box.internal/v1",
+                "model": "lm_studio/openai/gpt-oss-20b",
+                "lmstudio_lifecycle": {
+                    "enabled": True,
+                    "model_id": "lm_studio/openai/gpt-oss-20b",
+                    "context_length": 16384,
+                },
+            },
+        })
+        ids = {f["rule_id"] for f in out["findings"]}
+        assert "llm.lmstudio_lifecycle_non_local_base_url" in ids
+        assert "llm.lmstudio_lifecycle_model_id_mismatch" in ids
+
+        # correct, local, fully specified -> clean
+        out = await _call_in(session, "verify_component", {
+            "component_type": "llm_model",
+            "definition": {
+                "base_url": "http://localhost:1234/v1",
+                "model": "lm_studio/openai/gpt-oss-20b",
+                "lmstudio_lifecycle": {
+                    "enabled": True,
+                    "model_id": "openai/gpt-oss-20b",
+                    "context_length": 16384,
+                },
+            },
+        })
+        assert out["passed"] is True
+
+        # disabled -> zero findings from lifecycle checks even if base_url/model_id look odd
+        out = await _call_in(session, "verify_component", {
+            "component_type": "llm_model",
+            "definition": {"model": "gpt-4", "lmstudio_lifecycle": {"enabled": False, "model_id": "x"}},
+        })
+        assert out["passed"] is True
+
+    asyncio.run(_with_server(handler))
+
+
 def test_phase3_verify_prerequisite_artifacts_over_stdio():
     async def handler(session):
         out = await _call_in(session, "verify_prerequisite_artifacts", {
@@ -525,5 +582,144 @@ def test_phase5_verify_user_plan_over_stdio():
                               {"step": "summarize a directory of PDFs"})
         assert out2["recommendations"][0]["kind"] == "task"
         assert "Docling" in out2["recommendations"][0]["mechanism"]
+
+    asyncio.run(_with_server(handler))
+
+
+def _verify_crew_def_engine(crew_def):
+    from amsha_mcp.tools.verification import verify_crew_def
+    return verify_crew_def(crew_def)
+
+
+def test_phase3b_crew_def_fires_lifecycle_warnings():
+    res = _verify_crew_def_engine({
+        "name": "c", "memory": True, "tracing": True,
+        "checkpoint": {"enabled": True}, "description": "make copy",
+    })
+    ids = {f.rule_id for f in res.findings}
+    assert "crew.tracing_enabled_no_warning" in ids
+    assert "crew.memory_unjustified" in ids
+    assert "crew.checkpoint_no_events" in ids
+    assert res.passed is True  # all warnings; nothing structurally broken
+
+
+def test_phase3b_crew_def_valid_passes():
+    res = _verify_crew_def_engine({
+        "name": "c", "memory": True, "tracing": True,
+        "checkpoint": {"enabled": True, "on_events": ["task_completed"]},
+        "description": "retain user reject feedback across runs, mindful of privacy/cloud exposure",
+    })
+    ids = {f.rule_id for f in res.findings}
+    assert "crew.lifecycle_all_valid" in ids
+    assert not any(f.severity == "warning" for f in res.findings)
+
+
+def test_phase3b_crew_def_shape_errors():
+    res = _verify_crew_def_engine({"name": "c", "memory": "yes", "checkpoint": {"bogus": 1}})
+    err_ids = {f.rule_id for f in res.findings if f.severity == "error"}
+    assert "crew.lifecycle_field_type" in err_ids
+    assert "crew.checkpoint_unknown_keys" in err_ids
+    assert res.passed is False
+
+
+def test_phase3b_verify_job_config_real_example():
+    from amsha_mcp.tools.verification import verify_job_config
+    job = (MCP_ROOT.parent / "example" / "crew_forge" / "example_config" / "job_config.yaml").resolve()
+    res = verify_job_config(job)
+    ids = {f.rule_id for f in res.findings}
+    assert "crew.memory_unjustified" in ids  # memory=true, no retention need in def
+    assert "crew.checkpoint_no_events" not in ids  # example declares on_events
+
+
+def test_phase3b_verify_job_config_over_stdio():
+    async def handler(session):
+        out = await _call_in(session, "verify_crew_def", {
+            "crew_def": {"name": "c", "memory": True, "tracing": True,
+                         "checkpoint": {"enabled": True}, "description": "make copy"},
+        })
+        ids = {f["rule_id"] for f in out["findings"]}
+        assert "crew.tracing_enabled_no_warning" in ids
+        assert "crew.checkpoint_no_events" in ids
+
+    asyncio.run(_with_server(handler))
+
+
+def _verify_prereq_files_engine(doc_dir):
+    from amsha_mcp.tools.verification import verify_prerequisite_files
+    return verify_prerequisite_files(doc_dir)
+
+
+_GOOD_00 = """```yaml
+problem_definition:
+  problem: "Produce a validated chapter"
+  start_condition: "chapter summary available"
+  desired_end_condition: "validated chapter spec"
+  primary_objective: "produce validated chapter spec"
+  constraints:
+    - preserve continuity
+  success_definition: "passes all structural checks"
+```
+"""
+
+_GOOD_03 = """```yaml
+contracts:
+  - id: p1
+    name: analyze
+    purpose: "analyze source material"
+```
+"""
+
+
+def test_phase3c_prereq_files_from_markdown(tmp_path):
+    (tmp_path / "00_problem.md").write_text(_GOOD_00, encoding="utf-8")
+    (tmp_path / "03_contracts.md").write_text(_GOOD_03, encoding="utf-8")
+    res = _verify_prereq_files_engine(tmp_path)
+    ids = {f.rule_id for f in res.findings}
+    assert "prereq.complete" in ids
+    assert "prereq.00_incomplete" not in ids  # flattened wrapper verified clean
+    assert "prereq.03_missing_doc" not in ids  # contracts attributed
+
+
+def test_phase3c_prereq_files_reports_missing_stages(tmp_path):
+    (tmp_path / "00_problem.md").write_text(_GOOD_00, encoding="utf-8")
+    res = _verify_prereq_files_engine(tmp_path)
+    ids = {f.rule_id for f in res.findings}
+    assert "prereq.01_missing_doc" in ids
+    assert "prereq.02_missing_doc" in ids
+
+
+def test_phase3c_prereq_files_ignores_unattributable(tmp_path):
+    (tmp_path / "notes.md").write_text("just prose, nothing worth verifying\n", encoding="utf-8")
+    res = _verify_prereq_files_engine(tmp_path)
+    ids = {f.rule_id for f in res.findings}
+    assert "prereq.unattributed_docs" in ids
+
+
+def test_phase3c_prereq_files_empty_and_missing(tmp_path):
+    res = _verify_prereq_files_engine(tmp_path)
+    ids = {f.rule_id for f in res.findings}
+    assert "prereq.no_doc_files" in ids
+
+    res2 = _verify_prereq_files_engine(tmp_path / "nope")
+    ids2 = {f.rule_id for f in res2.findings}
+    assert "prereq.doc_dir_missing" in ids2
+
+
+def test_phase3c_prereq_files_never_mutates(tmp_path):
+    f = tmp_path / "00_problem.md"
+    f.write_text(_GOOD_00, encoding="utf-8")
+    before = f.read_text(encoding="utf-8")
+    _verify_prereq_files_engine(tmp_path)
+    assert f.read_text(encoding="utf-8") == before
+
+
+def test_phase3c_verify_prereq_files_over_stdio(tmp_path):
+    (tmp_path / "00_problem.md").write_text(_GOOD_00, encoding="utf-8")
+
+    async def handler(session):
+        out = await _call_in(session, "verify_prerequisite_files", {"doc_dir": str(tmp_path)})
+        assert "passed" in out
+        ids = {f["rule_id"] for f in out["findings"]}
+        assert "prereq.01_missing_doc" in ids
 
     asyncio.run(_with_server(handler))
