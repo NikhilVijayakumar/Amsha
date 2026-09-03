@@ -723,3 +723,75 @@ def test_phase3c_verify_prereq_files_over_stdio(tmp_path):
         assert "prereq.01_missing_doc" in ids
 
     asyncio.run(_with_server(handler))
+
+
+# --- Phase 3c closing-the-loop: write / scaffold prerequisite stage docs -----------
+
+
+def _accepted_session(artifacts: dict[str, dict]) -> str:
+    from amsha_mcp import session as sess
+    sid = sess.create("test")["id"]
+    for stage, art in artifacts.items():
+        sess.accept_stage(sid, stage, {**art, "checklist": ["self-check"]})
+    return sid
+
+
+def test_phase3c_write_doc_round_trips_through_verify(tmp_path):
+    from amsha_mcp.tools.verification import verify_prerequisite_files, write_prerequisite_stage_doc
+    sid = _accepted_session({
+        "00": {"problem": "Produce a validated chapter", "start_condition": "summary available",
+               "desired_end_condition": "validated spec", "primary_objective": "produce spec",
+               "constraints": ["preserve continuity"], "success_definition": "passes checks"},
+    })
+    out = write_prerequisite_stage_doc(sid, "00", tmp_path)
+    assert out["written"].endswith("00-problem-definition.md")
+    assert out["field_count"] == 6  # only user fields, checklist stripped
+    res = verify_prerequisite_files(tmp_path)
+    ids = {f.rule_id for f in res.findings}
+    assert "prereq.complete" in ids  # on-disk doc re-verifies clean via filename + keys
+
+
+def test_phase3c_write_doc_needs_accepted_stage(tmp_path):
+    from amsha_mcp.tools.verification import write_prerequisite_stage_doc
+    sid = _accepted_session({})
+    out = write_prerequisite_stage_doc(sid, "00", tmp_path)
+    assert "has not been accepted" in out["error"]
+
+
+def test_phase3c_write_doc_unknown_session(tmp_path):
+    from amsha_mcp.tools.verification import write_prerequisite_stage_doc
+    out = write_prerequisite_stage_doc("arch-999", "00", tmp_path)
+    assert "Unknown session" in out["error"]
+
+
+def test_phase3c_scaffold_is_blank_no_invented_values():
+    from amsha_mcp.tools.verification import scaffold_prerequisite_stage
+    sc = scaffold_prerequisite_stage("03")
+    assert sc["filename"] == "03-process-contracts-and-atomicity.md"
+    assert sc["required_fields"] == ["contracts"]
+    assert "contracts" in sc["doc"] and "''" in sc["doc"]  # name present, value blank
+
+
+def test_phase3c_scaffold_unknown_stage():
+    from amsha_mcp.tools.verification import scaffold_prerequisite_stage
+    assert "Unknown stage" in scaffold_prerequisite_stage("99")["error"]
+
+
+def test_phase3c_write_doc_over_stdio(tmp_path):
+
+    async def handler(session):
+        begin = await _call_in(session, "begin_architecture_session", {"problem_statement": "build a spec"})
+        sid = begin["session_id"]
+        sub = await _call_in(session, "submit_stage_artifact", {
+            "session_id": sid, "stage": "00",
+            "artifact": {"problem": "x", "start_condition": "a", "desired_end_condition": "b",
+                         "primary_objective": "o", "constraints": ["c"], "success_definition": "d"},
+        })
+        assert sub["accepted"] is True
+        out = await _call_in(session, "write_prerequisite_stage_doc",
+                             {"session_id": sid, "stage": "00", "target_dir": str(tmp_path)})
+        assert out["written"].endswith("00-problem-definition.md")
+        sc = await _call_in(session, "scaffold_prerequisite_stage", {"stage": "07"})
+        assert "capabilities" in sc["required_fields"]
+
+    asyncio.run(_with_server(handler))

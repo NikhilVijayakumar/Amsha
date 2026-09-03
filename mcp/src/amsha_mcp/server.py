@@ -130,8 +130,20 @@ def verify_prerequisite_artifacts(artifacts: dict) -> dict:
 
 @mcp.tool()
 def verify_prerequisite_files(doc_dir: str, pattern: str = "*.md") -> dict:
-    """Verify a user's prerequisite documentation as markdown files: scans doc_dir, extracts the YAML blocks each .md embeds, attributes them to stages 00-09, and reports which stages are present, missing, or unattributable. Lets a user document in markdown (not JSON) and still get the same prerequisite verification. Validates, never rewrites."""
+    """Verify a user's prerequisite documentation as markdown files: scans doc_dir, extracts the YAML blocks each .md embeds, attributes them to stages 00-09 (by methodology filename AND YAML keys), and reports which stages are present, missing, or unattributable. Lets a user document in markdown (not JSON) and still get the same prerequisite verification. Validates, never rewrites."""
     return _result_dict(verification.verify_prerequisite_files(doc_dir, pattern))
+
+
+@mcp.tool()
+def write_prerequisite_stage_doc(session_id: str, stage: str, target_dir: str) -> dict:
+    """After submit_stage_artifact accepts a stage in an architecture session, write that exact accepted artifact to disk as target_dir/<nn>-<name>.md (the methodology's own doc name), so the validated design lands in the user's repo. Serializes the user's own fields only — nothing invented — then verify_prerequisite_files re-checks the file with the same engine."""
+    return verification.write_prerequisite_stage_doc(session_id, stage, target_dir)
+
+
+@mcp.tool()
+def scaffold_prerequisite_stage(stage: str) -> dict:
+    """Return a blank skeleton (required field names only, zero values) for a prerequisite stage, filling the exact doc gap verify_prerequisite_files reports as missing/incomplete. The user fills it in and drops the file into their repo. A judge, never a generator — no invented content."""
+    return verification.scaffold_prerequisite_stage(stage)
 
 
 @mcp.tool()

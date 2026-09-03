@@ -1266,6 +1266,18 @@ _PREREQ_LABELS = {
     "09": "architecture handoff",
 }
 
+# Methodology doc filename per stage — the on-disk name write_prerequisite_stage_doc
+# uses (self-documenting) and verify_prerequisite_files uses as a filename hint.
+_STAGE_DOC_FILE = {
+    "00": "00-problem-definition.md", "01": "01-goal-and-boundary-definition.md",
+    "02": "02-process-decomposition.md", "03": "03-process-contracts-and-atomicity.md",
+    "04": "04-process-validation-and-human-review.md", "05": "05-flow-and-state-planning.md",
+    "06": "06-corner-cases-and-failure-planning.md", "07": "07-capability-selection.md",
+    "08": "08-architecture-validation.md", "09": "09-architecture-handoff-checklist.md",
+}
+# Reverse: filename prefix -> stage, for fingerprinting a hand-written doc by name.
+_STAGE_FROM_FILE = {name: stage for stage, name in _STAGE_DOC_FILE.items()}
+
 _CONTRACT_REQUIRED = {"id", "name", "purpose"}
 
 
@@ -1457,8 +1469,21 @@ def verify_prerequisite_files(doc_dir: str | Path, pattern: str = "*.md") -> Ver
     for fp in files:
         text = (fp.read_text(encoding="utf-8", errors="replace") or "")
         blocks = _extract_yaml_blocks(text)
+        # Filename hint: a doc named for the methodology (e.g. 00-problem-definition.md)
+        # owns that stage even when its YAML keys aren't self-describing.
+        file_stage = next((s for s, n in _STAGE_DOC_FILE.items() if fp.name == n), None)
         if not blocks:
-            unattributed.append(fp.name)
+            if file_stage is None:
+                unattributed.append(fp.name)
+            continue
+        if file_stage is not None:
+            effective: dict = {}
+            for block in blocks:
+                _stage, eff = _attribute_block(block)
+                effective.update(eff)
+            artifacts.setdefault(file_stage, {}).update(effective)
+            if not effective:
+                unattributed.append(fp.name)
             continue
         for block in blocks:
             stage, effective = _attribute_block(block)
@@ -1647,3 +1672,72 @@ def verify_crew_yaml(crew_dir: str | Path) -> VerificationResult:
             "advisory", "crew.all_valid", "verification",
             "Crew conforms to Amsha methodology (no errors or warnings raised).", ""))
     return VerificationResult(findings=findings, component_type="Crew")
+
+
+def _write_yaml_doc(artifact: dict, stage: str) -> str:
+    """Serialize an accepted artifact as a markdown-with-YAML-fence doc.
+
+    The YAML block is the artifact dict itself (no invented values, no wrapping
+    key that would mangle list-valued fields like `processes`/`contracts`); the
+    stage heading + methodology filename carry the attribution hint.
+    """
+    title = _PREREQ_LABELS.get(stage, f"stage {stage}")
+    body = yaml.safe_dump(artifact, sort_keys=False, allow_unicode=True,
+                          default_flow_style=False).strip()
+    return (f"# Prerequisite {stage} - {title}\n\n"
+            f"Authoring-guidance: see mcp/docs/prerequisite/{_STAGE_DOC_FILE[stage]}\n\n"
+            f"```yaml\n{body}\n```\n")
+
+
+def write_prerequisite_stage_doc(session_id: str, stage: str, target_dir: str | Path) -> dict:
+    """Land one accepted Phase-2 artifact from a session onto disk as a prerequisite
+    markdown doc (target_dir/<nn>-<name>.md), for the closing-the-loop round trip:
+    what's on disk is exactly the user's own submit_stage_artifact dict, then
+    verify_prerequisite_files re-checks the file with the same engine.
+
+    Safe under the no-silent-generation rule: every field value is the user's own
+    accepted artifact; only the container (dict -> markdown + YAML fence) changes.
+    """
+    from .. import session as sess
+
+    s = sess.get(session_id)
+    if not s:
+        return {"error": f"Unknown session '{session_id}'. Call begin_architecture_session first."}
+    if stage not in sess.STAGE_ORDER:
+        return {"error": f"Unknown stage '{stage}'. Valid stages: {', '.join(sess.STAGE_ORDER)}."}
+    artifact = s["artifacts"].get(stage)
+    if artifact is None:
+        return {"error": f"Stage '{stage}' has not been accepted for session '{session_id}'. "
+                         "Call submit_stage_artifact with a valid artifact first."}
+    # Drop the tool's own checklist wrapper (not user content), keep the user's fields.
+    content = {k: v for k, v in artifact.items() if k != "checklist"}
+
+    root = Path(target_dir)
+    root.mkdir(parents=True, exist_ok=True)
+    out = root / _STAGE_DOC_FILE[stage]
+    out.write_text(_write_yaml_doc(content, stage), encoding="utf-8")
+    return {"written": str(out), "stage": stage, "field_count": len(content)}
+
+
+def scaffold_prerequisite_stage(stage: str) -> dict:
+    """Return a blank skeleton for a prerequisite stage: required field names only,
+    zero invented values. Fills the documentation gap verify_prerequisite_files
+    reports (missing/incomplete stages) so the user has an exact template to fill
+    in and drop back into their repo.
+
+    A judge, not a generator — field names come from the methodology's own
+    Required... enumeration; no content is invented.
+    """
+    if stage not in _PREREQ_REQUIRED_FIELDS:
+        return {"error": f"Unknown stage '{stage}'. Valid stages: {', '.join(sorted(_PREREQ_REQUIRED_FIELDS))}."}
+    skeleton = {field: "" for field in sorted(_PREREQ_REQUIRED_FIELDS[stage])}
+    doc = _write_yaml_doc(skeleton, stage)
+    return {
+        "stage": stage,
+        "title": _PREREQ_LABELS.get(stage),
+        "filename": _STAGE_DOC_FILE[stage],
+        "required_fields": sorted(_PREREQ_REQUIRED_FIELDS[stage]),
+        "doc": doc,
+        "note": ("Fill in every field's value, save as " + _STAGE_DOC_FILE[stage] +
+                 ", then re-run verify_prerequisite_files to confirm."),
+    }
