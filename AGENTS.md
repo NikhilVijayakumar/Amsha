@@ -154,46 +154,33 @@ async def get_agent_by_id(self, agent_id: str) -> AgentResponse:
 
 ---
 
-## 7. Orchestration Patterns (Dual-Mode Architecture)
+## 7. Orchestration Pattern (File-Backed Architecture)
 
-**Core Pattern:** Amsha provides two orchestration modes with identical client interfaces.
+**Core Pattern:** Amsha provides file-based orchestration.
 
-### Mode 1: Database-Backed Orchestration
-- Agent/Task configs stored in MongoDB
-- Use `AmshaCrewDBApplication` base class
-- Fetches configs via repositories at runtime
-
-### Mode 2: File-Backed Orchestration
+### File-Backed Orchestration
 - Agent/Task configs stored in YAML files
 - Use `AmshaCrewFileApplication` base class
 - Parses configs from filesystem at runtime
 
-### Consistency Requirements
+### Base Class Pattern
 
-1.  **Identical Client Interface:**
-    Both modes must offer the same methods and behavior from the client's perspective.
+```python
+class MyApp(AmshaCrewFileApplication):
+    def __init__(self, config_paths, llm_type):
+        super().__init__(config_paths, llm_type)
+```
 
-2.  **Base Class Pattern:**
-    ```python
-    # DB Mode
-    class MyApp(AmshaCrewDBApplication):
-        def __init__(self, config_paths, llm_type):
-            super().__init__(config_paths, llm_type)
+### Shared Responsibilities
 
-    # File Mode
-    class MyApp(AmshaCrewFileApplication):
-        def __init__(self, config_paths, llm_type):
-            super().__init__(config_paths, llm_type)
-    ```
+-   Load job, app, and LLM configurations
+-   Initialize LLM via LLM Factory
+-   Manage input preparation (files, direct values)
+-   Provide output post-processing (`clean_json()`)
 
-3.  **Shared Responsibilities:**
-    -   Load job, app, and LLM configurations
-    -   Initialize LLM via LLM Factory
-    -   Manage input preparation (files, direct values)
-    -   Provide output post-processing (`clean_json()`)
+### Adding New Modes
 
-4.  **Adding New Modes:**
-    To add a new backend (e.g., REST API source):
+To add a new backend (e.g., REST API source):
 1.  **Generic by Default:**
     -   Do NOT hardcode project-specific logic (company names, specific workflows)
     -   Extract project-specific logic to configuration
@@ -242,10 +229,9 @@ async def get_agent_by_id(self, agent_id: str) -> AgentResponse:
 *   **Example:**
     ```python
     # src/nikhil/amsha/toolkit/crew_forge/__init__.py
-    from .orchestrator.db import AmshaCrewDBApplication
     from .orchestrator.file import AmshaCrewFileApplication
     
-    __all__ = ['AmshaCrewDBApplication', 'AmshaCrewFileApplication']
+    __all__ = ['AmshaCrewFileApplication']
     ```
 
 ---
@@ -437,10 +423,9 @@ Before committing code, verify:
 - [ ] **Exceptions:** Using custom exceptions from component `exceptions/` directory?
 - [ ] **Types:** All parameters and returns have type hints?
 - [ ] **Tests:** Unit tests written with mocked dependencies?
-    from .orchestrator.db import AmshaCrewDBApplication
     from .orchestrator.file import AmshaCrewFileApplication
     
-    __all__ = ['AmshaCrewDBApplication', 'AmshaCrewFileApplication']
+    __all__ = ['AmshaCrewFileApplication']
     ```
 
 ---

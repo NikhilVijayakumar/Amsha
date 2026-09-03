@@ -53,37 +53,7 @@ This document tracks all external framework dependencies in Amsha, assesses thei
 
 ---
 
-### 4. PyMongo (4.11.3)
-**Category:** Database Driver  
-**Risk Level:** 🟡 **MEDIUM** - Data persistence dependency
-
-**Usage:**
-- Repository implementations in `repo/adapters/mongo/`
-- Agent/Task/Crew config storage
-
-**Isolation Status:** ✅ **Excellent**
-- Repository pattern already isolates MongoDB
-- `IAgentRepository`, `ITaskRepository` interfaces defined
-- Easy to add PostgreSQL or other database adapters
-
-**Migration Path:**
-- Already follows best practice
-- Can add SQL adapter without changing services
-
-**Alternative Databases:**
-- PostgreSQL (with SQLAlchemy)
-- DynamoDB
-- Firebase/Firestore
-- In-memory (for testing)
-
-**Action Items:**
-- ✅ Well isolated via repository pattern
-- [ ] Consider adding SQL adapter for broader adoption (Q4 2025)
-
----
-
-- ✅ Well isolated via repository pattern
-- [ ] Consider adding SQL adapter for broader adoption (Q4 2025)
+> PyMongo / the MongoDB-backed repository mode has been removed. Amsha is file-based (YAML) only — see `docs/feature/crew_forge/About.md`.
 
 ---
 

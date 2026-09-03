@@ -2,7 +2,7 @@
 
 **Amsha** is a powerful, lightweight library designed to streamline **CrewAI** orchestration. It serves as a foundational "Crew Forge," providing essential boilerplate, configuration management, and helper utilities to build scalable and maintainable AI agent systems.
 
-Whether you are managing agents via configuration files or orchestrating them dynamically from a MongoDB database, Amsha provides the tools to simplify your workflow.
+Amsha manages your agents and tasks via version-controlled YAML configuration files, providing the tools to simplify your workflow.
 
 ---
 
@@ -11,9 +11,7 @@ Whether you are managing agents via configuration files or orchestrating them dy
 ### 🛠️ Crew Forge & Orchestration
 Amsha abstracts away the repetitive boilerplate code required to set up CrewAI agents and tasks.
 *   **Boilerplate Generation**: Quickly spin up crews with standardized structures.
-*   **Dual Orchestration Modes**:
-    *   **File-Based**: Define agents and tasks in YAML files for version-controlled, file-driven workflows.
-    *   **DB-Based**: Fetch agent and task definitions dynamically from MongoDB, allowing for centralized management and updates without code changes.
+*   **File-Based Orchestration**: Define agents and tasks in YAML files for version-controlled, file-driven workflows.
 
 ### 📚 Advanced Knowledge Management
 Amsha integrates powerful knowledge source management capabilities.
@@ -24,10 +22,6 @@ Amsha integrates powerful knowledge source management capabilities.
 
 ### 🔄 Input & Data Handling
 *   **Flexible Inputs**: seamlessly handle inputs from multiple sources—direct configuration values, text files, or JSON data.
-*   **MongoDB Sync**: The `SyncCrewConfigManager` allows you to sync your local crew configurations to a MongoDB database, keeping your deployment environment up-to-date with your local development.
-
-### 🔌 Core Integrations
-*   **MongoDB**: Native adapters for persisting and retrieving agent and task configurations.
 
 ---
 
@@ -70,17 +64,49 @@ app = AmshaCrewFileApplication(config_paths=config_paths, llm_type=LLMType.CREAT
 # The application will automatically load agents/tasks from the YAMLs defined in job_config
 ```
 
-### 2. Orchestration (DB-Based)
+### 2. Agent & Task Capability Tuning
 
-Use `AmshaCrewDBApplication` to run crews with definitions fetched from MongoDB.
+Beyond `role`/`goal`/`backstory`, `AgentRequest` and `TaskRequest` expose CrewAI's execution-tuning and capability fields directly through YAML — no Python required.
 
-```python
-from nikhil.amsha.crew_forge.orchestrator.db.amsha_crew_db_application import AmshaCrewDBApplication
-from nikhil.amsha.llm_factory.domain.llm_type import LLMType
+**Agent-level** (`agents/*_agent.yaml`):
 
-# Initialize with DB-specific logic
-app = AmshaCrewDBApplication(config_paths=config_paths, llm_type=LLMType.CREATIVE)
+```yaml
+agent:
+  role: "Senior Researcher"
+  goal: "..."
+  backstory: "..."
+  max_iter: 25              # max reasoning/tool-call iterations (CrewAI default: 25)
+  max_rpm: 10                # requests-per-minute cap
+  max_execution_time: 300    # seconds
+  max_retry_limit: 2         # retries on tool failure (CrewAI default: 2)
+  respect_context_window: true
+  allow_delegation: false    # CrewAI default: false
+  reasoning: true            # enable CrewAI's reasoning model
+  max_reasoning_attempts: 3
+  multimodal: true           # enable image/audio inputs
+  system_template: "..."     # override the system prompt template
+  prompt_template: "..."
+  response_template: "..."
 ```
+
+Every field is optional (`None` by default) — an unset field falls through to CrewAI's own default (verified: `max_iter=25`, `max_retry_limit=2`, `allow_delegation=False`, `reasoning=False`).
+
+**Task-level** (`tasks/*_task.yaml`):
+
+```yaml
+task:
+  name: "review_draft"
+  description: "..."
+  expected_output: "..."
+  context: ["research_task"]   # names of prerequisite tasks whose output feeds this one
+  async_execution: false
+  human_input: true             # require human approval before final output
+  markdown: true                 # render output as markdown
+  guardrail: "Output must be valid JSON matching the report schema."
+  guardrail_max_retries: 3
+```
+
+`context` resolves task **names** to CrewAI `Task` objects at build time — referencing an unknown task name raises a clear error rather than failing silently.
 
 ### 3. Knowledge Management
 
@@ -158,23 +184,7 @@ app.orchestrator.resume_crew(
 
 `resume_crew` builds a fresh crew and calls CrewAI's `kickoff(from_checkpoint=...)`, which skips already-completed tasks.
 
-### 6. Syncing Configurations to MongoDB
-
-Keep your database in sync with your local YAML configurations.
-
-```python
-from nikhil.amsha.crew_forge.sync.manager.sync_crew_config_manager import SyncCrewConfigManager
-
-sync_manager = SyncCrewConfigManager(
-    app_config_path="config/app_config.yaml",
-    job_config_path="config/job_config.yaml"
-)
-
-# Syncs the configurations to the output path specified in job_config
-sync_manager.sync()
-```
-
-### 7. Multi-Crew Pipelines (Flows)
+### 6. Multi-Crew Pipelines (Flows)
 
 When a `job_config.yaml` declares a `pipeline` (an ordered list of crew names), it can be run as a CrewAI `Flow` instead of driving each crew manually. Every pipeline step delegates to the same `run_crew()` path, so each crew keeps its execution state, performance monitoring, and checkpoint recording — nothing is orphaned by the Flow split.
 
@@ -193,7 +203,7 @@ handle = app.run_pipeline({"brief": "..."}, mode=ExecutionMode.BACKGROUND)  # Ex
 
 `outputs` maps each crew name to its raw result (`PipelineState.outputs`). Inputs passed to `run_pipeline` are fed to every crew step; omitted, they default to the union of each pipeline crew's declared `input` definitions. Single-crew runs remain exactly as before via `orchestrator.run_crew()` — the Flow path is strictly additive, and branching (`@router`) is a future extension, not part of this version.
 
-### 8. Tools
+### 7. Tools
 
 Agents and tasks can declare tools by name in YAML. Tool names are resolved against a registry that ships with built-in tools (`file_read`, `directory_read`, `scrape_website`) and can be extended with custom `BaseTool` subclasses.
 
@@ -230,7 +240,7 @@ class MyCustomTool(BaseTool):
 register_tool("my_tool", MyCustomTool)
 ```
 
-### 9. MCP Server Integration
+### 8. MCP Server Integration
 
 Agents can connect to MCP servers (stdio, HTTP, or SSE transports) via structured YAML configuration. Stdio is the recommended transport for local MCP servers.
 
@@ -249,7 +259,7 @@ agent:
 
 **Security note:** Stdio config specifies a `command` + `args` for a subprocess. Restrict which commands are permitted at the application level — don't let untrusted YAML declare arbitrary subprocess commands.
 
-### 10. Crew Tracing (Opt-In)
+### 9. Crew Tracing (Opt-In)
 
 CrewAI native tracing sends full prompt/response content to CrewAI's hosted dashboard. **Off by default** — enable explicitly only if you've reviewed the cloud dependency and data-sensitivity implications.
 
@@ -274,5 +284,4 @@ Amsha relies on a structured configuration approach:
 *   **`llm_config.yaml`**: Configuration for the LLM Factory (provider, model, API keys).
 
 ---
-
 

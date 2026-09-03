@@ -86,6 +86,8 @@ The library will expose its functionality through a single, cohesive service int
 -   **FR-CREW-07: Task Tool Override:** A task's YAML *may* list `tools: [tool_name, ...]`. Task-level tools are resolved the same way as agent tools and override agent-level tools for that task (CrewAI's own precedence: `Task(tools=[...])` replaces inherited agent tools).
 -   **FR-CREW-08: MCP Server Config:** An agent's YAML *may* list `mcp_servers:` with structured `McpServerConfig` entries (`transport: stdio|http|sse`, plus transport-specific fields). These are converted to CrewAI's `MCPServerStdio`/`MCPServerHTTP` objects and passed to `Agent(mcps=[...])`. Stdio config is the recommended transport for local MCP servers.
 -   **FR-CREW-09: Crew Tracing Opt-In:** A crew definition *may* set `tracing: true` to enable CrewAI native tracing on the built `Crew`. **Default off** — enabling sends full prompt/response content to CrewAI's hosted dashboard (`app.crewai.com`) and requires a `crewai login` account. This is additive to (not a replacement for) Amsha's `AmshaEventListener` observability path.
+-   **FR-CREW-10: Agent Execution & Capability Tuning:** An agent's YAML *may* set any of `max_iter`, `max_rpm`, `max_execution_time`, `max_retry_limit`, `respect_context_window`, `allow_delegation`, `reasoning`, `max_reasoning_attempts`, `multimodal`, `system_template`, `prompt_template`, `response_template`. Every field is optional (`None` by default); an unset field is not passed to `Agent(...)`, so CrewAI's own default applies (verified: `max_iter=25`, `max_retry_limit=2`, `allow_delegation=False`, `reasoning=False`).
+-   **FR-CREW-11: Task Execution & Guardrail Fields:** A task's YAML *may* set `context` (a list of prerequisite task names, resolved to `Task` object references at build time — an unknown name raises a clear error), `async_execution`, `human_input`, `markdown`, `guardrail` (an LLM-based guardrail description string), and `guardrail_max_retries`. All optional, `None` by default, same conditional-passthrough behavior as FR-CREW-10.
 
 #### 4.4. Operational Constraints (`FR-OP`)
 
@@ -95,7 +97,7 @@ The library will expose its functionality through a single, cohesive service int
 
 #### 4.5. Extensibility (`FR-EXT`)
 
--   **FR-EXT-01: Pluggable Storage Backend:** The library must be architected to support various persistent storage providers (e.g., different NoSQL databases, in-memory stores for testing) through a common interface. The core services of the library must not be directly coupled to any single database technology, allowing the consuming application to choose and provide a specific implementation.
+-   **FR-EXT-01: Pluggable Execution State Backend:** `IStateRepository` is a common interface for execution-state persistence; the core services must not be coupled to a single storage implementation. Only `InMemoryStateRepository` exists today — state does not survive a process restart. A durable backend (e.g. SQLite, flat-file) is an open follow-up, not something this requirement claims is already pluggable to a database.
 
 -----
 

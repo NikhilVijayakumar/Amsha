@@ -1,13 +1,13 @@
 # Amsha
 
-**Amsha** is a lightweight library for **CrewAI** orchestration. It provides configuration management, agent/task definition, knowledge integration, and monitoring utilities — letting you define crews in YAML (or MongoDB) and run them with minimal boilerplate.
+**Amsha** is a lightweight library for **CrewAI** orchestration. It provides configuration management, agent/task definition, knowledge integration, and monitoring utilities — letting you define crews in YAML and run them with minimal boilerplate.
 
 ---
 
 ## Key Features
 
 ### Crew Forge & Orchestration
-- **Dual Modes**: File-based (YAML) or DB-based (MongoDB) crew definitions.
+- **File-Based**: Define agents and tasks in version-controlled YAML files.
 - **Flows**: Multi-crew pipelines via CrewAI `Flow` — ordered execution with shared state.
 - **Memory & Checkpointing**: Opt-in per crew (`memory: true`, `checkpoint:` config) — off by default.
 - **Tracing**: Opt-in CrewAI native tracing (`tracing: true`) — off by default, sends prompts to CrewAI's hosted dashboard.

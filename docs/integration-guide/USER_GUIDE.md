@@ -10,11 +10,9 @@ This guide details what Amsha provides out-of-the-box, how you can use it within
 
 Amsha provides multiple robust systems aimed at enterprise-level CrewAI orchestration. Below are the key modules available:
 
-- **Crew Forge (`amsha.crew_forge`)**: The core orchestrator module. Provides dual execution pathways—either through a Database (`AmshaCrewDBApplication`) or File System (`AmshaCrewFileApplication`). It dynamically builds Crews, tasks, and agents based on blueprints without needing to hardcode Crew logic.
+- **Crew Forge (`amsha.crew_forge`)**: The core orchestrator module. Provides file-based execution (`AmshaCrewFileApplication`). It dynamically builds Crews, tasks, and agents based on YAML blueprints without needing to hardcode Crew logic.
 - **LLM Factory (`amsha.llm_factory`)**: Centralized LLM Provider architecture. Safely defines API endpoints, default models, fallback behaviors, and unified configuration (OpenAI, Gemini, Local LM Studio).
 - **Crew Monitor (`amsha.crew_monitor`)**: Quality assurance checks and event logging for active interactions, metrics gathering, and observability for long-running multi-agent systems.
-- **Crew Generation (`amsha.crew_gen`)**: Dynamic code translation/generation utilities focused dynamically injecting task or scenario definitions on the fly.
-- **Research / Information Retrieval (`amsha.research`)**: Implements tools pointing to web search, arXiv API, or Docling sources, feeding raw or processed text back to your Agents.
 
 ---
 
@@ -27,12 +25,8 @@ You must provide three primary configuration blocks to initialize your Amsha app
 ### A. App Configuration (`app_config.yaml`)
 Global details detailing where artifacts should be saved, and where the domain definitions exist.
 ```yaml
-backend: "mongo" or "file"
 domain_root_path: "path/to/my/app/crew_configs"
 output_dir_path: "path/to/save/outputs"
-mongo: # (If backend: mongo)
-  uri: "mongodb://user:pass@localhost:27017"
-  db_name: "amsha_db"
 ```
 
 ### B. LLM Configuration (`llm_config.yaml`)
@@ -77,7 +71,7 @@ crews:
 ## 3. How to Use Amsha
 
 ### Step 1: Initialize your Application
-Decide whether your blueprints (the Agent/Task Yamls) reside in a DB or as Files. Inherit from the relevant base class.
+Inherit from `AmshaCrewFileApplication` to run crews from your Agent/Task YAML blueprints.
 
 ```python
 from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
@@ -119,11 +113,8 @@ if __name__ == "__main__":
 
 For comprehensive technical insights, API contracts, sequence diagrams, and class layouts for each module, please visit the internal module documentation:
 
-1. **[Crew Forge](crew_forge/About.md)** - Blueprint execution, Job orchestrations, Atomic Builders, File vs. DB Modes.
-2. **[LLM Factory](llm_factory/About.md)** - Model abstractions, LiteLLM bindings, dynamic switching.
-3. **[Crew Gen](crew_gen/About.md)** - Utilities handling generator patterns and templates.
-4. **[Crew Monitor](crew_monitor/About.md)** - Diagnostics, tracking loops, execution callbacks.
-5. **[Research](docs/research/About.md)** - Knowledge parsing tools and providers.
-6. **[Paper Compilation](docs/paper/About.md)** - Tools for automatically parsing insights or source code into documentation suites or academic journals.
+1. **[Crew Forge](../feature/crew_forge/About.md)** - Blueprint execution, Job orchestrations, Atomic Builders, file-based mode.
+2. **[LLM Factory](../feature/llm_factory/About.md)** - Model abstractions, LiteLLM bindings, dynamic switching.
+3. **[Crew Monitor](../feature/crew_monitor/About.md)** - Diagnostics, tracking loops, execution callbacks.
 
 > **💡 Note for Developers:** All logic additions should be strictly isolated ensuring that inner layers (Domain) never query outer layers (Infrastructure/API). Please review `AGENTS.md` in the root repository to understand the comprehensive architecture rules (Clean Architecture, Protocol interfaces, DI Injection) enforced inside Amsha.

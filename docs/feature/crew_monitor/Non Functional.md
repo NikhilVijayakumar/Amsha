@@ -28,4 +28,4 @@ The `crew_monitor` package adds specific dependencies for optimal operation:
 
 ### File-Based
 *   Currently, all analysis and reporting tools operate on **local files** (JSON logs and Excel reports).
-*   **Scalability**: Suitable for development, testing, and small-to-medium scale deployments. For large-scale production monitoring, consider extending the classes to write to a database (e.g., MongoDB) which is supported by the broader Amsha architecture but not essentially by this specific module yet.
+*   **Scalability**: Suitable for development, testing, and small-to-medium scale deployments. For large-scale production monitoring, consider extending the classes to write to a database — Amsha has no built-in database backend today, so this would be a consumer-side extension.
