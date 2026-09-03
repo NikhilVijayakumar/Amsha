@@ -385,3 +385,145 @@ def test_phase4_smoke_over_stdio():
         assert out["agents"] == 1 and out["tasks"] == 1
 
     asyncio.run(_with_server(handler))
+
+
+# ---------------------------------------------------------------------------
+# Phase 5 — User plan verification & component discovery (proposal 05, addendum)
+# ---------------------------------------------------------------------------
+
+PHASE5_TOOLS = {"verify_user_plan", "recommend_components",
+                "find_agent", "find_task", "find_flow"}
+
+
+def test_phase5_tools_registered():
+    assert PHASE5_TOOLS <= _list_tools(), f"missing {PHASE5_TOOLS - _list_tools()}"
+
+
+def _plan_artifacts(obj, scope, processes, fails):
+    """Structurally complete prerequisite artifacts (all required stage fields)."""
+    ctr = [{"id": p["id"], "name": p["name"], "purpose": "purpose"} for p in processes]
+    return {
+        "00": {"problem": obj, "start_condition": "s", "desired_end_condition": "e",
+               "primary_objective": obj, "constraints": [], "success_definition": "done"},
+        "01": {"start_boundary": "", "end_boundary": "", "scope": scope,
+               "completion_definition": "done"},
+        "02": {"start_state": "s", "end_state": "e", "processes": processes, "relationships": []},
+        "03": {"contracts": ctr},
+        "04": {"validation": "ok"},
+        "05": {"flow_order": [], "transitions": [], "state_requirements": {}},
+        "06": {"failures": fails, "recovery": ["retry"], "unrecoverable_definition": "none"},
+        "07": {"capabilities": []},
+        "08": {"validation": "ok"},
+        "09": {"checklist": []},
+    }
+
+
+def test_phase5_verify_user_plan_rejects_incoherent():
+    """A goal that exceeds the boundary AND omits a step from the decomposition
+    must be rejected with findings naming the mismatch (proposal 05 test bar)."""
+    from amsha_mcp.tools.plan import verify_user_plan
+    artifacts = _plan_artifacts(
+        "Summarize finance reports", "summarize marketing documents",
+        [{"id": "p1", "name": "analyze_marketing"}], "analyze_marketing recovery")
+    out = verify_user_plan(artifacts, {
+        "objective": "Summarize finance reports",
+        "steps": ["Read the reports", "Produce a summary"],
+    })
+    assert out["passed"] is False
+    ids = {f["rule_id"] for f in out["findings"]}
+    assert "plan.goal_exceeds_boundary" in ids
+    assert "plan.decomposition_gap" in ids
+    bound = [f for f in out["findings"] if f["rule_id"] == "plan.goal_exceeds_boundary"]
+    gap = [f for f in out["findings"] if f["rule_id"] == "plan.decomposition_gap"]
+    assert "finance" in bound[0]["message"]
+    assert any("Read the reports" in g["message"] for g in gap)
+
+
+def test_phase5_verify_user_plan_passes_coherent():
+    """A goal within the boundary, steps covered, failure plan covering every
+    process yields a semantic pass (structural base stays clean)."""
+    from amsha_mcp.tools.plan import verify_user_plan
+    artifacts = _plan_artifacts(
+        "Categorize marketing feedback", "marketing feedback analysis",
+        [{"id": "p1", "name": "preprocess_feedback"},
+         {"id": "p2", "name": "categorize_feedback"}],
+        "preprocess_feedback categorize_feedback")
+    out = verify_user_plan(artifacts, {
+        "objective": "Categorize marketing feedback",
+        "steps": ["Preprocess feedback", "Categorize feedback"],
+    })
+    assert out["passed"] is True, out["summary"]
+    assert out["semantic"] == "pass"
+
+
+def test_phase5_recommend_docling_least_powerful():
+    """'summarize a directory of PDFs' must recommend the Task-with-Docling
+    (least powerful) ahead of any Agent, citing the real docling source and a
+    capability ladder ordering task < agent < crew."""
+    from amsha_mcp.tools.plan import recommend_components
+    out = recommend_components("summarize a directory of PDFs")
+    assert out["matched"] >= 1
+    first = out["recommendations"][0]
+    assert first["rank"] == 1
+    assert first["least_powerful"] is True
+    assert first["kind"] == "task"
+    assert "Docling" in first["mechanism"]
+    assert "amsha_crew_docling_source.py" in first["reference"]
+    assert not any(r["kind"] == "agent" and r["rank"] < first["rank"]
+                   for r in out["recommendations"])
+
+    # ladder: a query that genuinely needs an Agent AND a Crew still orders
+    # task(Docling) < agent < crew
+    lad = recommend_components(
+        "write a professional analytical summary of a directory of documents")
+    ranks = {r["kind"]: r["rank"] for r in lad["recommendations"]}
+    assert ranks["task"] < ranks["agent"] < ranks["crew"]
+
+
+def test_phase5_find_tools_grounded():
+    """find_task surfaces real Amsha references, not invented capabilities."""
+    from amsha_mcp.tools.plan import find_task
+    out = find_task("summarize a directory of PDFs")
+    assert out["matched"] >= 1
+    assert any("amsha_crew_docling_source.py" in c["reference"] for c in out["components"])
+    assert all(c["reference"] for c in out["components"])
+
+
+def test_phase5_read_only():
+    """verify_user_plan / recommend_components must never mutate their input."""
+    from amsha_mcp.tools.plan import verify_user_plan, recommend_components
+    artifacts = _plan_artifacts(
+        "Categorize marketing feedback", "marketing feedback analysis",
+        [{"id": "p1", "name": "preprocess_feedback"}],
+        "preprocess_feedback")
+    import copy
+    snapshot = copy.deepcopy(artifacts)
+    verify_user_plan(artifacts, {"objective": "Categorize marketing feedback",
+                                 "steps": ["Preprocess feedback"]})
+    assert artifacts == snapshot
+    step = "summarize a directory of PDFs"
+    recommend_components(step)
+    assert isinstance(step, str)  # untouched
+
+
+def test_phase5_verify_user_plan_over_stdio():
+    async def handler(session):
+        artifacts = _plan_artifacts(
+            "Summarize finance reports", "summarize marketing documents",
+            [{"id": "p1", "name": "analyze_marketing"}], "analyze_marketing recovery")
+        out = await _call_in(session, "verify_user_plan", {
+            "prerequisites": artifacts,
+            "goal": {"objective": "Summarize finance reports",
+                     "steps": ["Read the reports", "Produce a summary"]},
+        })
+        assert out["passed"] is False
+        ids = {f["rule_id"] for f in out["findings"]}
+        assert "plan.goal_exceeds_boundary" in ids
+        assert "plan.decomposition_gap" in ids
+
+        out2 = await _call_in(session, "recommend_components",
+                              {"step": "summarize a directory of PDFs"})
+        assert out2["recommendations"][0]["kind"] == "task"
+        assert "Docling" in out2["recommendations"][0]["mechanism"]
+
+    asyncio.run(_with_server(handler))

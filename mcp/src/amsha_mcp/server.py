@@ -4,7 +4,7 @@ from __future__ import annotations
 import mcp.server.stdio
 from mcp.server.fastmcp import FastMCP
 
-from .tools import architecture, evaluate, improve, install, methodology, modules, search, smoke, verification
+from .tools import architecture, evaluate, improve, install, methodology, modules, plan, search, smoke, verification
 
 # Import the heavy crew_forge domain models in the MAIN thread at startup.
 # Lazily importing CrewAI's models (transitively CrewAI) from inside a FastMCP
@@ -156,6 +156,36 @@ def score_crew(crew_dir: str, smoke_output: dict | None = None) -> dict:
 def evaluate_design(prerequisite_artifacts: dict, crew_dir: str) -> dict:
     """Score whether the assembled crew faithfully realizes the validated design: prerequisite completeness (design) + crew checks (realization)."""
     return evaluate.evaluate_design(prerequisite_artifacts, crew_dir)
+
+
+@mcp.tool()
+def verify_user_plan(prerequisites: dict, goal: dict) -> dict:
+    """Semantically verify a user's prerequisite plan: the goal stays within the declared boundary, every stated goal step is covered by the decomposition, and the failure plan covers each process. Extends verify_prerequisite_artifacts; read-only."""
+    return plan.verify_user_plan(prerequisites, goal)
+
+
+@mcp.tool()
+def recommend_components(step: str, capabilities: dict | None = None) -> dict:
+    """Recommend the Amsha-native components that fit a validated step, least-powerful-first (deterministic -> Task -> Agent -> Crew -> Flow), each with purpose, config keys, and a real reference. Read-only, grounded in what Amsha ships."""
+    return plan.recommend_components(step, capabilities)
+
+
+@mcp.tool()
+def find_agent(needs: str) -> dict:
+    """Find existing Amsha Agent patterns (plus wiring) that embody a capability need. Read-only."""
+    return plan.find_agent(needs)
+
+
+@mcp.tool()
+def find_task(needs: str) -> dict:
+    """Find existing Amsha Task patterns (knowledge/tool wiring) for a capability need. Read-only."""
+    return plan.find_task(needs)
+
+
+@mcp.tool()
+def find_flow(needs: str) -> dict:
+    """Find existing Amsha Flow / orchestration patterns for a capability need. Read-only."""
+    return plan.find_flow(needs)
 
 
 def main() -> None:
