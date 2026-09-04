@@ -1,4 +1,4 @@
-Yes. In fact, **these are exactly the questions I would ask before designing the Amsha MCP interface**.
+E:\Python\AmshaYes. In fact, **these are exactly the questions I would ask before designing the Amsha MCP interface**.
 
 But I would reorganize them into a more systematic question:
 
