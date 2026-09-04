@@ -122,6 +122,9 @@ def _build_crew(crew_dir: str | Path, module_name: str, output_dir: str) -> dict
 def _worker_main() -> int:
     """Subprocess entrypoint: reads args from argv, prints JSON result to stdout."""
     import argparse
+    repo_src = os.environ.get("AMSHA_MCP_REPO_SRC")
+    if repo_src and repo_src not in sys.path:
+        sys.path.insert(0, repo_src)
     p = argparse.ArgumentParser()
     p.add_argument("crew_dir")
     p.add_argument("--module", default="module")
@@ -149,21 +152,33 @@ def smoke_test(crew_dir: str | Path, module_name: str = "module",
     """
     import tempfile
 
-    src = str(Path(__file__).resolve().parent.parent.parent)
     from .. import docs_loader as _dl
     repo = _dl.repo_root()
     repo_src = str(repo / "src" / "nikhil") if repo and (repo / "src" / "nikhil" / "amsha").is_dir() else None
-    path_parts = (f"sys.path.insert(0, {repo_src!r}); " if repo_src else "") + f"sys.path.insert(0, {src!r}); "
-    code = ("import sys; " + path_parts +
-            "from amsha_mcp.tools.smoke import _worker_main; sys.exit(_worker_main())")
+
     env = dict(os.environ)
     env.setdefault("PYTHONIOENCODING", "utf-8")
+    if repo_src:
+        env["AMSHA_MCP_REPO_SRC"] = repo_src
+
+    if getattr(sys, "frozen", False):
+        # PyInstaller build: sys.executable is this exe itself, which has no
+        # real "-c" flag. Re-invoke it with a sentinel arg that server.py's
+        # main() recognizes and routes straight to _worker_main(), never
+        # starting the FastMCP/stdio server in the child at all.
+        cmd = [sys.executable, "--smoke-worker", str(crew_dir),
+               "--module", module_name, "--output", str(output_dir)]
+    else:
+        src = str(Path(__file__).resolve().parent.parent.parent)
+        code = (f"import sys; sys.path.insert(0, {src!r}); "
+                "from amsha_mcp.tools.smoke import _worker_main; sys.exit(_worker_main())")
+        cmd = [sys.executable, "-c", code, str(crew_dir),
+               "--module", module_name, "--output", str(output_dir)]
+
     try:
         proc = subprocess.run(
-            [sys.executable, "-c", code, str(crew_dir), "--module", module_name,
-             "--output", str(output_dir)],
-            capture_output=True, text=True, timeout=_SMOKE_TIMEOUT_SECONDS, env=env,
-            stdin=subprocess.DEVNULL,
+            cmd, capture_output=True, text=True, timeout=_SMOKE_TIMEOUT_SECONDS,
+            env=env, stdin=subprocess.DEVNULL,
         )
     except subprocess.TimeoutExpired:
         return {"ok": False, "agents": 0, "tasks": 0,

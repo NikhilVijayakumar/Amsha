@@ -235,6 +235,15 @@ def find_flow(needs: str) -> dict:
 
 
 def main() -> None:
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--smoke-worker":
+        # smoke_test() re-invokes this same executable to run the offline crew
+        # build in an isolated subprocess. Under a frozen (PyInstaller) build,
+        # sys.executable is this exe itself and has no real "-c" flag, so
+        # smoke.py routes here with a sentinel arg instead of a code string.
+        from .tools.smoke import _worker_main
+        sys.argv = [sys.argv[0]] + sys.argv[2:]
+        sys.exit(_worker_main())
     mcp.run()
 
 

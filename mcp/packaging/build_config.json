@@ -1,0 +1,8 @@
+{
+  "app_name": "AmshaMCP",
+  "app_version": "0.1.0",
+  "publisher": "Nikhil",
+  "output_dir": "E:\\Python\\Amsha\\mcp\\build\\AmshaMCP-dist",
+  "build_venv_dir": "E:\\Python\\Amsha\\mcp\\build\\AmshaMCP-dist\\.build-venv",
+  "onedir_name": "amsha-mcp"
+}

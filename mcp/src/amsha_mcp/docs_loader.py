@@ -27,22 +27,32 @@ _DOCS = PACKAGE_ROOT / "docs"
 # Process-global target repo. Set at startup from AMSHA_MCP_TARGET_REPO (or a
 # source-checkout default), and re-set by the register_repo tool. `None` = no repo.
 _REPO_ROOT: Path | None = None
+# Distinguishes "never resolved yet" from "explicitly configured to None" —
+# repo_root() self-initializes on first access so any caller works correctly
+# whether or not amsha_mcp.server (which also eagerly resolves at import time,
+# for the deadlock guard) has been imported in this process.
+_repo_resolved = False
 
 
 def configure_repo_root(root: str | Path | None) -> None:
     """Point the loader at a (different) target repo root, or clear it (None)."""
-    global _REPO_ROOT
+    global _REPO_ROOT, _repo_resolved
     _REPO_ROOT = None if root is None else Path(root)
+    _repo_resolved = True
 
 
 def repo_root() -> Path | None:
+    if not _repo_resolved:
+        resolve_default_repo()
     return _REPO_ROOT
 
 
 def resolve_default_repo() -> Path | None:
-    """Set the target repo at startup and return it: AMSHA_MCP_TARGET_REPO env
-    var, else the enclosing Amsha checkout when running from a source tree
-    (dev loop), else None (standalone install, no repo registered)."""
+    """Set the target repo and return it: AMSHA_MCP_TARGET_REPO env var, else
+    the enclosing Amsha checkout when running from a source tree (dev loop),
+    else None (standalone install, no repo registered). Idempotent — safe to
+    call eagerly (server.py, for the deadlock guard) and lazily (repo_root(),
+    for any caller that imports tools directly without going through server.py)."""
     env = os.environ.get("AMSHA_MCP_TARGET_REPO")
     if env:
         configure_repo_root(Path(env).expanduser())
