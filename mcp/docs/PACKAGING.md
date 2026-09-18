@@ -1,16 +1,18 @@
 # Amsha MCP — Packaging, Building, and Installing
 
-How to turn `mcp/` into a standalone Windows installer, and how to install/use the result. See [proposal 08](../src/amsha_mcp/docs/proposal/08-standalone-repo-agnostic-server.md) for why this is architected as a repo-agnostic, zero-`amsha`-dependency server in the first place.
+How to turn `mcp/` into a standalone platform-native bundle (Windows installer or Linux folder), and how to install/use the result. See [proposal 08](../src/amsha_mcp/docs/proposal/08-standalone-repo-agnostic-server.md) for why this is architected as a repo-agnostic, zero-`amsha`-dependency server in the first place.
+
+The build script (`build_standalone.py`) is platform-aware and runs on both Windows and Linux; the per-platform output paths live in `build_config.json`.
 
 ## What gets built
 
-1. **Standalone frozen app** (PyInstaller `--onedir`) — bundles the Python interpreter, `mcp` SDK, `PyYAML`, `pydantic`, and `amsha_mcp`'s own methodology docs into one self-contained folder. No system Python required to run it. Zero dependency on `E:\Python\Amsha`'s dev venv or the `amsha`/`crewai` packages at build time.
-2. **Windows installer** (Inno Setup) — wraps that folder into a normal double-click `.exe` installer with a Start Menu entry and a real uninstaller.
+1. **Standalone frozen app** (PyInstaller `--onedir`) — bundles the Python interpreter, `mcp` SDK, `PyYAML`, `pydantic`, and `amsha_mcp`'s own methodology docs into one self-contained folder. No system Python required to run it. Zero dependency on the dev venv or the `amsha`/`crewai` packages at build time.
+2. **Windows only:** an **Inno Setup installer** — wraps that folder into a normal double-click `.exe` installer with a Start Menu entry and a real uninstaller. On Linux there is no installer step: the `--onedir` folder *is* the distribution, and the build script prints a one-line `claude mcp add` registration command.
 
 ## One-time setup (build machine only)
 
 - Python 3.12–3.13 (any install; the build script makes its own fresh venv, doesn't touch your dev venv).
-- Inno Setup 6, for the installer compile step:
+- Windows only: Inno Setup 6, for the installer compile step:
   ```
   winget install --id JRSoftware.InnoSetup --silent --accept-package-agreements --accept-source-agreements
   ```
@@ -18,30 +20,37 @@ How to turn `mcp/` into a standalone Windows installer, and how to install/use t
 
 ## Build
 
+The same script works on both OSes — it reads its paths from the per-platform block in `build_config.json` and uses the correct venv layout (`Scripts/python.exe` vs `bin/python`), so there is nothing to pass:
+
 ```powershell
 E:\Python\Amsha\.venv\Scripts\python.exe E:\Python\Amsha\mcp\packaging\build_standalone.py
 ```
 
+```bash
+python3 /home/dell/PycharmProjects/Amsha/mcp/packaging/build_standalone.py
+```
+
 One command does everything:
-1. Deletes and recreates a fresh venv at `mcp/build/AmshaMCP-dist/.build-venv`.
-2. `pip install E:\Python\Amsha\mcp` into it — non-editable, so it's a real standalone copy built from whatever's currently in `mcp/pyproject.toml`/`mcp/src`, not a live link back to this checkout.
+1. Deletes and recreates a fresh venv under the configured `build_venv_dir`.
+2. `pip install ./mcp` into it — non-editable, so it's a real standalone copy built from whatever's currently in `mcp/pyproject.toml`/`mcp/src`, not a live link back to this checkout.
 3. `pip install pyinstaller`.
 4. Freezes `mcp/packaging/entrypoint.py` per `mcp/packaging/amsha_mcp.spec` into `--onedir` output.
-5. Finds `ISCC.exe` (checks the common install paths, then `PATH`) and compiles `mcp/packaging/amsha_mcp_installer.iss` against that fresh build.
+5. Windows only: finds `ISCC.exe` (checks the common install paths, then `PATH`) and compiles `mcp/packaging/amsha_mcp_installer.iss` against that fresh build. Linux: skips this step entirely — the folder is the distribution.
 
 Run this again any time `mcp/` changes — it always starts from a clean venv, so there's no stale-cache risk.
 
 ### Where things land
 
-Everything lives under `mcp/build/` (already covered by the repo's root `.gitignore` — the generic `build/` rule matches at any depth, so this never gets committed):
+Everything lives under the configured `output_dir`. On Windows that's `mcp/build/` (covered by the repo's root `.gitignore` — the generic `build/` rule matches at any depth, so it never gets committed); on this machine it's `/home/dell/mcp/amsha`:
 
 ```
-mcp/build/AmshaMCP-dist/
-├── .build-venv/              throwaway venv used only to run PyInstaller
-├── build/                    PyInstaller's own intermediate work dir
-├── dist/amsha-mcp/           the frozen standalone app
-│   └── amsha-mcp.exe         run this directly to test without installing
-└── installer/
+<output_dir>/                    e.g. E:\Python\Amsha\mcp\build\AmshaMCP-dist   or   /home/dell/mcp/amsha
+├── .build-venv/                 throwaway venv used only to run PyInstaller
+├── build/                       PyInstaller's own intermediate work dir
+├── dist/amsha-mcp/              the frozen standalone app
+│   ├── amsha-mcp.exe            Windows: run this directly to test without installing
+│   └── amsha-mcp                Linux: run this directly (the .exe has no Linux sibling)
+└── installer/                   Windows only
     └── AmshaMCP-Setup-0.1.0.exe   <- the file you share/run to install
 ```
 
@@ -52,11 +61,13 @@ mcp/build/AmshaMCP-dist/
 | Field | Meaning |
 |---|---|
 | `app_name`, `app_version`, `publisher` | Cosmetic — shown in the installer UI |
-| `output_dir` | Where everything above gets built |
-| `build_venv_dir` | Where the throwaway build venv goes (usually just `output_dir/.build-venv`) |
-| `onedir_name` | Name of the frozen app folder and its `.exe` |
+| `output_dir` (top-level) | Windows default; where everything above gets built |
+| `build_venv_dir` (top-level) | Windows default; where the throwaway build venv goes (usually just `output_dir/.build-venv`) |
+| `platforms.linux.output_dir` | Linux output — the build script prefers the platform block over the top-level values |
+| `platforms.linux.build_venv_dir` | Linux build venv location (defaults to `<linux output_dir>/.build-venv` if omitted) |
+| `onedir_name` | Name of the frozen app folder and its executable |
 
-**Not auto-synced**: if you change `output_dir` or `app_version` here, also update the matching literal values at the top of `mcp/packaging/amsha_mcp_installer.iss` (`SourceDist`, `OutputDir`, `#define MyAppVersion`) — kept as a manual two-file sync rather than building a config-injection layer for four values that rarely change together.
+**Not auto-synced**: if you change `output_dir` or `app_version`, also update the matching literal values at the top of `mcp/packaging/amsha_mcp_installer.iss` (`SourceDist`, `OutputDir`, `#define MyAppVersion`) — kept as a manual two-file sync rather than building a config-injection layer for four values that rarely change together. (Windows-only concern; the Linux build has no `.iss`.)
 
 ## Install
 
@@ -69,10 +80,18 @@ Run `AmshaMCP-Setup-0.1.0.exe`. Standard installer behavior:
 
 ## After installing: registering it with an MCP client
 
-The installer just puts the `.exe` on disk — it does not register it with Claude Code or any other client, and does not touch your global MCP config. Register it yourself:
+The installer just puts the executable on disk — it does not register it with Claude Code or any other client, and does not touch your global MCP config. Register it yourself:
 
 ```powershell
 claude mcp add amsha-mcp -s local -- "C:\Users\<you>\AppData\Local\Programs\Amsha MCP\amsha-mcp.exe"
+```
+
+On Linux there's no installer — point the client straight at the frozen binary:
+
+```bash
+claude mcp add amsha-mcp -s local -- "/home/dell/mcp/amsha/dist/amsha-mcp/amsha-mcp"
+# or in an opencode.jsonc:
+# { "mcp": { "amsha-mcp": { "type": "local", "command": ["/home/dell/mcp/amsha/dist/amsha-mcp/amsha-mcp"] } } }
 ```
 
 (`-s user` instead of `-s local` to make it available in every project, not just the one you run this from.)
@@ -83,6 +102,10 @@ With nothing configured, the server only serves its own bundled methodology docs
 
 ```powershell
 claude mcp add amsha-mcp -s local -e AMSHA_MCP_TARGET_REPO="E:\Python\Amsha" -- "C:\...\amsha-mcp.exe"
+```
+
+```bash
+claude mcp add amsha-mcp -s local -e AMSHA_MCP_TARGET_REPO="/home/dell/PycharmProjects/Amsha" -- "/home/dell/mcp/amsha/dist/amsha-mcp/amsha-mcp"
 ```
 
 `register_repo(path)` (a tool call) can also point doc-serving tools at a different repo mid-session, but schema-verification tools stay bound to whatever `AMSHA_MCP_TARGET_REPO` was at startup until the server restarts — deliberate, not a bug (see proposal 08).
