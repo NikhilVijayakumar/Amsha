@@ -19,10 +19,15 @@ class AtomicYamlBuilderService:
         self.skills_root: Optional[str] = skills_root
         self.builder:CrewBuilderService = CrewBuilderService(data)
 
-    def add_agent(self,knowledge_sources=None, tools: list = None):
-        agent_details = self.parser.parse_agent(self.agent_yaml_file)
+    def add_agent(self, knowledge_sources=None, tools: list = None, agent_yaml_file: Optional[str] = None):
+        """Add one agent. ``agent_yaml_file`` overrides the file this instance
+        was constructed with for this call only -- lets one builder (and its
+        one underlying ``CrewBuilderService``) accumulate multiple agents from
+        different YAML files, e.g. every step of a multi-step crew."""
+        yaml_file = agent_yaml_file or self.agent_yaml_file
+        agent_details = self.parser.parse_agent(yaml_file)
         if not agent_details:
-            raise ValueError(f"Agent file: '{self.agent_yaml_file}' not found.")
+            raise ValueError(f"Agent file: '{yaml_file}' not found.")
         agent_details.skills = self._resolve_skills(agent_details.skills)
         self.builder.add_agent(agent_details, knowledge_sources, tools)
 
@@ -52,10 +57,14 @@ class AtomicYamlBuilderService:
         return resolved
 
     def add_task(self, agent: Agent, output_filename: str = None,
-                 validation:bool=False,output_json: Any = None):
-        task_details = self.parser.parse_task(self.task_yaml_file)
+                 validation:bool=False,output_json: Any = None, task_yaml_file: Optional[str] = None):
+        """Add one task. ``task_yaml_file`` overrides the file this instance
+        was constructed with for this call only (same reuse purpose as
+        ``add_agent``'s ``agent_yaml_file`` override)."""
+        yaml_file = task_yaml_file or self.task_yaml_file
+        task_details = self.parser.parse_task(yaml_file)
         if not task_details:
-            raise ValueError(f"Task file: '{self.task_yaml_file}' not found.")
+            raise ValueError(f"Task file: '{yaml_file}' not found.")
         self.builder.add_task(task_details, agent, output_filename, validation,output_json)
 
     def build(self, process: Process = Process.sequential, knowledge_sources=None) -> Crew:

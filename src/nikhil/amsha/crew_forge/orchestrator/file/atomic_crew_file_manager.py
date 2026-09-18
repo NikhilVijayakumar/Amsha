@@ -60,11 +60,18 @@ class AtomicCrewFileManager:
             checkpoint= crew_def.get("checkpoint"),
             tracing= crew_def.get("tracing"))
 
+        # One builder (and its one underlying CrewBuilderService) for the whole
+        # crew -- reused across every step so all steps' agents/tasks accumulate
+        # into the same Crew instead of each step silently replacing the last
+        # (see AtomicYamlBuilderService.add_agent/add_task's per-call file
+        # overrides, which is what makes this reuse possible).
         crew_builder: Optional[AtomicYamlBuilderService] = None
+        domain_root_path = Path(self.app_config.get("domain_root_path", "."))
+        module_name = self.job_config.get("module_name", "")
+
         for step in crew_def['steps']:
             task_key = step['task_key']
             agent_key = step['agent_key']
-
 
             if not task_key:
                 raise ValueError(f"Task '{task_key}' not found in master blueprint.")
@@ -73,36 +80,38 @@ class AtomicCrewFileManager:
                 raise ValueError(f"Agent '{agent_key}' not found in master blueprint.")
 
             # Resolve paths based on domain_root_path
-            domain_root_path = Path(self.app_config.get("domain_root_path", "."))
             # e.g .../copy/tasks/ad_copy_task.yaml
-            module_name = self.job_config.get("module_name", "")
             task_yaml_file = str(domain_root_path / module_name / "tasks" / f"{task_key}.yaml")
             agent_yaml_file = str(domain_root_path / module_name / "agents" / f"{agent_key}.yaml")
 
-            crew_builder = AtomicYamlBuilderService(
-                data=crew_data,
-                parser=CrewParser(),
-                agent_yaml_file=agent_yaml_file,
-                task_yaml_file=task_yaml_file,
-                skills_root=str(domain_root_path / module_name / "skills"),
-            )
+            if crew_builder is None:
+                crew_builder = AtomicYamlBuilderService(
+                    data=crew_data,
+                    parser=CrewParser(),
+                    agent_yaml_file=agent_yaml_file,
+                    task_yaml_file=task_yaml_file,
+                    skills_root=str(domain_root_path / module_name / "skills"),
+                )
 
             agent_knowledge = self._build_knowledge_source(step.get('knowledge_sources', []))
             crew_builder.add_agent(
-                knowledge_sources=agent_knowledge
+                knowledge_sources=agent_knowledge,
+                agent_yaml_file=agent_yaml_file,
             )
             safe_model_name = self.model_name.replace("/", "_") if self.model_name else "default"
             if filename_suffix:
                 crew_builder.add_task(
                     agent=crew_builder.get_last_agent(),
                     output_filename=f"{safe_model_name}_{filename_suffix}",
-                    output_json=output_json
+                    output_json=output_json,
+                    task_yaml_file=task_yaml_file,
                 )
             else:
                 crew_builder.add_task(
                     agent=crew_builder.get_last_agent(),
                     output_filename=f"{safe_model_name}",
-                    output_json=output_json
+                    output_json=output_json,
+                    task_yaml_file=task_yaml_file,
                 )
 
         self.output_file = crew_builder.get_last_file()

@@ -346,9 +346,100 @@ class TestAtomicCrewFileManager(unittest.TestCase):
 
         crew = manager.build_atomic_crew("test_crew", "suffix")
         self.assertEqual(crew, "MockCrew")
+        # One builder is constructed and reused across every step (not re-created
+        # per step) so a multi-step crew's agents/tasks all land in the same Crew.
         mock_builder_class.assert_called_once()
-        mock_builder.add_agent.assert_called_once_with(knowledge_sources=None)
-        mock_builder.add_task.assert_called_once_with(agent=mock_builder.get_last_agent(), output_filename="gpt-4_suffix", output_json=None)
+        expected_agent_yaml = os.path.join("agents", "agent1.yaml")
+        expected_task_yaml = os.path.join("tasks", "task1.yaml")
+        mock_builder.add_agent.assert_called_once_with(knowledge_sources=None, agent_yaml_file=expected_agent_yaml)
+        mock_builder.add_task.assert_called_once_with(
+            agent=mock_builder.get_last_agent(), output_filename="gpt-4_suffix", output_json=None,
+            task_yaml_file=expected_task_yaml,
+        )
+
+    def test_build_atomic_crew_multi_step_reuses_one_builder(self):
+        """Regression test for a real bug: build_atomic_crew used to construct a
+        fresh AtomicYamlBuilderService (and therefore a fresh, empty
+        CrewBuilderService) on every step, so only the LAST step's agent/task
+        ever survived into the built Crew -- earlier steps were silently
+        dropped, and a later step's `context:` reference to an earlier step's
+        task name crashed with "task not found" because that task was never
+        really accumulated anywhere. This uses real parsing/building (no
+        mocked AtomicYamlBuilderService) so it actually exercises the
+        accumulation, not just that the right methods get called."""
+        from crewai import LLM
+
+        module_dir = os.path.join(self.test_dir, "mod")
+        os.makedirs(os.path.join(module_dir, "agents"))
+        os.makedirs(os.path.join(module_dir, "tasks"))
+
+        with open(os.path.join(module_dir, "agents", "agent1.yaml"), "w") as f:
+            f.write(
+                "agent:\n"
+                "  role: \"Agent One\"\n"
+                "  goal: \"Do the first thing.\"\n"
+                "  backstory: \"Specializes in the first thing.\"\n"
+            )
+        with open(os.path.join(module_dir, "agents", "agent2.yaml"), "w") as f:
+            f.write(
+                "agent:\n"
+                "  role: \"Agent Two\"\n"
+                "  goal: \"Do the second thing, using the first agent's output.\"\n"
+                "  backstory: \"Specializes in the second thing.\"\n"
+            )
+        with open(os.path.join(module_dir, "tasks", "task1.yaml"), "w") as f:
+            f.write(
+                "task:\n"
+                "  name: \"Task One\"\n"
+                "  description: \"Produce the first result.\"\n"
+                "  expected_output: \"The first result.\"\n"
+            )
+        with open(os.path.join(module_dir, "tasks", "task2.yaml"), "w") as f:
+            f.write(
+                "task:\n"
+                "  name: \"Task Two\"\n"
+                "  description: \"Produce the second result.\"\n"
+                "  expected_output: \"The second result.\"\n"
+                "  context: [\"Task One\"]\n"
+            )
+
+        with open(self.app_config_path, "w") as f:
+            f.write(f"output_dir_path: {os.path.join(self.test_dir, 'output')}\n")
+            f.write(f"domain_root_path: {self.test_dir}\n")
+
+        job_config = {
+            "crew_name": "test_crew",
+            "module_name": "mod",
+            "crews": {
+                "test_crew": {
+                    "steps": [
+                        {"task_key": "task1", "agent_key": "agent1"},
+                        {"task_key": "task2", "agent_key": "agent2"},
+                    ]
+                }
+            },
+        }
+
+        manager = AtomicCrewFileManager(
+            llm=LLM(model="gpt-4o-mini"),
+            app_config_path=self.app_config_path,
+            job_config=job_config,
+            model_name="gpt-4",
+        )
+
+        crew = manager.build_atomic_crew("test_crew")
+
+        # Both steps' agents and tasks must have accumulated into the one Crew --
+        # the exact thing the old per-step-fresh-builder code silently dropped.
+        self.assertEqual(len(crew.agents), 2)
+        self.assertEqual(len(crew.tasks), 2)
+        self.assertEqual({a.role for a in crew.agents}, {"Agent One", "Agent Two"})
+        # Task Two's context resolves to the real Task One object -- this is
+        # exactly the lookup that used to raise "Context task 'Task One' not
+        # found" because Task One lived in a builder that no longer existed.
+        task_two = next(t for t in crew.tasks if t.name == "Task Two")
+        self.assertEqual(len(task_two.context), 1)
+        self.assertEqual(task_two.context[0].name, "Task One")
 
     def test_build_atomic_crew_missing_files(self):
         from crewai import LLM
