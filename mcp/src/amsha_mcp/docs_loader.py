@@ -95,17 +95,19 @@ def read_proposal() -> dict[str, Path]:
 
 def read_top_level_markdown() -> dict[str, Path]:
     """Target-repo root markdown we serve: README, USER_GUIDE, AGENTS."""
-    if not _REPO_ROOT:
+    root = repo_root()
+    if not root:
         return {}
     names = ["README.md", "USER_GUIDE.md", "AGENTS.md", "DEPENDENCIES.md"]
-    return {n: _REPO_ROOT / n for n in names if (_REPO_ROOT / n).is_file()}
+    return {n: root / n for n in names if (root / n).is_file()}
 
 
 def read_features_docs() -> dict[str, Path]:
     """Target-repo docs/feature/*/About.md keyed by module name (flat)."""
-    if not _REPO_ROOT:
+    root = repo_root()
+    if not root:
         return {}
-    base = _REPO_ROOT / "docs" / "feature"
+    base = root / "docs" / "feature"
     if not base.is_dir():
         return {}
     result: dict[str, Path] = {}
@@ -118,9 +120,15 @@ def read_features_docs() -> dict[str, Path]:
 # Module inventory (source of truth = the real src tree, not a hand list)
 # ---------------------------------------------------------------------------
 
-# Public runtime modules under src/nikhil/amsha. `integration_tests` and
-# `common` are not user-facing capabilities, so they're listed separately.
+# Public runtime modules under src/nikhil/amsha, in dependency order.
+#
+# `common` is deliberately NOT listed: it holds cross-cutting internals
+# (the logger, rotation helpers) rather than a capability a user selects, so
+# `list_amsha_modules()` would offer it as something to inspect. The
+# exclusion is intentional and its rationale lives here. `integration_tests`
+# is not a runtime module and is likewise not served.
 RUNTIME_MODULES = [
+    "configuration",
     "crew_forge",
     "crew_monitor",
     "execution_runtime",
@@ -131,6 +139,7 @@ RUNTIME_MODULES = [
 ]
 
 _MODULE_PURPOSE = {
+    "configuration": "Layered config loading and validation (YAML, env, pydantic-settings) for crews, jobs, and LLMs.",
     "crew_forge": "Parse YAML/MongoDB crew definitions, build CrewAI crews/flows, and execute them.",
     "crew_monitor": "Real-time CPU/GPU/memory tracking, event-lifecycle logs, contribution analysis, and Excel reports.",
     "execution_runtime": "Runtime coordination and services shared by crew/flows during execution.",
@@ -143,9 +152,10 @@ _MODULE_PURPOSE = {
 
 def runtime_modules() -> dict[str, str]:
     """{module_name: one-line purpose} from the real src dir + README purposes."""
-    if not _REPO_ROOT:
+    root = repo_root()
+    if not root:
         return {}
-    src = _REPO_ROOT / "src" / "nikhil" / "amsha"
+    src = root / "src" / "nikhil" / "amsha"
     present = {
         d.name
         for d in (src.iterdir() if src.is_dir() else [])
@@ -157,9 +167,10 @@ def runtime_modules() -> dict[str, str]:
 
 def source_files_for(module: str) -> list[str]:
     """Relative paths of every non-pyc .py file under a module's src dir."""
-    if not _REPO_ROOT:
+    base = repo_root()
+    if not base:
         return []
-    root = _REPO_ROOT / "src" / "nikhil" / "amsha" / module
+    root = base / "src" / "nikhil" / "amsha" / module
     if not root.is_dir():
         return []
     files = [str(p.relative_to(root)) for p in sorted(root.rglob("*.py")) if not p.name.endswith(".pyc")]
@@ -189,9 +200,10 @@ def get_preview(path: Path, max_lines: int = 15) -> str:
 
 def extract_quickstart() -> str:
     """Return the `## Quick Start` code block from the target repo's README."""
-    if not _REPO_ROOT:
+    root = repo_root()
+    if not root:
         return ""
-    text = _read(_REPO_ROOT / "README.md")
+    text = _read(root / "README.md")
     if not text:
         return ""
     m = re.search(r"## Quick Start[^\n]*\n(.*?)(?=\n## |\Z)", text, re.S)
@@ -200,9 +212,10 @@ def extract_quickstart() -> str:
 
 def extract_installation() -> str:
     """Return the `## Installation` section from the target repo's README."""
-    if not _REPO_ROOT:
+    root = repo_root()
+    if not root:
         return ""
-    text = _read(_REPO_ROOT / "README.md")
+    text = _read(root / "README.md")
     if not text:
         return ""
     m = re.search(r"## Installation[^\n]*\n(.*?)(?=\n## |\Z)", text, re.S)

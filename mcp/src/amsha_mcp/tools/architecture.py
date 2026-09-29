@@ -50,11 +50,24 @@ def _missing_fields(stage: str, artifact: dict) -> list[str]:
 
 
 def _stage_content(stage: str) -> str:
-    path = dl.repo_root() / "mcp" / "docs" / "prerequisite" / _STAGE_DOC[stage]
+    """Bundled prerequisite doc for a stage, resolved through the loader.
+
+    Goes through docs_loader instead of joining a repository path: the
+    documents ship inside the package, so a repo-relative path resolved to
+    nothing after the docs moved to src/amsha_mcp/docs/ (commit ccc8f4c) and
+    the OSError below turned that into an empty string that read as success.
+    """
+    filename = _STAGE_DOC.get(stage)
+    if not filename:
+        return f"[No packaged document for prerequisite stage '{stage}']"
+    path = dl.read_prerequisite().get(filename)
+    if path is None:
+        return f"[Packaged document missing: prerequisite/{filename}]"
     try:
-        return path.read_text(encoding="utf-8")
-    except OSError:
-        return ""
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return f"[Unreadable packaged document prerequisite/{filename}: {exc}]"
+    return text or f"[Packaged document prerequisite/{filename} is empty]"
 
 
 def _valid_stage_or_error(stage: str) -> str | None:
