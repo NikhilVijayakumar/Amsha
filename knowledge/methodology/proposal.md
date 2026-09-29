@@ -6,10 +6,6 @@ tags: [amsha, methodology, proposals, openspec]
 generated: { by: "opencode/big-pickle", at: 2026-09-29T00:00:00Z }
 stale_after: 2026-12-29T00:00:00Z
 sources:
-  - id: proposal-archive
-    resource: ../../docs/proposal/archive
-    title: Archived numbered proposals (00-14)
-    author: team:amsha
   - id: openspec-root
     resource: ../../openspec
     title: OpenSpec change root
@@ -22,16 +18,11 @@ sources:
 
 # Methodology: proposals and OpenSpec
 
-**This concept describes the process. It does not contain the proposals.** The
-numbered history is at `docs/proposal/archive/` (00–14); new work is recorded
-as an OpenSpec change.
+**This concept describes the process.** New change intent is recorded through
+OpenSpec. The older numbered proposal documents have been retired from the
+active `docs/` tree as part of the migration to OKF and OpenSpec.
 
-## Two eras of change record
-
-**Numbered proposals (00–14, archived).** The historical record. Each
-answers: what is the problem, what changes, what is the impact. They are
-read, not executed. `04-crewai-version-migration.md` in particular records
-the migration that makes [AGENTS.md](../../AGENTS.md) §13 stale.
+## Current change record
 
 **OpenSpec changes (two roots).** The current process for anything that
 changes behaviour.

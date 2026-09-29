@@ -7,9 +7,13 @@ tags: [amsha, retired, crewai, generation]
 generated: { by: "opencode/big-pickle", at: 2026-09-29T00:00:00Z }
 stale_after: 2027-03-29T00:00:00Z
 sources:
-  - id: crew-gen-docs
-    resource: ../../docs/feature/crew_gen
-    title: Crew Gen feature documentation
+  - id: build-artifact
+    resource: ../../build/lib/amsha/crew_gen
+    title: Retained build artifact for the removed module
+    author: team:amsha
+  - id: docs-coverage-decision
+    resource: ../decisions/documentation-coverage.md
+    title: Documentation migration decision
     author: team:amsha
 ---
 
@@ -23,7 +27,6 @@ Amsha.
 - No `crew_gen` directory exists under `src/nikhil/amsha/`.
 - A stale copy survives at `build/lib/amsha/crew_gen/`. `build/` is a build
   artefact directory and is not a source of truth; nothing imports from it.
-- Documentation remains at `docs/feature/crew_gen/`.
 - The MCP server does not list it among its runtime modules.
 
 ## Why it is recorded rather than deleted
@@ -37,9 +40,8 @@ used to do, and the gap is worth keeping visible so it is not reintroduced
 accidentally.
 
 `status: deprecated` is the OKF lifecycle value for "kept for links and
-history; no longer current" — distinct from deleting the concept, which
-would break the documentation link from
-[`docs/feature/crew_gen/`](../../docs/feature/crew_gen/).
+history; no longer current" — distinct from deleting the concept entirely,
+which would erase the retirement record.
 
 ## Successor
 

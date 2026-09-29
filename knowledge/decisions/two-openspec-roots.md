@@ -10,16 +10,11 @@ sources:
     resource: ../../mcp/pyproject.toml
     title: amsha-mcp package configuration
     author: team:amsha
-  - id: proposal-15
-    resource: ../../docs/proposal/openspec-okf/proposal.md
-    title: Proposal 15 — OpenSpec + OKF adoption
-    author: team:amsha
 ---
 
 # Decision: two OpenSpec roots, not one
 
-**Status:** in effect. Recorded in
-[Proposal 15](../../docs/proposal/openspec-okf/proposal.md).
+**Status:** in effect.
 
 ## Context
 

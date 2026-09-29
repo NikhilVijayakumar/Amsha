@@ -10,9 +10,6 @@ sources:
     resource: ../../src/nikhil/amsha/llm_factory
     title: LLM Factory source tree
     author: team:amsha
-  - id: llm-factory-docs
-    resource: ../../docs/feature/llm_factory
-    title: LLM Factory feature documentation
 ---
 
 # LLM Factory

@@ -10,9 +10,6 @@ sources:
     resource: ../../src/nikhil/amsha/crew_monitor
     title: Crew Monitor source tree
     author: team:amsha
-  - id: crew-monitor-docs
-    resource: ../../docs/feature/crew_monitor
-    title: Crew Monitor feature documentation
 ---
 
 # Crew Monitor

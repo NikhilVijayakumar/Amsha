@@ -10,9 +10,6 @@ sources:
     resource: ../../src/nikhil/amsha/crew_forge
     title: Crew Forge source tree
     author: team:amsha
-  - id: crew-forge-docs
-    resource: ../../docs/feature/crew_forge
-    title: Crew Forge feature documentation
 ---
 
 # Crew Forge
