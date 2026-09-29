@@ -1,0 +1,52 @@
+schema: spec-driven
+
+context: |
+  amsha-mcp is a standalone MCP server exposing Amsha's crew-design
+  methodology as agent tools. Version 0.1.0. Python package `amsha_mcp`,
+  entry point `mcp/src/amsha_mcp/server.py`.
+
+  Standalone by design: the wheel carries both code and documentation
+  (`pyproject.toml` package-data `amsha_mcp = ["docs/**/*.md"]`), so an
+  installed server answers questions about Amsha without the source repo.
+
+  Two knowledge planes, enforced by `docs_loader.py`:
+    - Product  — `_DOCS` (PACKAGE_ROOT/docs), always available, no repo needed.
+    - Repo     — `_REPO_ROOT`, every entry point guarded by
+                 `if not _REPO_ROOT: return {}`, degrades to empty.
+  Invariant: product knowledge must never depend on repo knowledge.
+
+  Bundled methodology docs are runtime DATA, versioned with the wheel:
+    prerequisite/  (stages 00-09)  — read via `read_prerequisite()`
+    implementation/(topics 00-23)  — read via `read_implementation()`
+    proposal/      (archive + 08)  — read via `read_proposal()`
+  Their filenames are hardcoded in `_STAGE_DOC` and `_STAGE_DOC_FILE`.
+  Do not rename, move, or add YAML frontmatter to them: `get_preview()`
+  does not strip frontmatter, and it would leak into agent-visible text.
+
+  The loader must never reconstruct package paths from the repository
+  layout. Resolve through `docs_loader` accessors only.
+
+  The module inventory in `RUNTIME_MODULES` is the server's own view of
+  `src/nikhil/amsha/`. It is expected to match the source tree except for
+  `common`, which is intentionally internal and unserved.
+
+  Verification tools are deterministic and no-LLM: `verify_crew_yaml`,
+  `dry_run_parse`, `verify_prerequisite_files`, `smoke_test`,
+  `score_crew`, `verify_alignment`. Their findings are the evidence layer
+  for OKF `verified[]` entries in the Amsha repository's `knowledge/`.
+
+rules:
+  proposal:
+    - State whether the change alters the published wheel's contents.
+    - State explicitly whether standalone operation (no repo registered)
+      still holds after the change.
+  specs:
+    - Use SHALL/MUST. Every requirement needs at least one scenario.
+    - Scenarios are exactly `####` (four hashtags).
+    - New capabilities include a `## Purpose` of at least 50 characters.
+  design:
+    - Any change to `docs_loader.py` must state which plane it affects.
+    - Repo-plane additions must keep the `if not _REPO_ROOT` guard.
+  tasks:
+    - Each task states its own verification (command, or test).
+    - Changes under `src/amsha_mcp/docs/` require a wheel-rebuild smoke test.

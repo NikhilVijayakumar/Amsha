@@ -1,0 +1,56 @@
+schema: spec-driven
+
+context: |
+  Amsha is a lightweight common library for CrewAI orchestration, version 2.11.4.
+  Python >=3.12,<3.14. Distributed as `amsha` from `src/nikhil/amsha/`.
+
+  Architecture: Clean Architecture with a hard dependency rule. Inner layers
+  (domain, repository interfaces) never import outer layers (adapters, API).
+  Layer order: Domain <- Service/Application <- Orchestrator <- Infrastructure.
+
+  Interfaces: `ABC` + `@abstractmethod` for internal repository contracts
+  (IAgentRepository, ITaskRepository). `typing.Protocol` for client-facing
+  boundaries (BotManagerProtocol) and extension points. Concrete Pydantic
+  BaseModel for every DTO — never a Protocol for data.
+
+  Wiring: dependency-injector only. All containers in `dependency/containers.py`.
+  Services receive collaborators via `__init__`; they never construct them.
+
+  Modules: crew_forge, crew_monitor, execution_runtime, execution_state,
+  llm_factory, output_process, common, configuration, utils.
+
+  Docs: `knowledge/` is the OKF bundle (durable system knowledge).
+  `AGENTS.md` is the coding constitution and is authoritative for standards.
+  Each `openspec/specs/<capability>/spec.md` links its OKF concept in
+  `knowledge/features/<capability>.md` — specs state behaviour, the OKF
+  concept states role and context. Do not restate one in the other.
+
+  Versioning: MAJOR.MINOR.PATCH. Breaking public-API change bumps MAJOR.
+  Amsha pins exact dependency versions; clients may use ranges.
+
+  Testing: pytest, unit tests with mocked repositories under `tests/unit/`,
+  integration under `tests/integration/`. Service layer targets 80%+ coverage,
+  public API methods 100%.
+
+  Conventions: absolute imports only. Pydantic models for all data. No magic
+  values. Structured logging through `amsha.common.logger.get_logger()`.
+  Custom exceptions per component under `exceptions/`, never bare
+  `Exception`/`ValueError` for domain logic.
+
+rules:
+  proposal:
+    - Name the affected modules from the list above.
+    - State explicitly whether the change alters externally visible behaviour;
+      pure refactors, tooling and docs-only work set `skip_specs: true`.
+  specs:
+    - Use SHALL/MUST. Every requirement needs at least one scenario.
+    - Scenarios are exactly `####` (four hashes).
+    - New capabilities include a `## Purpose` of at least 50 characters.
+    - Link the owning OKF concept from `knowledge/features/` when one exists.
+  design:
+    - Respect the Clean Architecture dependency rule explicitly.
+    - State whether the change touches a distributed artifact
+      (`mcp/src/amsha_mcp/` ships inside the published wheel).
+  tasks:
+    - Each task states its own verification (test, command, or artifact).
+    - A task group lands the tests and docs its own work calls for.
