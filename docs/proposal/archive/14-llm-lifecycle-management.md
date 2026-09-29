@@ -6,7 +6,7 @@
 | **Priority** | New — requested directly |
 | **Risk** | Medium — makes real HTTP calls that unload/load models on a local server before a crew runs; wrong config could unload a model another process depends on |
 | **Effort** | Medium |
-| **Depends on** | Nothing in `crew_forge` — this is `llm_factory`-only. Follows the same "opt-in, off by default" precedent as [04](archive/04-memory-adoption.md)/[05](archive/05-checkpointing-consolidation.md)/[13](13-observability-tracing.md) |
+| **Depends on** | Nothing in `crew_forge` — this is `llm_factory`-only. Follows the same "opt-in, off by default" precedent as [04](04-memory-adoption.md)/[05](05-checkpointing-consolidation.md)/[13](13-observability-tracing.md) |
 | **Scope** | **LM Studio only. Local server only.** Explicitly not Ollama, not any cloud provider (OpenAI, Azure, Gemini, OpenRouter) |
 
 ## Execution Log (2026-09-03)
