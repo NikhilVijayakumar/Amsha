@@ -441,10 +441,12 @@ Before committing code, verify:
 - Dependencies declared here are installed when clients do `pip install amsha`
 - These appear in `[project].dependencies`
 
-**Development Dependencies:** Managed in **`requirements.txt`**
-- Tools for development only (pre-commit, mypy, black, pytest)
+**Development Dependencies:** Managed in **`pyproject.toml` → `[dependency-groups] dev`**
+- Tools for development only (pytest, pytest-cov, hypothesis)
 - NOT installed when clients use Amsha
 - Only needed by Amsha developers
+- There is **no `requirements.txt`** in this repository. If you are reading a
+  version of this section that references one, it is out of date.
 
 **Why this split?**
 - Clients shouldn't install dev tools (black, mypy) just to use Amsha
@@ -461,21 +463,19 @@ Before committing code, verify:
 ### Rules
 
 1. **Adding Production Dependencies to Amsha:**
-   ```bash
-   # Add to pyproject.toml [project].dependencies
-   # Also add to requirements.txt for dev consistency
+   ```toml
+   # pyproject.toml -> [project].dependencies
    ```
 
 2. **Adding Dev Dependencies to Amsha:**
-   ```bash
-   # Add ONLY to requirements.txt
-   # Examples: pre-commit, mypy, black, flake8, pytest
+   ```toml
+   # pyproject.toml -> [dependency-groups] dev
+   # Currently: hypothesis, pytest, pytest-cov
    ```
 
 3. **Client Projects:**
-   ```bash
+   ```toml
    # Use pyproject.toml exclusively
-   # Add amsha as dependency
    dependencies = [
        "amsha==2.11.4",
        "other-deps..."
@@ -483,37 +483,95 @@ Before committing code, verify:
    ```
 
 4. **Version Pinning:**
-   - **Amsha:** Pin exact versions (`pydantic==2.11.9`)
+   - **Amsha:** Pin exact versions (`pydantic == 2.11.9`)
    - **Clients:** Can use ranges (`amsha>=1.5.0,<2.0.0`)
 
-### Current Setup
+### Do Not Restate the Dependency List Here
 
-**pyproject.toml** (Production):
-```toml
-[project]
-name = "Amsha"
-version = "2.11.4"
-dependencies = [
-    "PyYAML==6.0.3",
-    "crewai==0.201.1",
-    "dependency-injector==4.48.2",
-    "pandas==2.3.2",
-    # ... etc
-]
+**This section intentionally contains no copy of the dependency set.** Read it
+from `pyproject.toml`, which is the single source of truth:
+
+- `[project].requires-python` — the supported Python range
+- `[project].dependencies` — production dependencies
+- `[dependency-groups] dev` — development-only dependencies
+
+A second copy in prose is the same duplication this repository's OpenSpec/OKF
+adoption exists to remove, and it goes stale silently: an earlier version of
+this section still prescribed `crewai == 0.201.1` and Python 3.10+ from before
+the CrewAI 1.x migration that archived proposal 02 records as Done.
+
+Note also that there is **no pre-commit dependency and no
+`.pre-commit-config.yaml`** in this repository. The OKF linter therefore ships
+as a standalone script (`python3 scripts/okf_lint.py`), not as a hook.
+
+---
+
+## 14. OpenSpec & OKF Governance
+
+This repository keeps **two** description systems. They are not
+interchangeable, and conflating them is the failure this section exists to
+prevent.
+
+| | **OpenSpec** `openspec/` | **OKF** `knowledge/` |
+|---|---|---|
+| Answers | What behaviour **must be true** | What we **know** about the system |
+| Format | `### Requirement:` + `#### Scenario:` | Prose: role, boundaries, rationale |
+| Lifetime | Grows from the next real change | Durable, years |
+| Validation | `openspec validate --specs --strict` | `python3 scripts/okf_lint.py` |
+| Records | `openspec/specs/`, `openspec/changes/` | `knowledge/features|methodology|contracts|decisions/` |
+
+**They link; they do not merge.** Every spec links its owning concept in
+`knowledge/features/`. Do not add custom frontmatter to bridge them — `id:` and
+`context:` are not OKF v0.2 fields, and inventing them forks the spec.
+
+### Two OpenSpec roots
+
+`mcp/` has its own independent root. OpenSpec resolves the nearest root by
+walking up, so `mcp/openspec/` wins inside `mcp/` and the repository root wins
+elsewhere. Validate each from its own directory:
+
+```bash
+openspec validate --specs --strict          # Amsha library, from repo root
+cd mcp && openspec validate --strict        # amsha-mcp, from mcp/
 ```
 
-**requirements.txt** (Development):
-```
-# Production dependencies (mirrors pyproject.toml)
-PyYAML == 6.0.2
-crewai == 0.201.1
-# ... etc
+### When to change what
 
-# Development-only dependencies
-pre-commit == 3.6.0
-mypy == 1.8.0
-black == 24.2.0
-pytest == 7.4.0
+| You are | Write to | Never |
+|---|---|---|
+| Changing observable behaviour | a new `openspec/changes/<id>/` with a delta spec, then archive | edit `openspec/specs/` directly |
+| Documenting existing behaviour | `knowledge/features/<module>.md` | a spec requirement asserting unimplemented code |
+| Both | spec for the *requirement*, knowledge for the *why* | one restating the other |
+
+**Specs are current-state; changes are how you get there.** If code and spec
+disagree, that is a finding — do not quietly relax the spec to match the bug.
+Phase 4 of proposal 15 deliberately left `utils` as a *failing* spec rather than
+weakening it to describe the current `exit()` bug.
+
+### The two knowledge planes (MCP)
+
+| Plane | Source | Ships in the wheel? |
+|---|---|---|
+| **Product** | `mcp/src/amsha_mcp/docs/` (43 files) | Yes — must stay byte-identical |
+| **Repository** | `knowledge/`, `docs/feature/`, `AGENTS.md`, `README.md` | No — repo-side only |
+
+> **Invariant:** MCP runtime knowledge is self-contained within the distributable.
+> Repository knowledge may describe the MCP; the MCP must never require it.
+
+A repo-side read MUST be guarded (`if not root: return {}`) so the standalone
+wheel still works with no repository registered. Verify by building the wheel
+and querying it with `AMSHA_MCP_TARGET_REPO` unset.
+
+### Validation is not automatic
+
+There is no CI in this repository, so nothing runs these validators for you.
+Run both before committing anything that touches `openspec/` or `knowledge/`:
+
+```bash
+openspec validate --specs --strict && python3 scripts/okf_lint.py
 ```
+
+Or run the `/verify-governance` command, which does both plus the link check.
+
 
 

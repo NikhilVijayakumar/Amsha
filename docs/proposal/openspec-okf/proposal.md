@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress — Phase 6 pre-staged |
+| **Status** | ✅ **Complete** — all 9 phases implemented and committed (11 commits, no push). One code fix deliberately deferred: see decision 8 |
 | **Date** | 2026-09-29 |
 | **Author** | Nikhil (compiled with Claude) |
 | **Priority** | High — unblocks agent context control; three live defects fixed en route |
@@ -50,10 +50,17 @@ This is the central architectural idea, and **it is not new — the code already
 
 | Plane | Source | Guard | Behaviour with no repo |
 |---|---|---|---|
-| **Product** | `_DOCS = PACKAGE_ROOT / "docs"` (`:25`, used `:77`) | none | always serves |
-| **Repository** | `_REPO_ROOT` (`:98, :106, :146, :160, :192, :203`) | `if not _REPO_ROOT: return {}` | returns `{}` |
+| **Product** | `_DOCS = PACKAGE_ROOT / "docs"` (`:25`) | none | always serves |
+| **Repository** | `repo_root()` (`:44`) | `if not root: return {}` | returns `{}` |
 
-Six guarded entry points, one unguarded. The standalone-wheel property is already enforced structurally, per `docs_loader.py:5-7`: *"These never depend on an outer-repo layout; a standalone wheel carries them."*
+Six guarded entry points, one unguarded. The standalone-wheel property is
+already enforced structurally, per `docs_loader.py:5-7`: *"These never depend on
+an outer-repo layout; a standalone wheel carries them."*
+
+> **Note (Phase 2, post-change):** the six repo-plane accessors originally read
+> the `_REPO_ROOT` module global directly. They now call `repo_root()`, so they
+> observe the same resolved root the loader itself uses — one resolution point
+> instead of seven. The guard count is unchanged.
 
 This proposal **documents that boundary** rather than inventing one.
 
@@ -105,13 +112,13 @@ OpenSpec resolves the **nearest qualifying root** by walking up (`dist/core/root
 |---|---|---|---|
 | **0** | Baseline inventory | Read-only. Counts: 9 modules, 26 skills, 43 packaged docs, 14 proposals, AGENTS.md defect list | Nothing modified |
 | **1** | Fix `AGENTS.md` | Remove the truncated duplicate; renumber 9–14 → 8–13; reconcile 4 version refs | ✅ **Done** — 713 → 519 lines, §1–13 sequential, one version string (2.11.4), checklist complete |
-| **2** | MCP fixes | Separate OpenSpec change, see below | `_stage_content()` returns text; `explain_module("configuration")` works |
-| **3** | `openspec init` ×2 | Root + `mcp/`, `--tools opencode` | `openspec list` works in both |
+| **2** | MCP fixes | Separate OpenSpec change, see below | ✅ **Done** — `_stage_content()` returns text for all 10 stages (3.5k–35k chars); `explain_module("configuration")` works, 8 modules served |
+| **3** | `openspec init` ×2 | Root + `mcp/`, `--tools opencode` | ✅ **Done** — both roots resolve independently; `mcp/` uses `--tools none` so no agent tooling enters the wheel |
 | **4** | Specs, 9 capabilities | `openspec/specs/<capability>/spec.md` | ✅ **Done** — 9 specs, 44 requirements, `openspec validate --specs --strict` clean; each links its `knowledge/features/` concept |
-| **5** | OKF bundle | `knowledge/` — 9 module concepts + 1 deprecated, 3 methodology playbooks, contracts, decisions | `type:` present on every non-reserved `.md` (§11) |
-| **6** | `docs/` reorg | Proposals → archive | **Already pre-staged** |
-| **7** | Loader: `knowledge/` as Plane 2 | Repo-side search only, keeps the `if not _REPO_ROOT` guard | Standalone wheel unaffected |
-| **8** | OKF linter | `scripts/okf_lint.py`: frontmatter parses, `type:` non-empty, `status` ∈ {draft, stable, deprecated}, ISO-8601 timestamps, actor convention, `index.md` carries no frontmatter | Standalone script — see note |
+| **5** | OKF bundle | `knowledge/` — 9 module concepts + 1 deprecated, 3 methodology playbooks, contracts, decisions | ✅ **Done** — 17 concepts + 5 indexes; `scripts/okf_lint.py` reports "17 concepts, conformant with OKF v0.2" |
+| **6** | `docs/` reorg | Proposals → archive | ✅ **Done** — proposals 12–14 archived; 00 deliberately left live. Name collision found and resolved, see below |
+| **7** | Loader: `knowledge/` as Plane 2 | Repo-side search only, keeps the `if not _REPO_ROOT` guard | ✅ **Done** — `read_knowledge_bundle()` indexes 22 files repo-side; wheel query with no repo returns `{}` |
+| **8** | OKF linter | `scripts/okf_lint.py`: frontmatter parses, `type:` non-empty, `status` ∈ {draft, stable, deprecated}, ISO-8601 timestamps, actor convention, `index.md` carries no frontmatter | ✅ **Done** — standalone script. Not yet wired to CI: the repo has no `.github/workflows`, so decision 5's "run it in CI" is still outstanding |
 
 ### Phase 2 as a separate change
 
@@ -120,19 +127,38 @@ The two MCP bugs are code defects, not documentation architecture. They ship as 
 - **Bug A** — `architecture.py:53` must use the loader abstraction that already knows the packaged location: `dl.read_prerequisite()[_STAGE_DOC[stage]]`, not a path reconstructed from the repository layout. Requirement: *The MCP MUST retrieve prerequisite documentation from the same package-resolved source used by the standalone runtime.*
 - **Bug B** — add `configuration` to `RUNTIME_MODULES`. Requirement: *The MCP MUST expose every supported Amsha runtime module.* This also enables a future consistency check comparing the OKF feature inventory against the MCP runtime inventory.
 
-### Phase 6 — current state
+### Phase 6 — outcome, and a filename collision found while executing
 
-Already staged in the working tree, uncommitted:
+Phase 6 arrived already staged in the working tree, and staging it revealed a
+problem this proposal had not anticipated. **Two different documents both named
+`00-overview-and-roadmap.md`:**
+
+| Path | Document | Status field |
+|---|---|---|
+| `docs/proposal/00-…` (top level) | Round 2 — "Overview & Roadmap (Round 2)" | *In progress* |
+| `docs/proposal/archive/00-…` (already in HEAD) | Round 1 — "Overview, **Gap Analysis** & Roadmap" | All phases done |
+
+Moving the top-level file into `archive/` therefore **overwrote Round 1**, which
+was the index for proposals 01–12. Committing that as staged would have left
+`archive/` holding 01–14 with no index, and would have contradicted Round 2's own
+History section ("the original 12-proposal roadmap is fully delivered and
+archived at `docs/proposal/archive/`. Start there for the history").
+
+Resolved by keeping both, as their own status fields imply:
 
 ```
-D  docs/proposal/00-overview-and-roadmap.md
-MM docs/proposal/archive/00-overview-and-roadmap.md
-R  docs/proposal/12-tools-and-mcp-adoption.md -> docs/proposal/archive/12-tools-and-mcp-adoption.md
-R  docs/proposal/13-observability-tracing.md -> docs/proposal/archive/13-observability-tracing.md
-RM docs/proposal/14-llm-lifecycle-management.md -> docs/proposal/archive/14-llm-lifecycle-management.md
+docs/proposal/00-overview-and-roadmap.md          # Round 2, still in progress
+docs/proposal/archive/00-overview-and-roadmap.md  # Round 1, restored
+docs/proposal/archive/{12,13,14}-*.md             # archived
 ```
 
-All 14 proposals now sit in `docs/proposal/archive/`, with relative links fixed (`archive/08-…` → `08-…`) to account for the extra directory level. This mirrors the existing `docs/archived/` convention rather than introducing `docs/legacy/proposal/`.
+A pre-existing broken link surfaced at the same time: Round 1 linked to
+`01-crewai-version-migration.md`, but 01 is the Nibandha removal and the CrewAI
+migration is 02. Fixed in its own commit rather than hidden inside the move.
+
+**Remaining live roadmap:** proposals 01–14 are archived and Round 2 is the only
+open roadmap. `docs/proposal/openspec-okf/` (this document) is the second open
+proposal.
 
 ---
 
@@ -140,7 +166,7 @@ All 14 proposals now sit in `docs/proposal/archive/`, with relative links fixed 
 
 ```
 knowledge/
-├── index.md                      # reserved filename, no frontmatter (§8)
+├── index.md                      # bundle root: may carry `okf_version` only (§8)
 ├── features/         common · configuration · crew-forge · crew-monitor
 │                      execution-runtime · execution-state · llm-factory
 │                      output-process · utils
@@ -159,10 +185,10 @@ knowledge/
 
 ## What NOT to do
 
-- **Do not add OKF frontmatter to `mcp/src/amsha_mcp/docs/`.** They are runtime data served verbatim to the LLM by `get_prerequisite_stage` / `get_implementation_guide`, and `get_preview` (`docs_loader.py:173-187`) does not strip frontmatter — it would leak into what the agent reads. (Note: `verify_prerequisite_files` is *not* at risk — `_YAML_FENCE` at `verification.py:1362` matches only fenced ` ```yaml ` blocks, never frontmatter.)
+- **Do not add OKF frontmatter to `mcp/src/amsha_mcp/docs/`.** They are runtime data served verbatim to the LLM by `get_prerequisite_stage` / `get_implementation_guide`, and `get_preview` (`docs_loader.py:206`) does not strip frontmatter — it would leak into what the agent reads. (Note: `verify_prerequisite_files` is *not* at risk — `_YAML_FENCE` at `verification.py:1362` matches only fenced ` ```yaml ` blocks, never frontmatter.)
 - **Do not let OpenSpec artifacts become first-class OKF concepts.** The lifecycles genuinely differ: a proposal runs `proposed → archived` in weeks; a domain concept stays valid for years. They link; they do not merge.
 - **Do not add an `evidence/` directory.** pytest, `docs/reference/testing/`, `.Amsha/Report` and coverage already hold evidence. A fourth store is a fourth thing to rot. Point at reproductions instead.
-- **Do not move `docs/feature/`.** `read_features_docs()` (`docs_loader.py:104-114`) globs `_REPO_ROOT/docs/feature/*/*.md`. Moving it silently empties the MCP's feature docs. Only `docs/proposal/` is safe to relocate — nothing reads it.
+- **Do not move `docs/feature/`.** `read_features_docs()` (`docs_loader.py:105`) globs `docs/feature/*/*.md` under the resolved repo root. Moving it silently empties the MCP's feature docs. Only `docs/proposal/` is safe to relocate — nothing reads it.
 - **Do not touch `.agent/`.** All 26 `.agent/skills/*/SKILL.md` carry frontmatter (`name`, `description`, `priority`) — they are the loadable definitions for a vibe-coding tool. `docs/reference/agent/skills/` is the human manual for the same 26 skills. The content matches (same stages, same venv enforcement, same `pyproject.toml` root discovery); the formats differ. These are two representations, not a fork. `docs/reference/agent/skills/` is inconsistently formatted — 14 files with frontmatter, 11 without — which signals hand-copying, not divergence. Delete nothing here.
 - **Do not bridge OKF and OpenSpec with custom frontmatter.** The obvious bridge (`id:` on both, `context:` holding a path list) is not OKF v0.2. Those fields do not exist. Bridging via custom keys means forking the spec. Link in markdown bodies instead.
 - **Do not make the MCP depend on repository knowledge.** Phase 7 adds `knowledge/` to the *repo-side* search surface only, behind the existing `if not _REPO_ROOT` guard. `_DOCS` never changes.
@@ -172,14 +198,33 @@ knowledge/
 
 ## Open decisions
 
-1. **`common` — serve it or mark it internal?** After the Bug B fix the MCP serves 8 of 9 modules; `common` remains unserved by deliberate comment. That breaks an exact OKF-vs-MCP inventory match. Options: (a) add `common` to `RUNTIME_MODULES`; (b) file `common` under `knowledge/contracts/` as an internal module and let OKF show 8-of-8; (c) record the mismatch as intentional. *Recommendation: (b) — `common` is cross-cutting logging, not a feature.*
-2. **Feature count.** Document 9 modules (mirrors `src/` exactly) or 8 (excludes `common` per (b))? *Recommendation: 9, with `common` typed as internal — a source tree is the least surprising thing to mirror.*
-3. **Linter placement.** `scripts/okf_lint.py` (repo convention) or inside `mcp/`? *Recommendation: `scripts/`, since OKF is repository knowledge.*
-4. **`AGENTS.md` §13 dependency staleness** — found during Phase 1, not fixed. The section prescribes `crewai == 0.201.1` and Python 3.10+ while the project runs `crewai == 1.15.18` on Python `>=3.12`. Options: (a) fix in this pass; (b) separate OpenSpec change `realign-agent-instruction-dependencies`; (c) replace the hand-maintained block with a pointer to `pyproject.toml` so it can never drift again. *Recommendation: (c) — the authoritative list already lives in `pyproject.toml`, and a second copy in prose is the same duplication class this proposal exists to remove.*
-5. **OKF linter wiring.** `AGENTS.md` §13 claims `pre-commit` is a dev dependency, but `requirements.txt` does not list it, there is no `.pre-commit-config.yaml`, and `.git/hooks/` holds only samples. The linter therefore ships as a standalone `python3 scripts/okf_lint.py` rather than a hook. Options: (a) leave standalone, run it in CI; (b) add a real `.pre-commit-config.yaml` and the dependency, which also means fixing the §13 drift; (c) add a plain `.git/hooks/pre-commit` shim with no new dependency. *Recommendation: (a) now, (b) as part of the §13 realignment in decision 4 — a hook that is not installed because the config was never written is worse than no hook, and this leaves the drift visible instead of papering over it.*
+1. **`common` — serve it or mark it internal?** After the Bug B fix the MCP serves 8 of 9 modules; `common` remains unserved by deliberate comment. That breaks an exact OKF-vs-MCP inventory match. Options: (a) add `common` to `RUNTIME_MODULES`; (b) file `common` under `knowledge/contracts/` as an internal module and let OKF show 8-of-8; (c) record the mismatch as intentional. *Recommendation: (b) — `common` is cross-cutting logging, not a feature.* **Resolved as (b), with the rationale recorded in `docs_loader.py` itself and in `knowledge/features/common.md`.** Filed under `knowledge/features/` rather than `contracts/` so the source tree still mirrors 9-for-9; `tags: [internal]` carries the distinction OKF actually has a field for.
+2. **Feature count.** Document 9 modules (mirrors `src/` exactly) or 8 (excludes `common` per (b))? *Recommendation: 9, with `common` typed as internal — a source tree is the least surprising thing to mirror.* **Resolved as 9 concepts + 1 deprecated `crew-gen` = 10 files, of which 9 are live modules.**
+3. **Linter placement.** `scripts/okf_lint.py` (repo convention) or inside `mcp/`? *Recommendation: `scripts/`, since OKF is repository knowledge.* **Resolved: `scripts/okf_lint.py`.**
+4. **`AGENTS.md` §13 dependency staleness** — found during Phase 1, not fixed. The section prescribes `crewai == 0.201.1` and Python 3.10+ while the project runs `crewai == 1.15.18` on Python `>=3.12`. Options: (a) fix in this pass; (b) separate OpenSpec change `realign-agent-instruction-dependencies`; (c) replace the hand-maintained block with a pointer to `pyproject.toml` so it can never drift again. *Recommendation: (c) — the authoritative list already lives in `pyproject.toml`, and a second copy in prose is the same duplication class this proposal exists to remove.* **Resolved as (c)**: §13 no longer restates the dependency set and points at `pyproject.toml` instead, which retires the `crewai == 0.201.1` / `PyYAML == 6.0.2` / Python 3.10+ drift permanently rather than re-stating newer numbers that would drift again. This also retires the false `pre-commit` claim in decision 5.
+5. **OKF linter wiring.** `AGENTS.md` §13 claims `pre-commit` is a dev dependency, but `requirements.txt` does not list it, there is no `.pre-commit-config.yaml`, and `.git/hooks/` holds only samples. The linter therefore ships as a standalone `python3 scripts/okf_lint.py` rather than a hook. Options: (a) leave standalone, run it in CI; (b) add a real `.pre-commit-config.yaml` and the dependency, which also means fixing the §13 drift; (c) add a plain `.git/hooks/pre-commit` shim with no new dependency. *Recommendation: (a) now, (b) as part of the §13 realignment in decision 4 — a hook that is not installed because the config was never written is worse than no hook, and this leaves the drift visible instead of papering over it.* **Partially resolved: (a) shipped** as `python3 scripts/okf_lint.py`. The CI half is **still outstanding** — the repo has no `.github/workflows/`, so nothing runs the linter automatically yet.
 6. **The linter found a bug in itself.** `sources[].author: team:...` appears in the OKF v0.2 specification's own normative examples (§5.1 and appendix A) but is not one of the three forms §7 defines. The first version of the check rejected it, making the linter stricter than the document it implements. It now accepts `team:` for `sources[].author` only, with a comment saying why, and still rejects it for `generated.by` / `verified[].by`. A second bug: PyYAML resolves a bare out-of-range scalar such as `2026-13-45` as an implicit timestamp and then raises `ValueError`, which is not a `YAMLError` — so a malformed `stale_after` crashed the linter instead of being reported. Both load sites now catch it.
 7. **What Phase 4 is allowed to assert about unimplemented code.** `output_process/evaluation/` (3 files) and `output_process/validation/` (2 files) are zero-byte stubs, and `crew_forge/repo/` + `crew_forge/dependency/` are empty. Writing the obvious requirements for them would produce a spec that validates and describes software that does not exist. Two options: (a) omit them and let the specs be silent; (b) state the boundary as a requirement. *Decision: (b).* `specs/output-process/spec.md` carries an explicit requirement that evaluation and validation are **not** provided, with a scenario requiring the caller be told so rather than handed an empty-but-successful result. Silence would let a client assume a capability exists; a `TBD` would validate. When either is implemented, the requirement is MODIFIED — the spec makes the gap visible instead of hiding it. Same reasoning, applied silently, is why no `crew-forge` requirement promises a shipped repository adapter: the ABCs are specified, the adapters are a client responsibility.
-8. **Phase 4 surfaced a real defect in `utils`.** `YamlUtils.yaml_safe_load` handles a missing or unparseable file with `print(...)` followed by bare `exit()` (`utils/yaml_utils.py:16,19`). Inside a library, that raises `SystemExit` and kills the host process instead of surfacing a recoverable error — and it contradicts `AGENTS.md` §5, which forbids bare generic errors for domain conditions. `JsonUtils`, in the same package, already does the right thing (reports and returns `None`). `specs/utils/spec.md` specifies the correct contract — report a configuration error naming the path, do not terminate the host — so the divergence is now a failing spec rather than invisible behaviour. **Not fixed in this pass:** a behaviour change needs its own change, per this proposal's own rule that specs are current-state and changes are separate. Candidate: `fix-utils-yaml-load-failure-handling`.
+8. **Phase 4 surfaced a real defect in `utils`.** `YamlUtils.yaml_safe_load` handles a missing or unparseable file with `print(...)` followed by bare `exit()` (`utils/yaml_utils.py:16,19`). Inside a library, that raises `SystemExit` and kills the host process instead of surfacing a recoverable error — and it contradicts `AGENTS.md` §5, which forbids bare generic errors for domain conditions. `JsonUtils`, in the same package, already does the right thing (reports and returns `None`). `specs/utils/spec.md` specifies the correct contract — report a configuration error naming the path, do not terminate the host — so the divergence is now a failing spec rather than invisible behaviour. **Not fixed in this pass:** a behaviour change needs its own change, per this proposal's own rule that specs are current-state and changes are separate. Candidate: `   fix-utils-yaml-load-failure-handling`.
+9. **The opencode MCP server is a stale frozen build.** Verifying the Phase 2
+   gates through the source tree, then checking what opencode actually invokes,
+   turned up that `~/.config/opencode/opencode.json` launches
+   `/home/dell/mcp/amsha/dist/amsha-mcp/amsha-mcp` — a PyInstaller build dated
+   **2026-09-14**, i.e. two weeks before this proposal's work landed. Its payload
+   contains no `read_knowledge_bundle`, no `configuration` entry, and no
+   `knowledge/` directory. So the MCP tools an agent reaches for during a session
+   are **not** the code in this repository until that binary is rebuilt or the
+   config is repointed at the source. *This proposal fixes nothing here* — the
+   binary and the global config are outside its stated scope (`Scope` above lists
+   `mcp/src/amsha_mcp/...`, not the frozen artifact). Flagged so the gap is
+   deliberate rather than assumed away.
+10. **The MCP test suite cannot currently go green in this environment.** 25 of 51
+    tests fail with `ModuleNotFoundError: No module named 'mcp'` because the MCP
+    **SDK** (`mcp>=1.0.0,<2`, a declared dependency of `mcp/pyproject.toml`) is
+    not installed. From the repository root, `import mcp` instead resolves to the
+    local `mcp/` *directory* as an implicit namespace package, which masks the
+    real error. Installing the SDK is an environment fix, not a code change; the
+    failure set is byte-identical before and after this proposal's work.
 
 
 ---

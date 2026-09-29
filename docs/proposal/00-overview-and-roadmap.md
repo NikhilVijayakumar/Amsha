@@ -15,8 +15,8 @@ The original 12-proposal roadmap (0.201.1 → 1.15.18 migration, Mongo removal, 
 
 | # | Proposal | Status | Why it's here |
 |---|---|---|---|
-| [12](12-tools-and-mcp-adoption.md) | Tools & MCP Integration (stdio-preferred) | ✅ Partial | Part 1 (Tools) done; Part 2 (MCP) config passthrough done, lifecycle deferred |
-| [13](13-observability-tracing.md) | Observability: Native Tracing vs. the Event Bus | ✅ Done | Tracing passthrough wired, default off |
+| [12](archive/12-tools-and-mcp-adoption.md) | Tools & MCP Integration (stdio-preferred) | ✅ Partial | Part 1 (Tools) done; Part 2 (MCP) config passthrough done, lifecycle deferred |
+| [13](archive/13-observability-tracing.md) | Observability: Native Tracing vs. the Event Bus | ✅ Done | Tracing passthrough wired, default off |
 
 ## Sequencing
 
