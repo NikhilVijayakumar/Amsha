@@ -205,7 +205,7 @@ To add a new backend (e.g., REST API source):
 
 ---
 
-## 9. Public API & Client Communication
+## 8. Public API & Client Communication
 
 **Rule:** The communication boundary between `Amsha` and Client Apps must be defined by **Protocols**, not Concrete Classes.
 
@@ -236,9 +236,9 @@ To add a new backend (e.g., REST API source):
 
 ---
 
-## 10. Versioning & Backward Compatibility
+## 9. Versioning & Backward Compatibility
 
-**Current Version:** 2.0.9
+**Current Version:** 2.11.4
 
 ### Semantic Versioning (MAJOR.MINOR.PATCH)
 
@@ -281,7 +281,7 @@ To add a new backend (e.g., REST API source):
 
 ---
 
-## 11. Testing Standards
+## 10. Testing Standards
 
 **Philosophy:** Common libraries must be thoroughly tested since bugs affect multiple projects.
 
@@ -328,7 +328,7 @@ tests/
 
 ---
 
-## 12. Documentation Standards
+## 11. Documentation Standards
 
 ### Code Documentation
 
@@ -368,201 +368,7 @@ tests/
 
 ---
 
-## 13. Common Patterns & Anti-Patterns
-
-### ✅ DO: Patterns to Follow
-
-```python
-# ✅ Dependency Injection
-class CrewOrchestrator:
-    def __init__(self, agent_repo: IAgentRepository):
-        self.agent_repo = agent_repo
-
-# ✅ Config-Driven Behavior
-llm_type = config.get("llm_type", LLMType.CREATIVE)
-
-# ✅ Custom Exceptions
-raise AgentNotFoundException(agent_id)
-
-# ✅ Type Hints
-def process(self, data: AgentRequest) -> AgentResponse:
-
-# ✅ Protocol for External APIs
-class OutputHandler(Protocol):
-    def handle(self, output: str) -> None: ...
-```
-
-### ❌ DON'T: Anti-Patterns
-
-```python
-# ❌ Manual Instantiation
-self.repo = MongoAgentRepository()  # Should be injected
-
-# ❌ Hardcoded Logic
-if project == "ProjectX":  # Should be config-driven
-
-# ❌ Generic Exceptions
-raise Exception("Failed")  # Use custom exceptions
-
-# ❌ Missing Type Hints
-def process(self, data):  # Missing types
-
-# ❌ Leaking Implementation
-from .repo.adapters.mongo import MongoRepo  # Should import interface
-```
-
----
-
-## Quick Reference Checklist
-
-Before committing code, verify:
-
-- [ ] **Architecture:** Does it follow dependency rule? (Inner layers don't depend on outer)
-- [ ] **DI:** Are dependencies injected, not instantiated?
-- [ ] **Interface:** Using `ABC` for repos, `Protocol` for client APIs?
-- [ ] **Exceptions:** Using custom exceptions from component `exceptions/` directory?
-- [ ] **Types:** All parameters and returns have type hints?
-- [ ] **Tests:** Unit tests written with mocked dependencies?
-    from .orchestrator.file import AmshaCrewFileApplication
-    
-    __all__ = ['AmshaCrewFileApplication']
-    ```
-
----
-
-## 10. Versioning & Backward Compatibility
-
-**Current Version:** 1.5.3
-
-### Semantic Versioning (MAJOR.MINOR.PATCH)
-
-*   **MAJOR (1.x.x):** Breaking changes to public API
-    -   Changing method signatures in `Protocol` interfaces
-    -   Removing public classes or methods
-    -   Changing required configuration structure
-
-*   **MINOR (x.5.x):** New features, backward-compatible
-    -   Adding new orchestration modes
-    -   Adding new optional parameters
-    -   New guardrails or validators
-
-*   **PATCH (x.x.3):** Bug fixes, backward-compatible
-    -   Fixing bugs in existing logic
-    -   Performance improvements
-    -   Documentation updates
-
-### Deprecation Policy
-
-1.  **Mark as Deprecated:** Add `@deprecated` decorator and warning
-    ```python
-    import warnings
-    
-    @deprecated("Use new_method() instead. Will be removed in 2.0.0")
-    def old_method(self):
-        warnings.warn("old_method is deprecated", DeprecationWarning)
-    ```
-
-2.  **Keep for 1 MINOR Version:** Support deprecated methods through next minor version
-
-3.  **Remove in MAJOR Version:** Breaking changes only in major version bumps
-
-### Breaking Change Checklist
-- [ ] Document in CHANGELOG
-- [ ] Update all examples
-- [ ] Create migration guide
-- [ ] Bump MAJOR version
-- [ ] Notify all known consumers
-
----
-
-## 11. Testing Standards
-
-**Philosophy:** Common libraries must be thoroughly tested since bugs affect multiple projects.
-
-### Test Structure
-```
-tests/
-├── unit/              # Isolated domain/service tests
-├── integration/       # Repository + DB tests
-└── examples/          # Example code tests
-```
-
-### Testing Rules
-
-1.  **Unit Tests (Domain & Services):**
-    -   Test domain logic in isolation
-    -   Mock all repository dependencies
-    -   Use dependency injection for testability
-    ```python
-    def test_atomic_builder_adds_agent():
-        mock_agent_repo = Mock(spec=IAgentRepository)
-        builder = AtomicDbBuilderService(mock_agent_repo, mock_task_repo)
-        # Test logic...
-    ```
-
-2.  **Integration Tests (Repositories):**
-    -   Test against real infrastructure (MongoDB, MinIO)
-    -   Use Docker containers for test databases
-    -   Clean up after each test
-
-3.  **Example Tests:**
-    -   All examples in `example/` must be runnable
-    -   Create test that executes example code
-    -   Validates example produces expected output
-
-4.  **Test Coverage:**
-    -   Aim for 80%+ coverage on service layer
-    -   100% coverage on public API methods
-    -   All exception paths must be tested
-
-5.  **Test Isolation:**
-    -   No test should depend on another test
-    -   Use fixtures for common setup
-    -   Mock external services (LLM APIs, external APIs)
-
----
-
-## 12. Documentation Standards
-
-### Code Documentation
-
-1.  **Docstrings Required For:**
-    -   All public classes and methods
-    -   All Protocol/ABC definitions
-    -   Complex algorithms or business logic
-
-2.  **Docstring Format:**
-    ```python
-    def build_crew(self, process: Process = Process.sequential) -> Crew:
-        """
-        Builds a CrewAI Crew from configured agents and tasks.
-        
-        Args:
-            process: Execution process (sequential or hierarchical)
-            
-        Returns:
-            Configured Crew instance ready for execution
-            
-        Raises:
-            InvalidCrewConfigException: If required agents/tasks are missing
-        """
-    ```
-
-3.  **Type Hints:**
-    -   All function parameters and return types
-    -   Use `Optional`, `Union`, `List` etc. from `typing`
-    -   Pydantic models for complex data structures
-
-### Project Documentation
-
-1.  **README.md:** Architecture overview, installation, usage examples
-2.  **AGENTS.md (this file):** Coding standards and principles
-3.  **CHANGELOG.md:** Version history and migration guides
-4.  **examples/README.md:** How to run examples for each component
-
----
-
-## 13. Common Patterns & Anti-Patterns
+## 12. Common Patterns & Anti-Patterns
 
 ### ✅ DO: Patterns to Follow
 
@@ -624,7 +430,7 @@ Before committing code, verify:
 
 ---
 
-## 14. Dependency Management Standards
+## 13. Dependency Management Standards
 
 **Critical Rule:** Dependency management must be consistent across Amsha and client projects.
 
@@ -649,7 +455,7 @@ Before committing code, verify:
 
 **All Dependencies:** Managed in **`pyproject.toml`**
 - Client applications use `pyproject.toml` for everything
-- Includes Amsha as a dependency: `amsha==2.0.9`
+- Includes Amsha as a dependency: `amsha==2.11.4`
 - Follows modern Python packaging standards
 
 ### Rules
@@ -671,7 +477,7 @@ Before committing code, verify:
    # Use pyproject.toml exclusively
    # Add amsha as dependency
    dependencies = [
-       "amsha==2.0.9",
+       "amsha==2.11.4",
        "other-deps..."
    ]
    ```
@@ -686,7 +492,7 @@ Before committing code, verify:
 ```toml
 [project]
 name = "Amsha"
-version = "2.0.9"
+version = "2.11.4"
 dependencies = [
     "PyYAML==6.0.3",
     "crewai==0.201.1",
