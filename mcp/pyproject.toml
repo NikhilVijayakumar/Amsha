@@ -19,5 +19,8 @@ amsha-mcp = "amsha_mcp.server:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.cmdclass]
+build_py = "amsha_mcp._build_hooks.build_py"
+
 [tool.setuptools.package-data]
 amsha_mcp = ["docs/**/*.md"]

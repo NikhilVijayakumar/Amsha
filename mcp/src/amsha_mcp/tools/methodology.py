@@ -13,7 +13,7 @@ from .. import docs_loader as dl
 
 
 def _stage_text(path: Path, summarize: bool) -> str:
-    text = path.read_text(encoding="utf-8")
+    text = dl.read_text(path) or ""
     if not summarize:
         return text
     return _summarize(text)

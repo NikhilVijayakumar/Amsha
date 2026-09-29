@@ -53,9 +53,9 @@ def _stage_content(stage: str) -> str:
     """Bundled prerequisite doc for a stage, resolved through the loader.
 
     Goes through docs_loader instead of joining a repository path: the
-    documents ship inside the package, so a repo-relative path resolved to
-    nothing after the docs moved to src/amsha_mcp/docs/ (commit ccc8f4c) and
-    the OSError below turned that into an empty string that read as success.
+    documents are resolved from the packaged wheel or, in a source checkout,
+    the authored OKF bundle. A repo-relative path can therefore not be trusted
+    to find the methodology plane.
     """
     filename = _STAGE_DOC.get(stage)
     if not filename:
@@ -64,7 +64,7 @@ def _stage_content(stage: str) -> str:
     if path is None:
         return f"[Packaged document missing: prerequisite/{filename}]"
     try:
-        text = path.read_text(encoding="utf-8")
+        text = dl.read_text(path) or ""
     except OSError as exc:
         return f"[Unreadable packaged document prerequisite/{filename}: {exc}]"
     return text or f"[Packaged document prerequisite/{filename} is empty]"

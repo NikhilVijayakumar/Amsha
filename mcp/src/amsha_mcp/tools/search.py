@@ -7,7 +7,7 @@ from .. import docs_loader as dl
 
 
 def search_amsha_docs(query: str) -> dict:
-    """Keyword search across the packaged methodology, mcp/docs/, and repo knowledge.
+    """Keyword search across packaged methodology and repo knowledge.
 
     The packaged groups are always available. The repo groups contribute
     nothing when no repository is registered, which keeps this tool working in
@@ -17,7 +17,6 @@ def search_amsha_docs(query: str) -> dict:
     for group in (
         dl.read_prerequisite(),
         dl.read_implementation(),
-        dl.read_proposal(),
         dl.read_top_level_markdown(),
         dl.read_features_docs(),
         dl.read_knowledge_bundle(),

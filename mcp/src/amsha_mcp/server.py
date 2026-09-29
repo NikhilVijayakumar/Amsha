@@ -69,7 +69,7 @@ def get_implementation_guide(topic: str, summarize: bool = False) -> dict:
 
 @mcp.tool()
 def search_amsha_docs(query: str) -> dict:
-    """Keyword search across mcp/docs/ + docs/ + top-level markdown, with file and line references. Should not be used for Boolean/search-engine operators. Should not be used to fetch whole pages."""
+    """Keyword search across packaged methodology + repo docs/knowledge, with file and line references. Should not be used for Boolean/search-engine operators. Should not be used to fetch whole pages."""
     return search.search_amsha_docs(query)
 
 

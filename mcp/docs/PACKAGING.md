@@ -1,6 +1,6 @@
 # Amsha MCP — Packaging, Building, and Installing
 
-How to turn `mcp/` into a standalone platform-native bundle (Windows installer or Linux folder), and how to install/use the result. See [proposal 08](../src/amsha_mcp/docs/proposal/08-standalone-repo-agnostic-server.md) for why this is architected as a repo-agnostic, zero-`amsha`-dependency server in the first place.
+How to turn `mcp/` into a standalone platform-native bundle (Windows installer or Linux folder), and how to install/use the result. See [knowledge/records/proposal-archive/08-standalone-repo-agnostic-server.md](../knowledge/records/proposal-archive/08-standalone-repo-agnostic-server.md) for why this is architected as a repo-agnostic, zero-`amsha`-dependency server in the first place.
 
 The build script (`build_standalone.py`) is platform-aware and runs on both Windows and Linux; the per-platform output paths live in `build_config.json`.
 

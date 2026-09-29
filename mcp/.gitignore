@@ -1,0 +1,3 @@
+# Build-staged product plane. Authored in ../knowledge/ as OKF concepts and
+# materialized here by scripts/sync_packaged_docs.py. Never hand-edit.
+build/package-docs/

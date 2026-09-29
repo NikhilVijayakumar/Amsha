@@ -3,9 +3,9 @@
 Package layout:
     amsha_mcp/
         server.py         stdio entrypoint, tool registration
-        docs_loader.py    target-repo + bundled methodology docs (docs/) from disk
+        docs_loader.py    target-repo + bundled methodology docs from disk/OKF
         repo_schemas.py   eager-imports real crew schemas from the target repo (deadlock guard)
-        docs/             bundled methodology docs (prerequisite/implementation/proposal)
+        docs/             build-time materialized methodology docs (wheel only)
         tools/            one module per group of tools
             modules.py    list_amsha_modules, explain_module
             install.py    get_install_instructions, get_quickstart

@@ -5,8 +5,7 @@ context: |
   methodology as agent tools. Version 0.1.0. Python package `amsha_mcp`,
   entry point `mcp/src/amsha_mcp/server.py`.
 
-  Standalone by design: the wheel carries both code and documentation
-  (`pyproject.toml` package-data `amsha_mcp = ["docs/**/*.md"]`), so an
+  Standalone by design: the wheel carries both code and documentation, so an
   installed server answers questions about Amsha without the source repo.
 
   Two knowledge planes, enforced by `docs_loader.py`:
@@ -18,10 +17,13 @@ context: |
   Bundled methodology docs are runtime DATA, versioned with the wheel:
     prerequisite/  (stages 00-09)  — read via `read_prerequisite()`
     implementation/(topics 00-23)  — read via `read_implementation()`
-    proposal/      (archive + 08)  — read via `read_proposal()`
   Their filenames are hardcoded in `_STAGE_DOC` and `_STAGE_DOC_FILE`.
   Do not rename, move, or add YAML frontmatter to them: `get_preview()`
   does not strip frontmatter, and it would leak into agent-visible text.
+
+  In a source checkout with no packaged docs under `src/amsha_mcp/docs/`,
+  `docs_loader.py` falls back to the MCP-local OKF bundle under
+  `mcp/knowledge/methodology/` and strips frontmatter on read.
 
   The loader must never reconstruct package paths from the repository
   layout. Resolve through `docs_loader` accessors only.
@@ -49,4 +51,4 @@ rules:
     - Repo-plane additions must keep the `if not _REPO_ROOT` guard.
   tasks:
     - Each task states its own verification (command, or test).
-    - Changes under `src/amsha_mcp/docs/` require a wheel-rebuild smoke test.
+    - Changes to methodology packaging or loading require a wheel-rebuild smoke test.

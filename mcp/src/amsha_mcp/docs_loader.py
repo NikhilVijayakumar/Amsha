@@ -3,15 +3,18 @@
 Two distinct sources:
 
 1. **Bundled methodology docs** — `amsha_mcp`'s own prerequisite/implementation
-   proposal material, shipped inside the package (`amsha_mcp/docs/`). These never
-   depend on an outer-repo layout; a standalone wheel carries them.
+    material, shipped inside the package (`amsha_mcp/docs/`). In a source checkout
+    with no packaged docs yet materialized, the loader falls back to the MCP-local
+    OKF bundle in `mcp/knowledge/` and strips frontmatter at read time. These never
+    depend on an outer-repo layout; a standalone wheel carries them.
 2. **The target repo** — the Amsha-shaped repo this server instance was pointed
    at (an env var or `register_repo()`), from which we serve live README/docs and
    import the real crew schemas. `None` means "no repo registered": docs-serving
    tools return empty and schema tools report they cannot verify.
 
-No content is copied into Python source: docs stay the single source of truth.
-If a doc changes, the server's answers change on the next call.
+No authored content is copied into Python source: the OKF bundle stays the
+single source of truth. If a doc changes, the server's answers change on the
+next call in a source checkout, and on the next build for packaged artifacts.
 """
 from __future__ import annotations
 
@@ -20,9 +23,11 @@ import re
 from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).resolve().parent  # the installed amsha_mcp package dir
+_SOURCE_MCP_ROOT = PACKAGE_ROOT.parent.parent
 
-# Bundled methodology/preoposal docs ship with the package (see pyproject package-data).
+# Bundled methodology docs ship with the package (see pyproject package-data).
 _DOCS = PACKAGE_ROOT / "docs"
+_AUTHORED_DOCS = _SOURCE_MCP_ROOT / "knowledge" / "methodology"
 
 # Process-global target repo. Set at startup from AMSHA_MCP_TARGET_REPO (or a
 # source-checkout default), and re-set by the register_repo tool. `None` = no repo.
@@ -67,30 +72,51 @@ def resolve_default_repo() -> Path | None:
 
 def _read(path: Path) -> str | None:
     try:
-        return path.read_text(encoding="utf-8")
+        text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
+        return None
+    try:
+        path.relative_to(_AUTHORED_DOCS)
+    except ValueError:
+        return text
+    try:
+        return _strip_frontmatter(text)
+    except ValueError:
         return None
 
 
-def _docs_under(relative_dir: str, pattern: str = "*.md") -> dict[str, Path]:
-    """Return {filename: path} for direct children of a bundled docs/ subdir."""
+def _strip_frontmatter(text: str) -> str:
+    if not text.startswith("---\n"):
+        raise ValueError("no OKF frontmatter block")
+    lines = text.split("\n")
+    for i, line in enumerate(lines[1:], start=1):
+        if line.rstrip() == "---":
+            return "\n".join(lines[i + 1:])
+    raise ValueError("unterminated OKF frontmatter block")
+
+
+def read_text(path: Path) -> str | None:
+    """Read one doc, stripping OKF frontmatter for authored methodology files."""
+    return _read(path)
+
+
+def _docs_under(relative_dir: str, authored_relative_dir: str, pattern: str = "*.md") -> dict[str, Path]:
+    """Return {filename: path} from packaged docs, else authored OKF sources."""
     base = _DOCS / relative_dir
-    return {p.name: p for p in sorted(base.glob(pattern))} if base.is_dir() else {}
+    if base.is_dir():
+        return {p.name: p for p in sorted(base.glob(pattern))}
+    authored_base = _AUTHORED_DOCS / authored_relative_dir
+    return {p.name: p for p in sorted(authored_base.glob(pattern))} if authored_base.is_dir() else {}
 
 
 def read_prerequisite() -> dict[str, Path]:
     """Bundled prerequisite/*.md keyed by filename (00-problem-definition.md ...)."""
-    return _docs_under("prerequisite")
+    return _docs_under("prerequisite", "prerequisite")
 
 
 def read_implementation() -> dict[str, Path]:
     """Bundled implementation/*.md keyed by filename."""
-    return _docs_under("implementation")
-
-
-def read_proposal() -> dict[str, Path]:
-    """Bundled proposal/*.md keyed by filename."""
-    return _docs_under("proposal")
+    return _docs_under("implementation", "implementation")
 
 
 def read_top_level_markdown() -> dict[str, Path]:
