@@ -116,6 +116,28 @@ def read_features_docs() -> dict[str, Path]:
     return dict(sorted(result.items()))
 
 
+def read_knowledge_bundle() -> dict[str, Path]:
+    """Target-repo knowledge/ OKF bundle, keyed by bundle-relative concept id.
+
+    Repo plane only. The OKF bundle is repository knowledge by definition, so
+    it is never part of the packaged plane and the standalone wheel is
+    unaffected by its absence. A repo with no knowledge/ directory simply
+    contributes nothing, exactly like a repo with no docs/feature/.
+    """
+    root = repo_root()
+    if not root:
+        return {}
+    base = root / "knowledge"
+    if not base.is_dir():
+        return {}
+    result: dict[str, Path] = {}
+    for md in base.rglob("*.md"):
+        if any(part.startswith(".") for part in md.relative_to(base).parts):
+            continue
+        result[str(md.relative_to(base))] = md
+    return dict(sorted(result.items()))
+
+
 # ---------------------------------------------------------------------------
 # Module inventory (source of truth = the real src tree, not a hand list)
 # ---------------------------------------------------------------------------

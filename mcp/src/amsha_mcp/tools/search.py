@@ -7,7 +7,12 @@ from .. import docs_loader as dl
 
 
 def search_amsha_docs(query: str) -> dict:
-    """Keyword search across mcp/docs/ + docs/ (features) + top-level markdown."""
+    """Keyword search across the packaged methodology, mcp/docs/, and repo knowledge.
+
+    The packaged groups are always available. The repo groups contribute
+    nothing when no repository is registered, which keeps this tool working in
+    a standalone install.
+    """
     merged: dict[str, Path] = {}
     for group in (
         dl.read_prerequisite(),
@@ -15,6 +20,7 @@ def search_amsha_docs(query: str) -> dict:
         dl.read_proposal(),
         dl.read_top_level_markdown(),
         dl.read_features_docs(),
+        dl.read_knowledge_bundle(),
     ):
         merged.update(group)
     hits = dl.search(merged, query)
