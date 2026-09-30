@@ -2,7 +2,7 @@
 
 How to turn `mcp/` into a standalone platform-native bundle (Windows installer or Linux folder), and how to install/use the result. See [knowledge/records/proposal-archive/08-standalone-repo-agnostic-server.md](../knowledge/records/proposal-archive/08-standalone-repo-agnostic-server.md) for why this is architected as a repo-agnostic, zero-`amsha`-dependency server in the first place.
 
-The build script (`build_standalone.py`) is platform-aware and runs on both Windows and Linux; the per-platform output paths live in `build_config.json`.
+The build script (`build_standalone.py`) is platform-aware and runs on Windows, Linux, and macOS; per-platform output paths come from the environment or the per-platform block in `build_config.json`.
 
 ## What gets built
 
@@ -20,9 +20,19 @@ The build script (`build_standalone.py`) is platform-aware and runs on both Wind
 
 ## Build
 
-The same script works on both OSes — it reads its paths from the per-platform block in `build_config.json` and uses the correct venv layout (`Scripts/python.exe` vs `bin/python`), so there is nothing to pass:
+The same script works on every supported OS — it reads its paths from the
+environment (falling back to the per-platform block in `build_config.json`) and
+uses the correct venv layout (`Scripts/python.exe` vs `bin/python`):
+
+```bash
+# Linux / macOS
+export AMSHA_MCP_BUILD_OUTPUT_DIR="$HOME/mcp/amsha/dist"
+python3 mcp/packaging/build_standalone.py
+```
 
 ```powershell
+# Windows
+$env:AMSHA_MCP_BUILD_OUTPUT_DIR = "E:\Python\Amsha\mcp-dist"
 E:\Python\Amsha\.venv\Scripts\python.exe E:\Python\Amsha\mcp\packaging\build_standalone.py
 ```
 
@@ -56,18 +66,53 @@ Everything lives under the configured `output_dir`. On Windows that's `mcp/build
 
 ### Config
 
-`mcp/packaging/build_config.json`:
+`mcp/packaging/build_config.json` holds **committed defaults only**. It must not
+contain absolute paths from a particular machine — a checked-in
+`E:\\Python\\...` or `/home/<user>/...` only ever worked on the machine that wrote
+it, so machine-local paths are expected to arrive via the environment.
+
+Each setting resolves in three layers, most specific wins:
+
+1. **Environment** — `AMSHA_MCP_BUILD_*`, set per machine, no file edit
+2. **`platforms.<current platform>`** — per-OS committed default
+3. **Top level** — cross-platform committed default
+
+| Env var | `build_config.json` key | Meaning |
+|---|---|---|
+| `AMSHA_MCP_BUILD_OUTPUT_DIR` | `output_dir` | Where everything gets built |
+| `AMSHA_MCP_BUILD_VENV_DIR` | `build_venv_dir` | Throwaway build venv (default `<output_dir>/.build-venv`) |
+| `AMSHA_MCP_BUILD_NAME` | `onedir_name` | Frozen app folder and executable name |
+| `AMSHA_MCP_BUILD_VERSION` | `app_version` | Version shown in the installer UI |
+| `AMSHA_MCP_BUILD_PUBLISHER` | `publisher` | Publisher shown in the installer UI |
+| `AMSHA_MCP_BUILD_APP_NAME` | `app_name` | Display name shown in the installer UI |
+
+The env spelling is the stable public contract and is deliberately not the JSON
+key uppercased — `AMSHA_MCP_BUILD_VENV_DIR`, not
+`AMSHA_MCP_BUILD_BUILD_VENV_DIR`. The JSON-key spelling is still accepted as a
+fallback.
+
+`output_dir` is **required**. With no value in the environment and none in the
+JSON, the build stops and names the variable that would supply it, rather than
+writing somewhere unexpected. A portable example:
+
+```bash
+export AMSHA_MCP_BUILD_OUTPUT_DIR="$HOME/mcp/amsha/dist"
+export AMSHA_MCP_BUILD_VENV_DIR="$HOME/.cache/amsha-mcp-build-venv"
+python3 mcp/packaging/build_standalone.py
+```
 
 | Field | Meaning |
 |---|---|
 | `app_name`, `app_version`, `publisher` | Cosmetic — shown in the installer UI |
 | `output_dir` (top-level) | Windows default; where everything above gets built |
 | `build_venv_dir` (top-level) | Windows default; where the throwaway build venv goes (usually just `output_dir/.build-venv`) |
-| `platforms.linux.output_dir` | Linux output — the build script prefers the platform block over the top-level values |
-| `platforms.linux.build_venv_dir` | Linux build venv location (defaults to `<linux output_dir>/.build-venv` if omitted) |
+| `platforms.<os>.output_dir` | Per-OS output — the build script prefers the platform block over the top-level values |
+| `platforms.<os>.build_venv_dir` | Per-OS build venv location (defaults to `<output_dir>/.build-venv` if omitted) |
 | `onedir_name` | Name of the frozen app folder and its executable |
 
-**Not auto-synced**: if you change `output_dir` or `app_version`, also update the matching literal values at the top of `mcp/packaging/amsha_mcp_installer.iss` (`SourceDist`, `OutputDir`, `#define MyAppVersion`) — kept as a manual two-file sync rather than building a config-injection layer for four values that rarely change together. (Windows-only concern; the Linux build has no `.iss`.)
+`<os>` is one of `windows`, `linux`, or `macos`.
+
+**Not auto-synced**: if you change `app_version`, also update the matching literal values at the top of `mcp/packaging/amsha_mcp_installer.iss` (`SourceDist`, `OutputDir`, `#define MyAppVersion`) — kept as a manual two-file sync rather than building a config-injection layer for four values that rarely change together. (Windows-only concern; the Linux and macOS builds have no `.iss`.)
 
 ## Install
 

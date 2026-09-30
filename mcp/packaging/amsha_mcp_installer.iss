@@ -4,7 +4,7 @@
 ;   {#SourceDist}\{#MyAppExeName}\   (see build_standalone.py)
 
 #define MyAppName "Amsha MCP"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "0.2.0"
 #define MyAppPublisher "Nikhil"
 #define MyAppExeName "amsha-mcp"
 #define SourceDist "E:\Python\Amsha\mcp\build\AmshaMCP-dist\dist"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "amsha-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server exposing Amsha's features, modules, and crew-design methodology (stdlib fastMCP)."
 requires-python = ">=3.12,<3.14"
 dependencies = [
@@ -23,4 +23,4 @@ where = ["src"]
 build_py = "amsha_mcp._build_hooks.build_py"
 
 [tool.setuptools.package-data]
-amsha_mcp = ["docs/**/*.md"]
+amsha_mcp = ["docs/**/*.md", "docs/product/manifest.json"]

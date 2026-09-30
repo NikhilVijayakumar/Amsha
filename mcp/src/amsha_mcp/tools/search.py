@@ -22,6 +22,11 @@ def search_amsha_docs(query: str) -> dict:
         dl.read_knowledge_bundle(),
     ):
         merged.update(group)
+    # Namespaced: product concepts and the repo knowledge bundle both contain an
+    # `index.md`, so merging on bare filenames would let one mask the other and
+    # mis-attribute hits.
+    for name, path in dl.read_product().items():
+        merged[f"product/{name}"] = path
     hits = dl.search(merged, query)
     return {
         "query": query,

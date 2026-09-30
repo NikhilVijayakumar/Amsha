@@ -1,8 +1,11 @@
-"""Build helpers for packaging the MCP methodology documents.
+"""Build helpers for packaging the MCP's bundled knowledge.
 
-Source checkouts author methodology in ``mcp/knowledge/`` with OKF
-frontmatter. Builds materialize the runtime product plane under the installed
-``amsha_mcp/docs`` package path with that frontmatter removed.
+Source checkouts author knowledge in ``mcp/knowledge/`` with OKF frontmatter:
+the crew-design methodology under ``methodology/`` and the projected Amsha
+product knowledge under ``product/``. Builds materialize both under the
+installed ``amsha_mcp/docs`` package path with that frontmatter removed, so a
+standalone wheel carries everything the server needs to answer questions about
+Amsha and its methodology with no repository registered.
 """
 from __future__ import annotations
 
@@ -20,9 +23,18 @@ STAGED_PACKAGE_DOCS = MCP_ROOT / "build" / "package-docs" / "amsha_mcp" / "docs"
 MAPPING: tuple[tuple[str, str], ...] = (
     ("methodology/prerequisite", "prerequisite"),
     ("methodology/implementation", "implementation"),
+    ("product", "product"),
 )
 
 EXCLUDED_NAMES = {"index.md"}
+
+# Sidecar machine metadata for the product plane, copied verbatim. The build
+# strips frontmatter from concepts, which would otherwise take the runtime's
+# module identities, section names, and install facts with it -- and the Python
+# constraint is not re-derivable from any concept body, since it originates in
+# pyproject.toml.
+MANIFEST_NAME = "manifest.json"
+SIDECARS: tuple[tuple[Path, Path], ...] = ((Path("product") / MANIFEST_NAME, Path("product") / MANIFEST_NAME),)
 
 
 def strip_frontmatter(text: str) -> str:
@@ -55,7 +67,9 @@ def authored_doc_mappings() -> dict[Path, Path]:
 
 def packaged_doc_relpaths() -> list[Path]:
     """Return packaged doc paths relative to the package root."""
-    return [Path("docs") / rel for rel in authored_doc_mappings().values()]
+    rels = [Path("docs") / rel for rel in authored_doc_mappings().values()]
+    rels.extend(Path("docs") / rel for _, rel in SIDECARS)
+    return rels
 
 
 def render_authored_doc(concept: Path) -> str:
@@ -66,15 +80,20 @@ def render_authored_doc(concept: Path) -> str:
 
 
 def materialize_package_docs(target_docs_root: Path, clean: bool = True) -> int:
-    """Write the packaged methodology docs into ``target_docs_root``."""
+    """Write the packaged docs plus sidecars into ``target_docs_root``."""
     expected = {
         target_docs_root / rel: render_authored_doc(src)
         for src, rel in authored_doc_mappings().items()
     }
+    for src_rel, dst_rel in SIDECARS:
+        source = KNOWLEDGE / src_rel
+        if not source.is_file():
+            raise SystemExit(f"sync: missing sidecar {source}")
+        expected[target_docs_root / dst_rel] = source.read_text(encoding="utf-8")
 
     if clean and target_docs_root.is_dir():
-        for existing in sorted(target_docs_root.rglob("*.md")):
-            if existing not in expected:
+        for existing in sorted(target_docs_root.rglob("*")):
+            if existing.is_file() and existing not in expected:
                 existing.unlink()
 
     for dst, body in sorted(expected.items()):

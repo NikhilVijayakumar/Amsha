@@ -1,0 +1,56 @@
+{
+  "documents": {
+    "configuration.md": {
+      "module": "configuration",
+      "purpose": "Loads and validates the job, app, and LLM configuration schemas that every other module reads.",
+      "title": "Amsha Configuration"
+    },
+    "crew-forge.md": {
+      "module": "crew_forge",
+      "purpose": "Turns crew definitions into runnable CrewAI crews and flows, and executes them.",
+      "title": "Amsha Crew Forge"
+    },
+    "crew-monitor.md": {
+      "module": "crew_monitor",
+      "purpose": "Observes running crews \u2014 resource usage, event lifecycle, per-agent contribution, and Excel reporting.",
+      "title": "Amsha Crew Monitor"
+    },
+    "execution-runtime.md": {
+      "module": "execution_runtime",
+      "purpose": "Submits work to a bounded thread pool and returns a cancellable, awaitable handle.",
+      "title": "Amsha Execution Runtime"
+    },
+    "execution-state.md": {
+      "module": "execution_state",
+      "purpose": "Models the lifecycle of a single run and persists it through an injected state repository.",
+      "title": "Amsha Execution State"
+    },
+    "installation.md": {
+      "install_command": "pip install amsha",
+      "optional_extra": "pip install docling",
+      "requires_python": ">=3.12,<3.14",
+      "section": "Installation",
+      "title": "Amsha Installation"
+    },
+    "llm-factory.md": {
+      "module": "llm_factory",
+      "purpose": "Builds LLM instances for any provider from one configuration, with purpose profiles for creative versus evaluation work.",
+      "title": "Amsha LLM Factory"
+    },
+    "output-process.md": {
+      "module": "output_process",
+      "purpose": "Post-processes structured crew output \u2014 currently JSON cleaning only; the evaluation and validation subpackages are unbuilt stubs.",
+      "title": "Amsha Output Processing"
+    },
+    "quickstart.md": {
+      "section": "Quick Start",
+      "title": "Amsha Quick Start"
+    },
+    "utils.md": {
+      "module": "utils",
+      "purpose": "Small format helpers for JSON, YAML, and UTF-8 handling, shared across modules.",
+      "title": "Amsha Utils"
+    }
+  },
+  "generated_by": "process:project-product-knowledge"
+}

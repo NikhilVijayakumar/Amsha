@@ -18,6 +18,7 @@ next call in a source checkout, and on the next build for packaged artifacts.
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 from pathlib import Path
@@ -28,6 +29,8 @@ _SOURCE_MCP_ROOT = PACKAGE_ROOT.parent.parent
 # Bundled methodology docs ship with the package (see pyproject package-data).
 _DOCS = PACKAGE_ROOT / "docs"
 _AUTHORED_DOCS = _SOURCE_MCP_ROOT / "knowledge" / "methodology"
+# Frontmatter is stripped for any authored knowledge file, methodology or product.
+_AUTHORED_KNOWLEDGE = _SOURCE_MCP_ROOT / "knowledge"
 
 # Process-global target repo. Set at startup from AMSHA_MCP_TARGET_REPO (or a
 # source-checkout default), and re-set by the register_repo tool. `None` = no repo.
@@ -76,7 +79,7 @@ def _read(path: Path) -> str | None:
     except (OSError, UnicodeDecodeError):
         return None
     try:
-        path.relative_to(_AUTHORED_DOCS)
+        path.relative_to(_AUTHORED_KNOWLEDGE)
     except ValueError:
         return text
     try:
@@ -101,22 +104,36 @@ def read_text(path: Path) -> str | None:
 
 
 def _docs_under(relative_dir: str, authored_relative_dir: str, pattern: str = "*.md") -> dict[str, Path]:
-    """Return {filename: path} from packaged docs, else authored OKF sources."""
+    """Return {filename: path} from packaged docs, else authored OKF sources.
+
+    `relative_dir` is the packaged path under `docs/`; `authored_relative_dir` is
+    the path under `knowledge/` (e.g. `methodology/prerequisite`, `product`).
+    """
     base = _DOCS / relative_dir
     if base.is_dir():
         return {p.name: p for p in sorted(base.glob(pattern))}
-    authored_base = _AUTHORED_DOCS / authored_relative_dir
+    authored_base = _AUTHORED_KNOWLEDGE / authored_relative_dir
     return {p.name: p for p in sorted(authored_base.glob(pattern))} if authored_base.is_dir() else {}
 
 
 def read_prerequisite() -> dict[str, Path]:
     """Bundled prerequisite/*.md keyed by filename (00-problem-definition.md ...)."""
-    return _docs_under("prerequisite", "prerequisite")
+    return _docs_under("prerequisite", "methodology/prerequisite")
 
 
 def read_implementation() -> dict[str, Path]:
     """Bundled implementation/*.md keyed by filename."""
-    return _docs_under("implementation", "implementation")
+    return _docs_under("implementation", "methodology/implementation")
+
+
+def read_product() -> dict[str, Path]:
+    """Packaged Amsha product knowledge: module concepts + install/quickstart.
+
+    This is the product plane -- it ships in the wheel so the server can answer
+    what Amsha is, what its modules do, and how to install and start it, with no
+    repository registered.
+    """
+    return _docs_under("product", "product")
 
 
 def read_top_level_markdown() -> dict[str, Path]:
@@ -199,18 +216,154 @@ _MODULE_PURPOSE = {
 
 
 def runtime_modules() -> dict[str, str]:
-    """{module_name: one-line purpose} from the real src dir + README purposes."""
+    """{module_name: one-line purpose} from the packaged product knowledge.
+
+    The inventory comes from `docs/product/`, which ships in the wheel, so this
+    answers with no repository registered. A registered repo is only used to
+    *narrow* the list to modules actually present in that repo's source tree --
+    a target repo may legitimately be an older or newer Amsha than the server.
+    """
+    purposes = {m: p for m, p in _packaged_module_purposes().items()}
+    if not purposes:
+        # Packaged knowledge unavailable (unusual: only reachable in a stripped
+        # install). Fall back to the code-side table so the server still answers.
+        purposes = dict(_MODULE_PURPOSE)
     root = repo_root()
     if not root:
-        return {}
+        return purposes
     src = root / "src" / "nikhil" / "amsha"
+    if not src.is_dir():
+        return purposes
     present = {
         d.name
-        for d in (src.iterdir() if src.is_dir() else [])
-        if d.is_dir() and not d.name.startswith("__") and not d.name == "integration_tests"
+        for d in src.iterdir()
+        if d.is_dir() and not d.name.startswith("__") and d.name != "integration_tests"
     }
-    names = [m for m in RUNTIME_MODULES if m in present]
-    return {n: _MODULE_PURPOSE[n] for n in names}
+    return {m: p for m, p in purposes.items() if m in present}
+
+
+def product_concept(module: str) -> Path | None:
+    """Path to a packaged product concept for a module, if one exists."""
+    kebab = module.replace("_", "-")
+    path = read_product().get(f"{kebab}.md")
+    return path
+
+
+def _packaged_module_purposes() -> dict[str, str]:
+    """{module: purpose} from the packaged product concepts.
+
+    Works from either origin: frontmatter in a source checkout, the packaged
+    manifest in a wheel. Falls back to the concept's own first prose line, so a
+    module is still described even if both are missing.
+    """
+    meta = product_metadata()
+    out: dict[str, str] = {}
+    for name, path in read_product().items():
+        if name == "index.md":
+            continue
+        entry = meta.get(name, {})
+        # A `section` marks a procedure reference (Installation, Quick Start), not
+        # a module concept. Without this, filename-derivation would invent
+        # "installation" and "quickstart" modules.
+        if entry.get("section"):
+            continue
+        module = entry.get("module") or path.stem.replace("-", "_")
+        if module not in RUNTIME_MODULES:
+            continue
+        purpose = entry.get("purpose") or entry.get("description")
+        if not purpose:
+            text = _read(path) or ""
+            body = re.split(r"\n#\s+[^\n]*\n", text, maxsplit=1)
+            for line in (body[1] if len(body) > 1 else "").splitlines():
+                line = line.strip()
+                if line and not line.startswith(("#", ">", "-", "|", "*", "`")):
+                    purpose = line
+                    break
+        if purpose:
+            out[module] = purpose
+    return out
+
+
+def _frontmatter_of(path: Path) -> dict[str, str]:
+    """Parse the trivial `key: value` OKF frontmatter the product concepts use.
+
+    Reads the file raw: `_read()` deliberately strips frontmatter for authored
+    knowledge, so parsing it through `_read()` would always see no frontmatter.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return {}
+    if not text.startswith("---\n"):
+        return {}
+    end = text.find("\n---\n", 4)
+    if end == -1:
+        return {}
+    out: dict[str, str] = {}
+    for line in text[4:end].split("\n"):
+        if not line or line[:1] in (" ", "\t", "-"):
+            continue
+        key, _, value = line.partition(":")
+        out[key.strip()] = value.strip().strip('"')
+    return out
+
+
+def product_metadata() -> dict[str, dict[str, str]]:
+    """Per-document machine facts for the product plane, keyed by filename.
+
+    Prefers each concept's OKF frontmatter, which is what a source checkout has.
+    Falls back to the packaged `manifest.json`, because the build strips
+    frontmatter -- and the Python constraint cannot be re-derived from a concept
+    body at all, as it originates in `pyproject.toml`.
+    """
+    docs = read_product()
+    meta: dict[str, dict[str, str]] = {}
+    for name, path in docs.items():
+        if not name.endswith(".md"):
+            continue
+        front = _frontmatter_of(path)
+        if front.get("module") or front.get("section"):
+            meta[name] = dict(front)
+    if meta:
+        return meta
+    manifest = _DOCS / "product" / "manifest.json"
+    if not manifest.is_file():
+        return {}
+    try:
+        documents = json.loads(manifest.read_text(encoding="utf-8")).get("documents", {})
+    except (OSError, ValueError):
+        return {}
+    return {n: dict(d) for n, d in documents.items() if n in docs or not docs}
+
+
+def _packaged_section(title: str) -> str:
+    """Body of a packaged product concept for a README section, minus its H1.
+
+    The concept body is the source section verbatim, so everything after the H1
+    is what gets served -- there is no preamble to strip and no sub-heading
+    boundary to guess at.
+    """
+    meta = product_metadata()
+    for name, path in read_product().items():
+        if meta.get(name, {}).get("section") != title:
+            continue
+        text = _read(path) or ""
+        m = re.search(r"\n#\s+[^\n]*\n(.*)\Z", text, re.S)
+        return m.group(1).strip() if m else ""
+    return ""
+
+
+def packaged_install_facts() -> dict[str, str]:
+    """Structured install facts from the packaged concept: command, extra, Python floor."""
+    for entry in product_metadata().values():
+        if entry.get("section") != "Installation":
+            continue
+        return {
+            "install": entry.get("install_command", ""),
+            "optional_docling": entry.get("optional_extra", ""),
+            "python": entry.get("requires_python", ""),
+        }
+    return {}
 
 
 def source_files_for(module: str) -> list[str]:
@@ -247,27 +400,32 @@ def get_preview(path: Path, max_lines: int = 15) -> str:
 
 
 def extract_quickstart() -> str:
-    """Return the `## Quick Start` code block from the target repo's README."""
+    """The Quick Start procedure: target repo README if present, else packaged.
+
+    The packaged concept is generated from the Amsha README's `## Quick Start`
+    section, so a standalone install still gets real instructions instead of a
+    pointer to a README it does not have.
+    """
     root = repo_root()
-    if not root:
-        return ""
-    text = _read(root / "README.md")
-    if not text:
-        return ""
-    m = re.search(r"## Quick Start[^\n]*\n(.*?)(?=\n## |\Z)", text, re.S)
-    return m.group(1).strip() if m else ""
+    if root:
+        text = _read(root / "README.md")
+        if text:
+            m = re.search(r"## Quick Start[^\n]*\n(.*?)(?=\n## |\Z)", text, re.S)
+            if m:
+                return m.group(1).strip()
+    return _packaged_section("Quick Start")
 
 
 def extract_installation() -> str:
-    """Return the `## Installation` section from the target repo's README."""
+    """The Installation procedure: target repo README if present, else packaged."""
     root = repo_root()
-    if not root:
-        return ""
-    text = _read(root / "README.md")
-    if not text:
-        return ""
-    m = re.search(r"## Installation[^\n]*\n(.*?)(?=\n## |\Z)", text, re.S)
-    return m.group(1).strip() if m else ""
+    if root:
+        text = _read(root / "README.md")
+        if text:
+            m = re.search(r"## Installation[^\n]*\n(.*?)(?=\n## |\Z)", text, re.S)
+            if m:
+                return m.group(1).strip()
+    return _packaged_section("Installation")
 
 
 def search(paths: dict[str, Path], query: str, max_hits: int = 20) -> list[dict]:
