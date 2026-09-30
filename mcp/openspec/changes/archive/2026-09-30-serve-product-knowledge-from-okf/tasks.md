@@ -72,4 +72,17 @@
 - [x] 7.2 `packaged-product` capability spec added
 - [x] 7.3 `documentation-discovery` and `documentation-build` deltas written
 - [x] 7.4 Root `openspec validate --specs --strict` still passes (11 specs)
-- [ ] 7.5 Archive this change after W3 verification
+- [x] 7.5 Archive this change after W3 verification
+
+## 8. W3 build
+
+- [x] 8.1 Bump version 0.1.0 -> 0.2.0 in `pyproject.toml`, `build_config.json`,
+      and the `.iss` literal
+- [x] 8.2 Build via env config only (`AMSHA_MCP_BUILD_OUTPUT_DIR`,
+      `AMSHA_MCP_BUILD_VENV_DIR`), no machine paths in the JSON
+- [x] 8.3 Frozen binary built; driven over JSON-RPC stdio with
+      `AMSHA_MCP_TARGET_REPO` unset from `cwd=/`
+- [x] 8.4 All four product tools answered from the frozen binary
+- [x] 8.5 Wheel: 44 docs (24 implementation + 10 prerequisite + 10 product),
+      0 starting with `---`, 0 absolute repo paths, `manifest.json` present
+- [x] 8.6 Clean-venv wheel install from `cwd=/tmp` serves all four tools
