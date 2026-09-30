@@ -22,5 +22,3 @@ Optional: for document processing features:
 ```bash
 pip install docling
 ```
-
----

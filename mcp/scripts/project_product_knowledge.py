@@ -176,7 +176,10 @@ def readme_section(title: str) -> str:
     m = re.search(rf"## {re.escape(title)}[^\n]*\n(.*?)(?=\n## |\Z)", text, re.S)
     if not m:
         raise SystemExit(f"project: README.md has no `## {title}` section")
-    return m.group(1).strip()
+    # Drop trailing horizontal rules: the README uses `---` to close a section
+    # before the next `##`, and a section's body otherwise ends with a stray rule
+    # that the server would hand back as the last line of the procedure.
+    return re.sub(r"\n-{3,}\s*\Z", "", m.group(1).strip()).strip()
 
 
 def section_concept(title: str) -> tuple[str, str]:

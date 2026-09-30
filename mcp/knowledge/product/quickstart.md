@@ -70,5 +70,3 @@ pipeline:
 ```python
 outputs = app.run_pipeline({"brief": "..."})
 ```
-
----
