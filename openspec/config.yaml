@@ -1,7 +1,7 @@
 schema: spec-driven
 
 context: |
-  Amsha is a lightweight common library for CrewAI orchestration, version 3.0.0.
+  Amsha is a lightweight common library for CrewAI orchestration, version 3.0.1.
   Python >=3.12,<3.14. Distributed as `amsha` from `src/nikhil/amsha/`.
 
   Architecture: Clean Architecture with a hard dependency rule. Inner layers
