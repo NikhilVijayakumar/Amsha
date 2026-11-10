@@ -28,7 +28,7 @@ class TestJsonCleanerUtils(unittest.TestCase):
         cleaner = JsonCleanerUtils(self.test_file)
         
         self.assertEqual(str(cleaner.input_file_path), self.test_file)
-        self.assertIsNone(cleaner.output_file_path)
+        self.assertFalse(cleaner.output_file_path.exists())
     
     def test_process_file_success_with_valid_json(self):
         """Test successful processing of valid JSON file."""
@@ -42,7 +42,9 @@ class TestJsonCleanerUtils(unittest.TestCase):
         
         self.assertTrue(result)
         self.assertIsNotNone(cleaner.output_file_path)
-        self.assertEqual(cleaner.output_file_path, str(self.test_file))
+        self.assertNotEqual(cleaner.output_file_path, Path(self.test_file))
+        self.assertEqual(json.loads(cleaner.output_file_path.read_text()), test_data)
+        self.assertEqual(json.loads(Path(self.test_file).read_text()), test_data)
     
     def test_process_file_with_complex_json(self):
         """Test processing complex nested JSON structure."""
@@ -73,7 +75,7 @@ class TestJsonCleanerUtils(unittest.TestCase):
         result = cleaner.process_file()
         
         self.assertFalse(result)
-        self.assertIsNone(cleaner.output_file_path)
+        self.assertFalse(cleaner.output_file_path.exists())
     
     def test_process_file_invalid_json(self):
         """Test handling of invalid JSON content."""
@@ -85,7 +87,7 @@ class TestJsonCleanerUtils(unittest.TestCase):
         result = cleaner.process_file()
         
         self.assertFalse(result)
-        self.assertIsNone(cleaner.output_file_path)
+        self.assertFalse(cleaner.output_file_path.exists())
     
     def test_process_file_empty_json_object(self):
         """Test processing empty JSON object."""
@@ -166,7 +168,9 @@ class TestJsonCleanerUtils(unittest.TestCase):
         cleaner = JsonCleanerUtils(self.test_file)
         cleaner.process_file()
         
-        self.assertEqual(cleaner.output_file_path, str(self.test_file))
+        self.assertNotEqual(cleaner.output_file_path, Path(self.test_file))
+        self.assertEqual(json.loads(cleaner.output_file_path.read_text()), test_data)
+        self.assertEqual(json.loads(Path(self.test_file).read_text()), test_data)
         self.assertTrue(os.path.exists(cleaner.output_file_path))
     
     def test_process_file_with_numbers_and_booleans(self):

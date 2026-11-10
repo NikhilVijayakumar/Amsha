@@ -30,7 +30,7 @@
 - **Contribution Analysis & Reporting**: Feature attribution analysis and Excel report generation.
 
 ### LLM Factory
-- **Unified Config**: One YAML for all LLM providers (Ollama, LM Studio, OpenRouter, Azure, Gemini).
+- **Unified Config**: One YAML for all LLM providers (Ollama, LM Studio, OpenRouter, Gemini).
 - **Purpose Profiles**: Creative (high temperature) vs. Evaluation (deterministic) modes.
 
 ---
@@ -44,6 +44,10 @@ pip install amsha
 Amsha currently declares Docling as a runtime dependency. Until the first PyPI release is published, use the existing source installation. See [release guidance](docs/releasing.md) for the publishing process.
 
 ---
+
+## Migration to 3.0
+
+**Migration:** Azure-qualified LLM models (`azure/` and `azure_ai/`) are no longer supported. Configure another provider before upgrading to the next major version.
 
 ## Quick Start
 

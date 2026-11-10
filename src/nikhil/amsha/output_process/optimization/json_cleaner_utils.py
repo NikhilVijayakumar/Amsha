@@ -6,6 +6,9 @@ from typing import Any, Optional
 from amsha.common.logger import get_logger
 
 
+_PARSE_FAILURE = object()
+
+
 class JsonCleanerUtils:
     """
     A class to read an LLM output file, clean its JSON content,
@@ -93,7 +96,7 @@ class JsonCleanerUtils:
         """Ensures the directory for the final output file exists."""
         self.output_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def _clean_and_parse_string(self, content: str) -> Optional[Any]:
+    def _clean_and_parse_string(self, content: str) -> Any:
         """
         Cleans and parses JSON strings, even if:
         - There’s junk text above ```json or ``` fences.
@@ -140,7 +143,7 @@ class JsonCleanerUtils:
             self.logger.error("JSON cleaning failed - could not parse content", extra={
                 "input_file": str(self.input_file_path)
             })
-            return None
+            return _PARSE_FAILURE
 
     def process_file(self) -> bool:
         """
@@ -163,7 +166,7 @@ class JsonCleanerUtils:
 
         parsed_data = self._clean_and_parse_string(content)
 
-        if parsed_data:
+        if parsed_data is not _PARSE_FAILURE:
             self.output_file_path.write_text(json.dumps(parsed_data, indent=4), encoding='utf-8')
             self.logger.info("JSON file processed and saved", extra={
                 "output_file": str(self.output_file_path),

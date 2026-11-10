@@ -17,13 +17,15 @@ class TestAmshaCrewFileApplication(unittest.TestCase):
             "llm": os.path.join(self.test_dir, "llm.yaml")
         }
         
-        # Create dummy config files
+        # JSON is valid YAML and supplies the required configuration schema.
         with open(self.config_paths["job"], 'w') as f:
-            f.write("crews: {test_crew: {input: {topic: AI}, steps: []}}")
+            json.dump({"crew_name": "test_crew", "usecase": "test", "module_name": "test", "output_filepath": "output.json", "crews": {"test_crew": {"input": {"topic": "AI"}, "steps": []}}, "pipeline": ["test_crew"]}, f)
         with open(self.config_paths["app"], 'w') as f:
-            f.write("output_dir_path: output")
+            json.dump({"domain_root_path": self.test_dir, "output_dir_path": "output"}, f)
+        model = {"default": "test", "models": {"test": {"model": "gpt-4"}}}
+        parameters = {"temperature": 0.5, "top_p": 1.0}
         with open(self.config_paths["llm"], 'w') as f:
-            f.write("llm: {model: gpt-4}")
+            json.dump({"llm": {"creative": model, "evaluation": model}, "llm_parameters": {"creative": parameters, "evaluation": parameters}}, f)
 
     def tearDown(self):
         import shutil
@@ -37,7 +39,7 @@ class TestAmshaCrewFileApplication(unittest.TestCase):
         mock_builder = MagicMock()
         mock_container.return_value.llm_builder.return_value = mock_builder
         mock_llm = MagicMock()
-        mock_llm.provider.model_name = "test-model"
+        mock_llm.model_name = "test-model"
         mock_builder.build_creative.return_value = mock_llm
         
         app = AmshaCrewFileApplication(self.config_paths, LLMType.CREATIVE)
@@ -198,7 +200,7 @@ class TestAmshaCrewFileApplication(unittest.TestCase):
         mock_builder = MagicMock()
         mock_container.return_value.llm_builder.return_value = mock_builder
         mock_llm = MagicMock()
-        mock_llm.provider.model_name = "test-model"
+        mock_llm.model_name = "test-model"
         mock_builder.build_creative.return_value = mock_llm
         
         app = AmshaCrewFileApplication(self.config_paths, LLMType.CREATIVE)
@@ -274,7 +276,7 @@ class TestAmshaCrewFileApplication(unittest.TestCase):
             mock_builder = MagicMock()
             mock_container.return_value.llm_builder.return_value = mock_builder
             mock_llm = MagicMock()
-            mock_llm.provider.model_name = "test-model"
+            mock_llm.model_name = "test-model"
             mock_builder.build_creative.return_value = mock_llm
             
             app = AmshaCrewFileApplication(self.config_paths, LLMType.CREATIVE)

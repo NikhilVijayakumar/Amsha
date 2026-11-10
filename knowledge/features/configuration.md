@@ -42,7 +42,7 @@ configuration is pure data and needs none.
 optional `knowledge_sources`, `input`, and `memory`.
 
 **`AmshaLLMConfig`** — per-model provider settings: `model` (required),
-`base_url`, `api_key`, `api_key_env`, `api_version` (for Azure OpenAI), and
+`base_url`, `api_key`, `api_key_env`, `api_version`, and
 `output_config`. Note `api_key` and `api_key_env` are alternatives, letting
 config reference an environment variable instead of embedding a secret.
 

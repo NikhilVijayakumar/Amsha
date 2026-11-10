@@ -238,7 +238,7 @@ To add a new backend (e.g., REST API source):
 
 ## 9. Versioning & Backward Compatibility
 
-**Current Version:** 2.11.4
+**Current Version:** 3.0.0
 
 ### Semantic Versioning (MAJOR.MINOR.PATCH)
 
@@ -457,7 +457,7 @@ Before committing code, verify:
 
 **All Dependencies:** Managed in **`pyproject.toml`**
 - Client applications use `pyproject.toml` for everything
-- Includes Amsha as a dependency: `amsha==2.11.4`
+- Includes Amsha as a dependency: `amsha==3.0.0`
 - Follows modern Python packaging standards
 
 ### Rules
@@ -477,7 +477,7 @@ Before committing code, verify:
    ```toml
    # Use pyproject.toml exclusively
    dependencies = [
-       "amsha==2.11.4",
+       "amsha==3.0.0",
        "other-deps..."
    ]
    ```

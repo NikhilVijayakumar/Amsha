@@ -66,13 +66,10 @@ class TestLLMUtils(unittest.TestCase):
         
         self.assertEqual(result, "gpt-3.5-turbo")
     
-    def test_extract_model_name_with_azure_prefix(self):
-        """Test extracting model name with azure prefix."""
-        model_string = "azure-gpt-4"
-        result = LLMUtils.extract_model_name(model_string)
-        
-        # Azure is in prefix list, so it should remove it
-        self.assertEqual(result, "-gpt-4")
+    def test_azure_model_names_are_not_rewritten(self):
+        """Azure is unsupported and must not be treated as a supported prefix."""
+        self.assertEqual(LLMUtils.extract_model_name("azure/gpt-4"), "azure/gpt-4")
+        self.assertEqual(LLMUtils.extract_model_name("azure-gpt-4"), "azure-gpt-4")
     
     def test_extract_model_name_without_prefix(self):
         """Test extracting model name without any prefix."""
@@ -118,7 +115,7 @@ class TestLLMUtils(unittest.TestCase):
             ("lm_studio/model", "model"),
             ("gemini/model", "model"),
             ("open_ai/model", "model"),
-            ("azuremodel", "model"),  # azure as prefix without slash
+            ("azuremodel", "azuremodel"),  # unrelated model names remain unchanged
         ]
         
         for input_str, expected in test_cases:
