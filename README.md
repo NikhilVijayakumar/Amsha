@@ -41,7 +41,7 @@
 pip install amsha
 ```
 
-Amsha currently declares Docling as a runtime dependency. See [release guidance](docs/releasing.md) for the publishing process.
+Amsha currently declares Docling as a runtime dependency. See [release guidance](https://github.com/NikhilVijayakumar/Amsha/blob/master/docs/releasing.md) for the publishing process.
 
 ---
 
@@ -136,10 +136,10 @@ python -m pytest tests/unit/ --cov=amsha --cov-report=term-missing
 
 ## Documentation
 
-- [Crew Forge](docs/feature/crew_forge/About.md) — orchestration, YAML schema, tools, MCP, flows
-- [Crew Monitor](docs/feature/crew_monitor/About.md) — performance monitoring, event observability
-- [LLM Factory](docs/feature/llm_factory/About.md) — LLM configuration and profiles
+- [Crew Forge](https://github.com/NikhilVijayakumar/Amsha/blob/master/knowledge/features/crew-forge.md) — orchestration, YAML schema, tools, MCP, flows
+- [Crew Monitor](https://github.com/NikhilVijayakumar/Amsha/blob/master/knowledge/features/crew-monitor.md) — performance monitoring, event observability
+- [LLM Factory](https://github.com/NikhilVijayakumar/Amsha/blob/master/knowledge/features/llm-factory.md) — LLM configuration and profiles
 
 ## License
 
-Copyright (c) 2025 Nikhil Vijayakumar. Licensed under the [MIT License](LICENSE).
+Copyright (c) 2025 Nikhil Vijayakumar. Licensed under the [MIT License](https://github.com/NikhilVijayakumar/Amsha/blob/master/LICENSE).
