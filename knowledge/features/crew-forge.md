@@ -46,7 +46,7 @@ dependency injection.
 class for file-backed orchestration. It loads job, app, and LLM configuration
 from the filesystem at runtime, initialises the LLM through the LLM factory,
 manages input preparation, and exposes `clean_json()` for output
-post-processing.
+post-processing. Single-crew retry is provided by `FileCrewOrchestrator.run_crew` with a caller-supplied output validator; the application exposes its orchestrator and does not provide a separate built-in validation service.
 
 ## Contracts
 

@@ -154,80 +154,53 @@ class TestAmshaCrewFileApplication(unittest.TestCase):
 
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.LLMContainer')
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.AtomicCrewFileManager')
-    def test_execute_crew_with_retry_success(self, mock_manager, mock_container):
-        # Mock LLM init
-        mock_builder = MagicMock()
-        mock_container.return_value.llm_builder.return_value = mock_builder
-        mock_llm = MagicMock()
-        mock_builder.build_creative.return_value = mock_llm
-        
+    def test_execute_crew_without_validator_succeeds_once(self, mock_manager, mock_container):
+        from amsha.crew_forge.service.base_crew_orchestrator import BaseCrewOrchestrator
         app = AmshaCrewFileApplication(self.config_paths, LLMType.CREATIVE)
-        app.orchestrator = MagicMock()
-        app.orchestrator.run_crew.return_value = "Success"
-        app.orchestrator.get_last_output_file.return_value = "out.json"
-        
-        result = app.execute_crew_with_retry("test_crew", {"topic": "AI"}, max_retries=2)
-        
-        self.assertEqual(result, "Success")
-        self.assertEqual(app.orchestrator.run_crew.call_count, 1)
+        with patch.object(BaseCrewOrchestrator, 'run_crew', return_value='Success') as run:
+            result = app.orchestrator.run_crew('test_crew', {'topic': 'AI'}, max_retries=2)
+        self.assertEqual(result, 'Success')
+        self.assertEqual(run.call_count, 1)
 
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.LLMContainer')
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.AtomicCrewFileManager')
-    def test_execute_crew_with_retry_failure_then_success(self, mock_manager, mock_container):
-        # Mock LLM init
-        mock_builder = MagicMock()
-        mock_container.return_value.llm_builder.return_value = mock_builder
-        mock_llm = MagicMock()
-        mock_builder.build_creative.return_value = mock_llm
-        
+    def test_execute_crew_retries_after_validator_failure(self, mock_manager, mock_container):
+        from amsha.crew_forge.service.base_crew_orchestrator import BaseCrewOrchestrator
         app = AmshaCrewFileApplication(self.config_paths, LLMType.CREATIVE)
-        app.orchestrator = MagicMock()
-        app.orchestrator.run_crew.return_value = "Success"
-        
-        # Mock validation to fail first time
-        app.validate_execution = MagicMock(side_effect=[False, True])
-        
-        result = app.execute_crew_with_retry("test_crew", {"topic": "AI"}, max_retries=2)
-        
-        self.assertEqual(result, "Success")
-        self.assertEqual(app.orchestrator.run_crew.call_count, 2)
+        validator = MagicMock(side_effect=[False, True])
+        with patch.object(BaseCrewOrchestrator, 'run_crew', return_value='Success') as run, \
+             patch.object(app.orchestrator, 'get_last_output_file', return_value='out.json'):
+            result = app.orchestrator.run_crew('test_crew', {'topic': 'AI'}, max_retries=2, output_validator=validator)
+        self.assertEqual(result, 'Success')
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(validator.call_count, 2)
+        validator.assert_called_with('out.json')
 
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.LLMContainer')
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.AtomicCrewFileManager')
-    @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.FileCrewOrchestrator')
-    def test_run_success(self, mock_orchestrator, mock_manager, mock_container):
-        # Setup mock container and builder
-        mock_builder = MagicMock()
-        mock_container.return_value.llm_builder.return_value = mock_builder
-        mock_llm = MagicMock()
-        mock_llm.model_name = "test-model"
-        mock_builder.build_creative.return_value = mock_llm
-        
+    def test_run_with_validator_succeeds_once(self, mock_manager, mock_container):
+        from amsha.crew_forge.service.base_crew_orchestrator import BaseCrewOrchestrator
         app = AmshaCrewFileApplication(self.config_paths, LLMType.CREATIVE)
-        mock_orchestrator.return_value.run_crew.return_value = "Success"
-        
-        res = app.execute_crew_with_retry("test_crew", {"topic": "AI"})
-        self.assertEqual(res, "Success")
-        mock_orchestrator.return_value.run_crew.assert_called_once()
+        validator = MagicMock(return_value=True)
+        with patch.object(BaseCrewOrchestrator, 'run_crew', return_value='Success') as run, \
+             patch.object(app.orchestrator, 'get_last_output_file', return_value='out.json'):
+            result = app.orchestrator.run_crew('test_crew', {'topic': 'AI'}, output_validator=validator)
+        self.assertEqual(result, 'Success')
+        run.assert_called_once()
+        validator.assert_called_once_with('out.json')
 
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.LLMContainer')
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.AtomicCrewFileManager')
-    @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.FileCrewOrchestrator')
-    def test_run_failure_retry(self, mock_orchestrator, mock_manager, mock_container):
-        mock_builder = MagicMock()
-        mock_container.return_value.llm_builder.return_value = mock_builder
-        mock_llm = MagicMock()
-        mock_builder.build_creative.return_value = mock_llm
-        
+    def test_run_exhausts_configured_retries(self, mock_manager, mock_container):
+        from amsha.crew_forge.service.base_crew_orchestrator import BaseCrewOrchestrator
         app = AmshaCrewFileApplication(self.config_paths, LLMType.CREATIVE)
-        mock_orchestrator.return_value.run_crew.return_value = "Failed"
-        mock_orchestrator.return_value.get_last_execution_id.return_value = "exec-1"
-        
-        # Mock validation to fail
-        with patch.object(AmshaCrewFileApplication, 'validate_execution', return_value=False):
-            res = app.execute_crew_with_retry("test_crew", {"topic": "AI"}, max_retries=1)
-            self.assertEqual(res, "Failed")
-            self.assertEqual(mock_orchestrator.return_value.run_crew.call_count, 2)
+        validator = MagicMock(return_value=False)
+        with patch.object(BaseCrewOrchestrator, 'run_crew', return_value='Failed') as run, \
+             patch.object(app.orchestrator, 'get_last_output_file', return_value='out.json'):
+            result = app.orchestrator.run_crew('test_crew', {'topic': 'AI'}, max_retries=1, output_validator=validator)
+        self.assertEqual(result, 'Failed')
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(validator.call_count, 2)
 
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.LLMContainer')
     @patch('amsha.crew_forge.orchestrator.file.amsha_crew_file_application.AtomicCrewFileManager')
