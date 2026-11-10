@@ -8,7 +8,7 @@ class LLMOutputConfig(BaseModel):
     Configuration for LLM output file organization and naming.
     
     Attributes:
-        alias: Custom alias for output filename (e.g., "azure-key1" instead of model name)
+        alias: Custom alias for output filename (e.g., "model-key1" instead of model name)
         folder_name: Custom folder name for organizing outputs
         structure: Output structure - "flat" (default) or "folder" (nested)
         display_name: Human-readable name for UI display (not used in file paths)

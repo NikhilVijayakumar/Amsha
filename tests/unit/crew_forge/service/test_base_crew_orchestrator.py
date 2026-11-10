@@ -59,7 +59,7 @@ class TestBaseCrewOrchestrator(unittest.TestCase):
         # Verify
         self.assertEqual(result, "Success result")
         self.mock_state_manager.create_execution.assert_called_once_with(inputs=inputs)
-        self.mock_manager.build_atomic_crew.assert_called_once_with(crew_name, None)
+        self.mock_manager.build_atomic_crew.assert_called_once_with(crew_name, None, None)
         self.mock_runtime.submit.assert_called_once()
         
         # Verify internal execution function logic

@@ -1,9 +1,8 @@
 # src/nikhil/amsha/llm_factory/service/llm_builder.py
 
 from crewai import LLM
-import litellm
-import types
 
+from amsha.llm_factory.exceptions import UnsupportedProviderError
 from amsha.llm_factory.domain.model.llm_type import LLMType
 from amsha.llm_factory.domain.model.llm_build_result import LLMBuildResult
 from amsha.llm_factory.domain.model.lmstudio_lifecycle_config import LMStudioLifecycleConfig
@@ -19,6 +18,8 @@ class LLMBuilder:
 
     def build(self, llm_type: LLMType, model_key: str = None) -> LLMBuildResult:
         model_config = self.settings.get_model_config(llm_type.value, model_key)
+        if model_config.model.casefold().startswith(("azure/", "azure_ai/")):
+            raise UnsupportedProviderError("Azure LLM providers are not supported by Amsha")
         params = self.settings.get_parameters(llm_type.value)
 
         lifecycle_config = getattr(model_config, "lmstudio_lifecycle", None)
@@ -38,37 +39,22 @@ class LLMBuilder:
             "api_key": model_config.api_key,
             "api_version": model_config.api_version,
             "model": model_config.model,
-            "stream": True
         }
         
         if model_config.base_url is not None:
             kwargs["base_url"] = model_config.base_url
+        else:
+            kwargs["stream"] = True
             
-        # Selectively pass parameters, as Azure OpenAI reasoning models might reject them entirely
-        if "azure" not in model_config.model.lower():
-            kwargs["max_completion_tokens"] = params.max_completion_tokens
-            kwargs["temperature"] = params.temperature
-            kwargs["top_p"] = params.top_p
-            kwargs["presence_penalty"] = params.presence_penalty
-            kwargs["frequency_penalty"] = params.frequency_penalty
-            if params.stop:
-                kwargs["stop"] = params.stop
-            
+        kwargs["max_completion_tokens"] = params.max_completion_tokens
+        kwargs["temperature"] = params.temperature
+        kwargs["top_p"] = params.top_p
+        kwargs["presence_penalty"] = params.presence_penalty
+        kwargs["frequency_penalty"] = params.frequency_penalty
+        if params.stop:
+            kwargs["stop"] = params.stop
+
         llm_instance = LLM(**kwargs)
-
-        # Monkeypatch litellm.completion because CrewAI passes 'stop' dynamically
-        if "azure" in model_config.model.lower():
-            original_completion = getattr(litellm, "completion", None)
-            if original_completion and not hasattr(original_completion, "_patched_for_azure"):
-                def patched_completion(*args, **ckwargs):
-                    if "stop" in ckwargs:
-                        ckwargs.pop("stop", None)
-                    return original_completion(*args, **ckwargs)
-                patched_completion._patched_for_azure = True
-                litellm.completion = patched_completion
-
-            # Also patch the kwargs of the llm_instance itself just in case
-            llm_instance.stop = None
 
         # Wrap raw LLM in the provider adapter to fulfill ILLMProvider protocol
         provider = CrewAIProviderAdapter(crewai_llm=llm_instance, model_name=clean_model_name)

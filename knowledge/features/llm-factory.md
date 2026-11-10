@@ -1,7 +1,7 @@
 ---
 type: Module
 title: LLM Factory
-description: Builds LLM instances for any provider from one configuration, with purpose profiles for creative versus evaluation work.
+description: Builds LLM instances for supported providers from one configuration, with purpose profiles for creative versus evaluation work.
 tags: [amsha, capability, llm, crewai]
 generated: { by: "opencode/big-pickle", at: 2026-09-29T00:00:00Z }
 stale_after: 2027-03-29T00:00:00Z
@@ -32,6 +32,10 @@ what keeps provider-specific configuration out of the orchestration code.
 This is the densest `domain` layer in Amsha (10 non-empty files), which fits
 its position: provider configuration is the widest surface area in the
 library and the easiest to get subtly wrong.
+
+## Provider boundary
+
+Azure-specific LLM handling is not supported. An explicitly Azure-qualified model is rejected before a provider client is constructed. Other configured providers retain their normal construction path. Custom endpoints receive their configured endpoint without forced streaming; the standard path requests streaming.
 
 ## Purpose profiles
 
