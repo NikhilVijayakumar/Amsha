@@ -41,7 +41,7 @@
 pip install amsha
 ```
 
-Amsha currently declares Docling as a runtime dependency. Until the first PyPI release is published, use the existing source installation. See [release guidance](docs/releasing.md) for the publishing process.
+Amsha currently declares Docling as a runtime dependency. See [release guidance](docs/releasing.md) for the publishing process.
 
 ---
 
