@@ -20,8 +20,8 @@ The publishing workflow SHALL validate the tag and run tests and distribution ch
 - **WHEN** the release workflow runs
 - **THEN** it SHALL fail before upload.
 
-#### Scenario: Maintainer approval before PyPI upload
+#### Scenario: Validated release uploads directly
 
-- **GIVEN** a configured `pypi` GitHub environment with required approval
-- **WHEN** a validated release awaits the publish job
-- **THEN** the upload SHALL wait until the environment approval is granted.
+- **GIVEN** a matching tag, passing checks and configured PyPI trusted publisher
+- **WHEN** the publish job starts
+- **THEN** it uploads the validated distributions without a GitHub reviewer step.
