@@ -6,7 +6,7 @@ class LLMModelDefinition(BaseModel):
     model: str = Field(..., description="Model identifier string")
     api_key: Optional[str] = Field(default=None, description="API key")
     api_key_env: Optional[str] = Field(default=None, description="Environment variable name for the API key")
-    api_version: Optional[str] = Field(default=None, description="API version string (e.g., for Azure OpenAI)")
+    api_version: Optional[str] = Field(default=None, description="API version string")
     output_config: Optional[Dict[str, Any]] = Field(default=None, description="Output file naming and organization configuration")
 
 class LLMTypeSection(BaseModel):

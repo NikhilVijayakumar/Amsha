@@ -69,9 +69,9 @@ class TestCrewPerformanceMonitor(unittest.TestCase):
 
     def test_log_usage_no_attr(self):
         mock_result = object()
-        with patch('builtins.print') as mock_print:
+        with patch.object(self.monitor.logger, 'warning') as mock_warning:
             self.monitor.log_usage(mock_result)
-            mock_print.assert_called_with("[CrewPerformanceMonitor] Warning: 'token_usage' not found in result.")
+            mock_warning.assert_called_once_with('Token usage not found in result')
 
     def test_get_metrics(self):
         self.monitor.start_time = 1000.0
@@ -156,9 +156,9 @@ class TestCrewPerformanceMonitor(unittest.TestCase):
     def test_gpu_monitoring_stop_failure(self, mock_nvml):
         mock_nvml.nvmlDeviceGetCount.side_effect = Exception("Stop Error")
         with patch('amsha.crew_monitor.service.crew_performance_monitor.GPU_AVAILABLE', True), \
-             patch('builtins.print') as mock_print:
+             patch.object(self.monitor.logger, 'warning') as mock_warning:
             self.monitor.stop_monitoring()
-            mock_print.assert_called_with("[CrewPerformanceMonitor] GPU monitoring failed to stop: Stop Error")
+            mock_warning.assert_called_once_with('GPU monitoring failed to stop', extra={'error': 'Stop Error'})
 
 if __name__ == '__main__':
     unittest.main()

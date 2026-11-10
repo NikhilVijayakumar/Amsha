@@ -24,7 +24,7 @@ One implementation, 179 lines: `optimization/json_cleaner_utils.py`.
 `JsonCleanerUtils(input_file_path, output_folder=None)` strips markdown
 fences and surrounding prose from LLM output that is meant to be JSON. It
 derives an output path, de-duplicates collisions via `_get_unique_filepath`,
-and ensures the output directory exists. This is the `clean_json()` behaviour
+and ensures the output directory exists. Valid JSON can represent empty containers, zero, false or null; these values are distinct from a parsing failure. This is the `clean_json()` behaviour
 that `AmshaCrewFileApplication` exposes to clients.
 
 ## What does not exist

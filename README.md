@@ -30,7 +30,7 @@
 - **Contribution Analysis & Reporting**: Feature attribution analysis and Excel report generation.
 
 ### LLM Factory
-- **Unified Config**: One YAML for all LLM providers (Ollama, LM Studio, OpenRouter, Azure, Gemini).
+- **Unified Config**: One YAML for all LLM providers (Ollama, LM Studio, OpenRouter, Gemini).
 - **Purpose Profiles**: Creative (high temperature) vs. Evaluation (deterministic) modes.
 
 ---
@@ -41,18 +41,19 @@
 pip install amsha
 ```
 
-Optional: for document processing features:
-```bash
-pip install docling
-```
+Amsha currently declares Docling as a runtime dependency. Until the first PyPI release is published, use the existing source installation. See [release guidance](docs/releasing.md) for the publishing process.
 
 ---
+
+## Migration to 3.0
+
+**Migration:** Azure-qualified LLM models (`azure/` and `azure_ai/`) are no longer supported. Configure another provider before upgrading to the next major version.
 
 ## Quick Start
 
 ```python
-from nikhil.amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
-from nikhil.amsha.llm_factory.domain.llm_type import LLMType
+from amsha.crew_forge.orchestrator.file.amsha_crew_file_application import AmshaCrewFileApplication
+from amsha.llm_factory.domain.model.llm_type import LLMType
 
 config_paths = {
     "app": "config/app_config.yaml",
@@ -138,3 +139,7 @@ python -m pytest tests/unit/ --cov=amsha --cov-report=term-missing
 - [Crew Forge](docs/feature/crew_forge/About.md) — orchestration, YAML schema, tools, MCP, flows
 - [Crew Monitor](docs/feature/crew_monitor/About.md) — performance monitoring, event observability
 - [LLM Factory](docs/feature/llm_factory/About.md) — LLM configuration and profiles
+
+## License
+
+Copyright (c) 2025 Nikhil Vijayakumar. Licensed under the [MIT License](LICENSE).

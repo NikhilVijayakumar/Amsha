@@ -43,7 +43,7 @@ class TestSharedJSONFileService(unittest.TestCase):
         result = self.service.clean_json(file_path)
         
         self.assertTrue(result)
-        mock_cleaner_class.assert_called_once_with(file_path)
+        mock_cleaner_class.assert_called_once_with(file_path, None)
         mock_cleaner_instance.process_file.assert_called_once()
 
     def test_clean_json_file_not_found(self):

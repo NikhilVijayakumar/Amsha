@@ -12,3 +12,5 @@ One concept per module under `src/nikhil/amsha/`. Nine live, one retired.
 * [llm-factory](llm-factory.md) - Builds provider-agnostic LLM instances from one configuration.
 * [output-process](output-process.md) - JSON cleaning. The evaluation and validation subpackages are unbuilt stubs.
 * [utils](utils.md) - JSON, YAML, and UTF-8 format helpers.
+
+* [python-distribution](python-distribution.md) - Package boundaries and PyPI release considerations.

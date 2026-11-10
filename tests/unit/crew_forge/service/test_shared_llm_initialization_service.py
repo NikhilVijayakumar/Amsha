@@ -49,10 +49,11 @@ class TestSharedLLMInitializationService(unittest.TestCase):
         mock_builder.build_creative.return_value = mock_build_result
         
         # Call the service
-        llm, model_name = self.service.initialize_llm(config_path, LLMType.CREATIVE)
+        llm, model_name, output_config = self.service.initialize_llm(config_path, LLMType.CREATIVE)
         
         # Verify
         self.assertEqual(llm, mock_llm_instance)
+        self.assertIsNone(output_config)
         self.assertEqual(model_name, "test-model")
         mock_container.config.llm.yaml_path.from_value.assert_called_once_with(config_path)
         mock_builder.build_creative.assert_called_once()
@@ -77,10 +78,11 @@ class TestSharedLLMInitializationService(unittest.TestCase):
         mock_builder.build_evaluation.return_value = mock_build_result
         
         # Call the service
-        llm, model_name = self.service.initialize_llm(config_path, LLMType.EVALUATION)
+        llm, model_name, output_config = self.service.initialize_llm(config_path, LLMType.EVALUATION)
         
         # Verify
         self.assertEqual(llm, mock_llm_instance)
+        self.assertIsNone(output_config)
         self.assertEqual(model_name, "eval-model")
         mock_builder.build_evaluation.assert_called_once()
 
