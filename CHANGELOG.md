@@ -1,6 +1,10 @@
 # Changelog
 
-## 3.0.0 — Unreleased
+## 3.0.1 — Unreleased
+
+- Correct PyPI documentation and license links to point to tracked GitHub pages.
+
+## 3.0.0
 
 - Remove Azure-specific LLM support. Azure-qualified `azure/` and `azure_ai/` model names now raise `UnsupportedProviderError`; migrate those configurations to another provider. Amsha no longer modifies global LiteLLM completion behavior.
 - Do not force streaming for custom LLM endpoints; default endpoints continue to request streaming.
